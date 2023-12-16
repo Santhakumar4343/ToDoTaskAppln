@@ -25,7 +25,7 @@ public class ProjectServiceImpl implements ProjectService {
         // Update fields based on your requirements
         existingProject.setProjectName(updatedProject.getProjectName());
         existingProject.setAssignedTo(updatedProject.getAssignedTo());
-        existingProject.setActionItem(updatedProject.getActionItem());
+       
         existingProject.setStatus(updatedProject.getStatus());
         existingProject.setStartDate(updatedProject.getStartDate());
         existingProject.setClosedDate(updatedProject.getClosedDate());

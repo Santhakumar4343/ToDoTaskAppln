@@ -28,7 +28,7 @@ public class ProjectController {
     public Project saveProject(
             @RequestParam String projectName,
             @RequestParam String assignedTo,
-            @RequestParam String actionItem,
+            
             @RequestParam String status,
             @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date startDate,
             @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date closedDate,
@@ -38,7 +38,7 @@ public class ProjectController {
         Project project = new Project();
         project.setProjectName(projectName);
         project.setAssignedTo(assignedTo);
-        project.setActionItem(actionItem);
+       
         project.setStatus(status);
         project.setStartDate(startDate);
         project.setClosedDate(closedDate);
@@ -52,7 +52,7 @@ public class ProjectController {
     		@PathVariable Long projectId,
             @RequestParam(required = false) String projectName,
             @RequestParam(required = false) String assignedTo,
-            @RequestParam(required = false) String actionItem,
+           
             @RequestParam(required = false) String status,
             @RequestParam (required = false)@DateTimeFormat(pattern = "yyyy-MM-dd") Date startDate,
             @RequestParam (required = false)@DateTimeFormat(pattern = "yyyy-MM-dd") Date closedDate,
@@ -62,7 +62,7 @@ public class ProjectController {
         updatedProject.setId(projectId);
         updatedProject.setProjectName(projectName);
         updatedProject.setAssignedTo(assignedTo);
-        updatedProject.setActionItem(actionItem);
+       
         updatedProject.setStatus(status);
         updatedProject.setStartDate(startDate);
         updatedProject.setClosedDate(closedDate);

@@ -79,22 +79,25 @@ public class ModuleController {
 		
     	  moduleService.deleteModule(moduleId);
      }
-	 @GetMapping("/getModuleByPid/{projectId}")
-	    public ResponseEntity<List<Modules>> getModulesByProject(@PathVariable Long projectId) {
-	        // Assuming ProjectId is a Long; adjust the type accordingly
+	
+	 
+	 @GetMapping("/getModuleByPId/{projectId}")
+	 public ResponseEntity<List<Modules>> getModulesByProject(@PathVariable Long projectId) {
+	     // Assuming ProjectId is a Long; adjust the type accordingly
 
-	        // Call the service method to get modules by project
-	        Project project = new Project();
-	        project.setId(projectId); // Assuming Project has an 'id' field
+	     // Create a Project instance and set the ID
+	     Project project = new Project();
+	     project.setId(projectId);
 
-	        List<Modules> modules = moduleService.getModulesByProject(project);
+	     // Call the service method to get modules by project
+	     List<Modules> modules = moduleService.getModulesByProject(project);
 
-	        // Check if modules were found
-	        if (!modules.isEmpty()) {
-	            return ResponseEntity.ok(modules);
-	        } else {
-	            return ResponseEntity.notFound().build();
-	        }
-	    }
+	     // Check if modules were found
+	     if (!modules.isEmpty()) {
+	         return ResponseEntity.ok(modules);
+	     } else {
+	         return ResponseEntity.notFound().build();
+	     }
+	 }
 	
 }

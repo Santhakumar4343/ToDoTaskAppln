@@ -20,6 +20,7 @@ public class Modules {
     private Date endDate;
     private String status;
     private String remarks;
+    private String priority;
 
 
     @ManyToOne
@@ -34,7 +35,7 @@ public class Modules {
 
 
 	public Modules(Long id, String moduleName, Date startDate, Date endDate, String status, String remarks,
-			Project project) {
+			String priority, Project project) {
 		super();
 		this.id = id;
 		this.moduleName = moduleName;
@@ -42,6 +43,7 @@ public class Modules {
 		this.endDate = endDate;
 		this.status = status;
 		this.remarks = remarks;
+		this.priority = priority;
 		this.project = project;
 	}
 
@@ -106,6 +108,16 @@ public class Modules {
 	}
 
 
+	public String getPriority() {
+		return priority;
+	}
+
+
+	public void setPriority(String priority) {
+		this.priority = priority;
+	}
+
+
 	public Project getProject() {
 		return project;
 	}
@@ -116,10 +128,5 @@ public class Modules {
 	}
 
 
-	@Override
-	public String toString() {
-		return "Module [id=" + id + ", moduleName=" + moduleName + ", startDate=" + startDate + ", endDate=" + endDate
-				+ ", status=" + status + ", remarks=" + remarks + ", project=" + project + "]";
-	}
-    
+	
 }

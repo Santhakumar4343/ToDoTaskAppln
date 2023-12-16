@@ -20,6 +20,7 @@ public class Task {
     private Date endDate;
     private String status;
     private String priority;
+    private String remarks;
 
     @ManyToOne
     @JoinColumn(name = "module_id")
@@ -30,7 +31,8 @@ public class Task {
 		// TODO Auto-generated constructor stub
 	}
 
-	public Task(Long id, String taskName, Date startDate, Date endDate, String status, String priority, Modules module) {
+	public Task(Long id, String taskName, Date startDate, Date endDate, String status, String priority, String remarks,
+			Modules module) {
 		super();
 		this.id = id;
 		this.taskName = taskName;
@@ -38,6 +40,7 @@ public class Task {
 		this.endDate = endDate;
 		this.status = status;
 		this.priority = priority;
+		this.remarks = remarks;
 		this.module = module;
 	}
 
@@ -89,6 +92,14 @@ public class Task {
 		this.priority = priority;
 	}
 
+	public String getRemarks() {
+		return remarks;
+	}
+
+	public void setRemarks(String remarks) {
+		this.remarks = remarks;
+	}
+
 	public Modules getModule() {
 		return module;
 	}
@@ -97,11 +108,7 @@ public class Task {
 		this.module = module;
 	}
 
-	@Override
-	public String toString() {
-		return "Task [id=" + id + ", taskName=" + taskName + ", startDate=" + startDate + ", endDate=" + endDate
-				+ ", status=" + status + ", priority=" + priority + ", module=" + module + "]";
-	}
+	
     
     
     

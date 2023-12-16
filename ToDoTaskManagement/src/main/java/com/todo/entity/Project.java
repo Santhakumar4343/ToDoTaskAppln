@@ -16,28 +16,29 @@ public class Project {
 
 	private String projectName;
 	private String assignedTo;
-	private String actionItem;
+	
 	private String status;
 	private Date startDate;
 	private Date closedDate;
 	private String remarks;
+    private String priority;
 
 	public Project() {
 		super();
 		// TODO Auto-generated constructor stub
 	}
 
-	public Project(Long id, String projectName, String assignedTo, String actionItem, String status, Date startDate,
-			Date closedDate, String remarks) {
+	public Project(Long id, String projectName, String assignedTo, String status, Date startDate, Date closedDate,
+			String remarks, String priority) {
 		super();
 		this.id = id;
 		this.projectName = projectName;
 		this.assignedTo = assignedTo;
-		this.actionItem = actionItem;
 		this.status = status;
 		this.startDate = startDate;
 		this.closedDate = closedDate;
 		this.remarks = remarks;
+		this.priority = priority;
 	}
 
 	public Long getId() {
@@ -62,14 +63,6 @@ public class Project {
 
 	public void setAssignedTo(String assignedTo) {
 		this.assignedTo = assignedTo;
-	}
-
-	public String getActionItem() {
-		return actionItem;
-	}
-
-	public void setActionItem(String actionItem) {
-		this.actionItem = actionItem;
 	}
 
 	public String getStatus() {
@@ -104,11 +97,14 @@ public class Project {
 		this.remarks = remarks;
 	}
 
-	@Override
-	public String toString() {
-		return "Project [id=" + id + ", projectName=" + projectName + ", assignedTo=" + assignedTo + ", actionItem="
-				+ actionItem + ", status=" + status + ", startDate=" + startDate + ", closedDate=" + closedDate
-				+ ", remarks=" + remarks + "]";
+	public String getPriority() {
+		return priority;
 	}
+
+	public void setPriority(String priority) {
+		this.priority = priority;
+	}
+
+	
 
 }

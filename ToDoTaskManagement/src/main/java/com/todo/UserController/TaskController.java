@@ -29,13 +29,16 @@ public class TaskController {
     @Autowired
     private TaskService taskService;
 
-    @PostMapping("/saveTask/{moduleId}")
+    @PostMapping("/saveTask/{projectId}/{moduleId}")
     public Task createTaskForModule(
+    		@PathVariable Long projectId,
             @PathVariable Long moduleId,
             @RequestParam String taskName,
             @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date startDate,
             @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date endDate,
             @RequestParam String status,
+            @RequestParam String remarks,
+            
             @RequestParam String priority) {
         Modules module = moduleService.getModuleById(moduleId);
 
@@ -45,6 +48,7 @@ public class TaskController {
         task.setStartDate(startDate);
         task.setEndDate(endDate);
         task.setStatus(status);
+        task.setRemarks(remarks);
         task.setPriority(priority);
 
         return taskService.saveTask(task);
@@ -57,6 +61,7 @@ public class TaskController {
             @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date startDate,
             @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date endDate,
             @RequestParam String status,
+            @RequestParam String remarks,
             @RequestParam String priority) {
         // Retrieve the task from the service
         Task task = taskService.getTaskById(taskId);
@@ -66,6 +71,7 @@ public class TaskController {
         task.setStartDate(startDate);
         task.setEndDate(endDate);
         task.setStatus(status);
+        task.setRemarks(remarks);
         task.setPriority(priority);
 
         // Save the updated task
