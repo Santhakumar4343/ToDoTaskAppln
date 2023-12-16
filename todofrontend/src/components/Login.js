@@ -70,23 +70,23 @@ const Login = () => {
         }
     };
     return (
-        <div className="container mt-2">
+        <div className="container ">
             
-            <Form className="mx-auto" style={{ maxWidth: '300px', border: '1px solid #ccc', padding: '20px', marginTop: '100px', textAlign: 'center' }}>
+            <Form className="mx-auto mt-5" style={{ maxWidth: '300px', border: '1px solid black', padding: '20px', marginTop: '100px', textAlign: 'center' ,borderRadius:"2px"}}>
                <h4>Login </h4>
                 <Form.Group controlId="formUsername">
-                    <Form.Control type="text" placeholder="Enter your username" value={username} onChange={(e) => setUsername(e.target.value)} />
+                    <Form.Control type="text" placeholder="username" value={username} onChange={(e) => setUsername(e.target.value)} style={{ border: '1px solid black' }}/>
                 </Form.Group>
 
                 <Form.Group controlId="formPassword" className="mt-4">
-                    <Form.Control type="password" placeholder="Enter your password" value={password} onChange={(e) => setPassword(e.target.value)} />
+                    <Form.Control type="password" placeholder="password" value={password} onChange={(e) => setPassword(e.target.value)} style={{ border: '1px solid black' }}  />
                 </Form.Group>
 
                 <div className=" mt-2  ">
                     <Button type="submit" variant="primary" className="mt-2  w-50 mr-2" disabled={loading} onClick={handleLogin}>
                         {loading ? (
                             <>
-                                <Spinner animation="border" size="sm" className="me-2" />
+                                <Spinner animation="border" size="sm" className="me-2" style={{ border: '1px solid black' }}/>
                                 Loading...
                             </>
                         ) : (
@@ -113,6 +113,7 @@ const Login = () => {
                         <Form.Control
                             type="text"
                             placeholder="Enter OTP"
+                            className='border border-dark'
                             value={otp}
                             onChange={(e) => setOtp(e.target.value)}
                         />

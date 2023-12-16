@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Modal, Form, Table ,FormControl,Alert} from 'react-bootstrap';
+import { Button, Modal, Form, Table, FormControl, Alert, Col, Row } from 'react-bootstrap';
 import moment from 'moment';
 import Swal from "sweetalert2";
 import axios from 'axios';
@@ -15,7 +15,8 @@ const Modules = () => {
   const [remarks, setRemarks] = useState('');
   const [modules, setModules] = useState([]);
   const [selectedModuleId, setSelectedModuleId] = useState(null);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
+
   useEffect(() => {
     // Fetch all projects on component mount
     axios.get('http://localhost:8082/api/projects/getAllProjects')
@@ -45,6 +46,12 @@ const Modules = () => {
       });
   };
 
+  const filteredModules = modules.filter(
+    (module) =>
+      module.moduleName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      module.status.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      module.remarks.toLowerCase().includes(searchTerm.toLowerCase())
+  );
   const handleCreateModule = () => {
 
     setModuleName('');
@@ -110,14 +117,15 @@ const Modules = () => {
         console.log('Module saved successfully:', response.data);
         Swal.fire({
           icon: 'success',
-          title: 'Module ' + (selectedModuleId? 'Updated' : 'Created') + ' Successfully',
-          text: `The module has been ${selectedModuleId? 'updated' : 'created'} successfully!`,
+          title: 'Module ' + (selectedModuleId ? 'Updated' : 'Created') + ' Successfully',
+          text: `The module has been ${selectedModuleId ? 'updated' : 'created'} successfully!`,
           customClass: {
             popup: 'max-width-100',
-          },});
+          },
+        });
         setShowModal(false);
         fetchModules(); // Fetch modules again to update the table
-        
+
       })
       .catch(error => {
         console.error('Error saving module:', error);
@@ -139,17 +147,17 @@ const Modules = () => {
     })
       .then((response) => {
         if (response.ok) {
-          console.log('Project deleted successfully');
+          console.log('Module deleted successfully');
           Swal.fire({
             icon: 'success',
-            title: 'Project deleted successfully',
-            text: 'Project deleted successfully!',
+            title: 'Module deleted successfully',
+            text: 'Module deleted successfully!',
             customClass: {
               popup: 'max-width-100',
             },
           });
           fetchModules();
-          
+
         } else {
           console.error('Error deleting project:', response.status);
           Swal.fire({
@@ -174,18 +182,12 @@ const Modules = () => {
         });
       });
   };
-//search filtetr 
-const filteredModules = modules.filter(
-  (module) =>
-    module.moduleName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    module.status.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    module.remarks.toLowerCase().includes(searchTerm.toLowerCase())
-);
+
   return (
     <div>
-      
+      <h4 className='text-center '>Modules Component </h4>
       <select id="projectDropdown" onChange={(e) => setSelectedProject(e.target.value)}>
-        <option value="">-- Select Project --</option>
+        <option value="" className=''>-- Select Project --</option>
         {projects.map(project => (
           <option key={project.id} value={project.id}>{project.projectName}</option>
         ))}
@@ -201,107 +203,134 @@ const filteredModules = modules.filter(
         style={{ border: '1px solid black' }}
         onChange={(e) => setSearchTerm(e.target.value)}
       />
-
       {filteredModules.length > 0 ? (
-  <>
-    <Table striped bordered hover>
-      <thead>
-        <tr>
-          <th>Module Name</th>
-          <th>Start Date</th>
-          <th>Closed Date</th>
-          <th>Status</th>
-          <th>Remarks</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {filteredModules.map((module) => (
-          <tr key={module.id}>
-            <td>{module.moduleName}</td>
-            <td>{moment(module.startDate).format('YYYY-MM-DD')}</td>
-            <td>{moment(module.endDate).format('YYYY-MM-DD')}</td>
-            <td>{module.status}</td>
-            <td style={{ maxWidth: '200px', overflowX: 'auto' }}>{module.remarks}</td>
-            <td>
-              <Button
-                variant="primary"
-                className='mb-1'
-                onClick={() => handleUpdateModule(module.id)}
-              >
-                Update
-              </Button>{' '}
-              <Button
-                variant="danger"
-                onClick={() => handleDeleteModule(module.id)}
-              >
-                Delete
-              </Button>
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </Table>
-  </>
-) : (
-  <Alert variant="danger text-center" className="mb-3">
-    No results found for "{searchTerm}".
-  </Alert>
-)}
+        <>
+          <Table striped bordered hover className="text-center border border-dark" >
+            <thead>
+              <tr>
+                <th className='h6'>Module Name</th>
+                <th className='h6'>Status</th>
+                <th className='h6'>Planned Start Date</th>
+                <th className='h6'>Planned Closed Date</th>
+                <th className='h6'>Comments</th>
+                <th className='h6'>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredModules.map((module) => (
+                <tr key={module.id}>
+                  <td>{module.moduleName}</td>
+                  <td>{module.status}</td>
+                  <td>{moment(module.startDate).format('YYYY-MM-DD')}</td>
+                  <td>{moment(module.endDate).format('YYYY-MM-DD')}</td>
 
-      {/* Modal for creating a module */}
+                  <td style={{ maxWidth: '200px', overflowX: 'auto' }}>{module.remarks}</td>
+                  <td>
+                    {/* <Button
+                      variant="primary"
+                      className='mb-1'
+                      onClick={() => handleUpdateModule(module.id)}
+                    >
+                      Update
+                    </Button>{' '}
+                    <Button
+                      variant="danger"
+                      onClick={() => handleDeleteModule(module.id)}
+                    >
+                      Delete
+                    </Button> */}
+                    <i className="bi bi-pencil fs-4" onClick={() => handleUpdateModule(module.id)}></i>
+                    {' '}
+                    <i class="bi bi-trash3 fs-4 m-2" onClick={() => handleDeleteModule(module.id)}></i>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        </>
+      ) : (
+        <Alert variant="danger text-center" className="mb-3">
+          No results found for "{searchTerm}".
+        </Alert>
+      )}
+
+
+
+
       <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
-          <Modal.Title>Create Module</Modal.Title>
+          <Modal.Title>Create/Update Module</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form>
-            <Form.Group controlId="formModuleName">
-              <Form.Label>Module Name</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="Enter module name"
-                value={moduleName}
-                onChange={(e) => setModuleName(e.target.value)}
-              />
-            </Form.Group>
-            <Form.Group controlId="formStartDate">
-              <Form.Label>Start Date</Form.Label>
-              <Form.Control
-                type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-              />
-            </Form.Group>
-            <Form.Group controlId="formEndDate">
-              <Form.Label>End Date</Form.Label>
-              <Form.Control
-                type="date"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-              />
-            </Form.Group>
-            <Form.Group controlId="formStatus">
-              <Form.Label>Status</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="Enter status"
-                value={status}
-                onChange={(e) => setStatus(e.target.value)}
-              />
-            </Form.Group>
-            <Form.Group controlId="formRemarks">
-              <Form.Label>Remarks</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="Enter remarks"
-                value={remarks}
-                onChange={(e) => setRemarks(e.target.value)}
-              />
-            </Form.Group>
+            <Row>
+              <Col md={4}><Form.Label>Module Name</Form.Label></Col>
+              <Col md={8} >
+                <Form.Group controlId="formModuleName">
+                  <Form.Control
+                    type="text"
+                    className="mb-3 border border-dark"
+                    value={moduleName}
+                    onChange={(e) => setModuleName(e.target.value)}
+                  />
+                </Form.Group>
+              </Col>
+            </Row>
+            <Row>
+              <Col md={4}><Form.Label>Start Date</Form.Label></Col>
+              <Col md={8}><Form.Group controlId="formStartDate">
+
+                <Form.Control
+                  type="date"
+                  className=" mb-3 border border-dark"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                />
+              </Form.Group></Col>
+            </Row>
+
+            <Row>
+              <Col md={4}> <Form.Label>End Date</Form.Label></Col>
+              <Col md={8}> <Form.Group controlId="formEndDate">
+
+                <Form.Control
+                  type="date"
+                  className=" mb-3 border border-dark"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                />
+              </Form.Group></Col>
+            </Row>
+
+            <Row>
+              <Col md={4}><Form.Label>Status</Form.Label></Col>
+              <Col md={8}><Form.Group controlId="formStatus">
+
+                <Form.Control
+                  type="text"
+                  className=" mb-3 border border-dark"
+                  value={status}
+                  onChange={(e) => setStatus(e.target.value)}
+                />
+              </Form.Group></Col>
+            </Row>
+
+            <Row>
+              <Col md={4}><Form.Label>Remarks</Form.Label></Col>
+              <Col md={8}><Form.Group controlId="formRemarks">
+
+                <Form.Control
+                  type="text"
+                  className=" mb-3 border border-dark"
+                  value={remarks}
+                  onChange={(e) => setRemarks(e.target.value)}
+                />
+              </Form.Group></Col>
+            </Row>
+
           </Form>
         </Modal.Body>
-        <Modal.Footer>
+        <Modal.Footer className="d-flex justify-content-center align-content-center" >
           <Button variant="secondary" onClick={() => setShowModal(false)}>
             Close
           </Button>
@@ -313,5 +342,4 @@ const filteredModules = modules.filter(
     </div>
   );
 };
-
 export default Modules;

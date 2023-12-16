@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Modal, Form, Table, Alert, FormControl } from 'react-bootstrap';
+import { Button, Modal, Form, Table, FormControl, Alert, Row, Col } from 'react-bootstrap';
 import moment from 'moment';
 import Swal from 'sweetalert2';
 import axios from 'axios';
@@ -13,18 +13,35 @@ const Task = () => {
   const [status, setStatus] = useState('');
   const [priority, setPriority] = useState('');
   const [tasks, setTasks] = useState([]);
+  const [remarks, setRemarks] = useState('');
   const [selectedTaskId, setSelectedTaskId] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [projects, setProjects] = useState([]);
+  const [selectedProject, setSelectedProject] = useState('');
+
   useEffect(() => {
-    // Fetch all modules on component mount
-    axios.get('http://localhost:8082/api/modules/getAllModules')
+    // Fetch all projects on component mount
+    axios.get('http://localhost:8082/api/projects/getAllProjects')
       .then(response => {
-        setModules(response.data);
+        setProjects(response.data);
       })
       .catch(error => {
-        console.error('Error fetching modules:', error);
+        console.error('Error fetching projects:', error);
       });
   }, []);
+
+  useEffect(() => {
+    // Fetch modules when the selected project changes
+    if (selectedProject) {
+      axios.get(`http://localhost:8082/api/modules/getModuleByPId/${selectedProject}`)
+        .then(response => {
+          setModules(response.data);
+        })
+        .catch(error => {
+          console.error('Error fetching modules:', error);
+        });
+    }
+  }, [selectedProject]);
 
   useEffect(() => {
     // Fetch tasks when the selected module changes
@@ -49,9 +66,15 @@ const Task = () => {
     setEndDate('');
     setStatus('');
     setPriority('');
+    setRemarks('');
     setSelectedTaskId(null);
 
     // Make sure a module is selected before creating a task
+    if (!selectedProject) {
+      alert('Please select a project');
+      return;
+    }
+
     if (!selectedModule) {
       alert('Please select a module');
       return;
@@ -69,6 +92,7 @@ const Task = () => {
     setEndDate(moment(selectedTask.endDate).format('YYYY-MM-DD'));
     setStatus(selectedTask.status);
     setPriority(selectedTask.priority);
+    setRemarks(selectedTask.remarks);
     setSelectedTaskId(taskId);
 
     // Display the modal for updating the task
@@ -82,10 +106,12 @@ const Task = () => {
     formData.append('endDate', endDate);
     formData.append('status', status);
     formData.append('priority', priority);
+    formData.append('remarks',remarks);
+
 
     const requestUrl = selectedTaskId
       ? `http://localhost:8082/api/tasks/updateTask/${selectedTaskId}`
-      : `http://localhost:8082/api/tasks/saveTask/${selectedModule}`;
+      : `http://localhost:8082/api/tasks/saveTask/${selectedProject}/${selectedModule}`;
 
     const method = selectedTaskId ? 'PUT' : 'POST';
 
@@ -123,7 +149,13 @@ const Task = () => {
         });
       });
   };
-
+  //search filter 
+  const filteredTasks = tasks.filter(
+    (task) =>
+      task.taskName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      task.priority.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      task.status.toLowerCase().includes(searchTerm.toLowerCase())
+  );
   const handleDeleteTask = (taskId) => {
     axios.delete(`http://localhost:8082/api/tasks/deleteTaskById/${taskId}`)
       .then(response => {
@@ -150,16 +182,17 @@ const Task = () => {
         });
       });
   };
-  //search filter 
-  const filteredTasks = tasks.filter(
-    (task) =>
-      task.taskName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      task.priority.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      task.status.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+
   return (
     <div>
-     
+<h4 className='text-center '>Tasks Component </h4>
+      <select id="projectDropdown" onChange={(e) => setSelectedProject(e.target.value)}>
+        <option value="">-- Select Project --</option>
+        {projects.map(project => (
+          <option key={project.id} value={project.id}>{project.projectName}</option>
+        ))}
+      </select>
+
       <select id="moduleDropdown" onChange={(e) => setSelectedModule(e.target.value)}>
         <option value="">-- Select Module --</option>
         {modules.map(module => (
@@ -170,11 +203,10 @@ const Task = () => {
       <Button variant="success" className="mb-3 m-2" onClick={handleCreateTask}>
         Create Task
       </Button>
-
       <FormControl
         type="text"
         placeholder="Search by Task Name, Priority To, or Status"
-        className="mb-3 "
+        className="mb-3 border border-dark "
         onChange={(e) => setSearchTerm(e.target.value)}
       />
       {filteredTasks.length === 0 && searchTerm !== '' ? (
@@ -183,92 +215,129 @@ const Task = () => {
         </Alert>
       ) : (
 
-        <Table striped bordered hover>
+        <Table striped bordered hover className='text-center border border-dark'>
           <thead>
             <tr>
-              <th>Task Name</th>
-              <th>Start Date</th>
-              <th>End Date</th>
-              <th>Status</th>
-              <th>Priority</th>
-              <th>Actions</th>
+            <th className='h6'>Task Name</th>
+              <th className='h6'>Status</th>
+              <th className='h6'>Planned Start Date</th>
+              <th className='h6'>Planned Closed Date</th>
+              <th className='h6'>Priority</th>
+              <th className='h6'>Comments</th>
+              <th className='h6'>Actions</th>
             </tr>
           </thead>
           <tbody>
             {filteredTasks.map(task => (
               <tr key={task.id}>
                 <td>{task.taskName}</td>
+                <td>{task.status}</td>
                 <td>{moment(task.startDate).format('YYYY-MM-DD')}</td>
                 <td>{moment(task.endDate).format('YYYY-MM-DD')}</td>
-                <td>{task.status}</td>
+
                 <td>{task.priority}</td>
+                <td>{task.remarks}</td>
                 <td>
-                  <Button variant="primary" className="mb-1" onClick={() => handleUpdateTask(task.id)}>
+                  {/* <Button variant="primary" className="mb-1" onClick={() => handleUpdateTask(task.id)}>
                     Update
                   </Button>
                   {' '}
                   <Button variant="danger" onClick={() => handleDeleteTask(task.id)}>
                     Delete
-                  </Button>
+                  </Button> */}
+                   <i className="bi bi-pencil fs-4"  onClick={() => handleUpdateTask(task.id)}></i>
+                   {' '}
+                   <i class="bi bi-trash3 fs-4 m-2"  onClick={() => handleDeleteTask(task.id)}></i>
                 </td>
               </tr>
             ))}
           </tbody>
         </Table>
       )}
-
       <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
           <Modal.Title>Create/Update Task</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form>
-            <Form.Group controlId="formTaskName">
-              <Form.Label>Task Name</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="Enter task name"
-                value={taskName}
-                onChange={(e) => setTaskName(e.target.value)}
-              />
-            </Form.Group>
-            <Form.Group controlId="formStartDate">
-              <Form.Label>Start Date</Form.Label>
-              <Form.Control
-                type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-              />
-            </Form.Group>
-            <Form.Group controlId="formEndDate">
-              <Form.Label>End Date</Form.Label>
-              <Form.Control
-                type="date"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-              />
-            </Form.Group>
-            <Form.Group controlId="formStatus">
-              <Form.Label>Status</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="Enter status"
-                value={status}
-                onChange={(e) => setStatus(e.target.value)}
-              />
-            </Form.Group>
-            <Form.Group controlId="formPriority">
-              <Form.Label>Priority</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="Enter priority"
-                value={priority}
-                onChange={(e) => setPriority(e.target.value)}
-              />
-            </Form.Group>
+            <Row>
+              <Col md={4}><Form.Label>Task Name</Form.Label></Col>
+              <Col md={8}><Form.Group controlId="formTaskName">
+
+                <Form.Control
+                  type="text"
+                  className='border border-black mb-3'
+                  value={taskName}
+                  onChange={(e) => setTaskName(e.target.value)}
+                />
+              </Form.Group></Col>
+            </Row>
+
+            <Row>
+              <Col md={4}> <Form.Label>Start Date</Form.Label></Col>
+              <Col md={8}><Form.Group controlId="formStartDate">
+                <Form.Control
+                  type="date"
+                  className='border border-black mb-3'
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                />
+              </Form.Group></Col>
+            </Row>
+            <Row>
+              <Col md={4}><Form.Label>End Date</Form.Label></Col>
+              <Col md={8}><Form.Group controlId="formEndDate">
+
+                <Form.Control
+                  type="date"
+                  className='border border-black mb-3'
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                />
+              </Form.Group></Col>
+            </Row>
+
+            <Row>
+              <Col md={4}>  <Form.Label>Status</Form.Label></Col>
+              <Col md={8}>  <Form.Group controlId="formStatus">
+
+                <Form.Control
+                  type="text"
+                  className='border border-black mb-3'
+                  value={status}
+                  onChange={(e) => setStatus(e.target.value)}
+                />
+              </Form.Group></Col>
+            </Row>
+
+            <Row>
+              <Col md={4}><Form.Label>Priority</Form.Label></Col>
+              <Col md={8}>  <Form.Group controlId="formPriority">
+
+                <Form.Control
+                  type="text"
+                  className='border border-black mb-3'
+                  value={priority}
+                  onChange={(e) => setPriority(e.target.value)}
+                />
+              </Form.Group></Col>
+            </Row>
+            <Row>
+              <Col md={4}><Form.Label>Remarks</Form.Label></Col>
+              <Col md={8}>  <Form.Group controlId="formPriority">
+
+                <Form.Control
+                  type="text"
+                  className='border border-black mb-3'
+                  value={remarks}
+                  onChange={(e) => setRemarks(e.target.value)}
+                />
+              </Form.Group></Col>
+            </Row>
+
           </Form>
         </Modal.Body>
-        <Modal.Footer>
+        <Modal.Footer className='d-flex algin-items-center justify-content-center'>
           <Button variant="secondary" onClick={() => setShowModal(false)}>
             Close
           </Button>

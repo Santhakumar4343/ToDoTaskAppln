@@ -128,38 +128,40 @@ const RegistrationForm = () => {
     };
 
     return (
-        <div className="d-flex justify-content-center align-items-center vh-100 ">
+        <div className="d-flex justify-content-center align-items-center vh-85  " >
             <form
                 onSubmit={handleSubmit}
-                className="p-4 border"
-                style={{ minWidth: '300px', maxWidth: '750px', width: '100%', marginBottom: '80px' }}
+                className="p-4 border  "
+                style={{ minWidth: '300px', maxWidth: '750px', width: '100%', marginBottom: '80px',}}
             >
                 <h2 className="mb-4 text-center">Registration</h2>
 
-                <div className="row g-3 d-flex justify-content-center align-items-center ">
+                <div className="row g-3 d-flex justify-content-center align-items-center  ">
                     <div className="col-md-4 mb-2">
                         <input
-                            placeholder="Enter the username"
+                            placeholder="username"
                             type="text"
-                            className="form-control"
+                            className="form-control border border-dark"
                             id="username"
                             name="username"
                             value={formData.username}
                             onChange={handleChange}
                             required
+                            
                         />
                         {errors.username && <div className="text-danger">{errors.username}</div>}
                     </div>
                     <div className="col-md-4 mb-2">
                         <input
-                            placeholder="Enter the Employee ID"
+                            placeholder="Employee ID"
                             type="text"
-                            className="form-control"
+                            className="form-control border border-dark"
                             id="employeeId"
                             name="employeeId"
                             value={formData.employeeId}
                             onChange={handleChange}
                             required
+                            
                         />
                         {errors.employeeId && <div className="text-danger">{errors.employeeId}</div>}
                     </div>
@@ -167,27 +169,29 @@ const RegistrationForm = () => {
                 <div className="row g-3 d-flex justify-content-center align-items-center">
                     <div className="col-md-4 mb-2">
                         <input
-                            placeholder="Enter the password"
+                            placeholder="Password"
                             type="password"
-                            className="form-control"
+                            className="form-control border border-dark"
                             id="password"
                             name="password"
                             value={formData.password}
                             onChange={handleChange}
                             required
+                            
                         />
                         {errors.password && <div className="text-danger">{errors.password}</div>}
                     </div>
                     <div className="col-md-4 mb-2">
                         <input
-                            placeholder="Confirm the password"
+                            placeholder="Confirm Password"
                             type="password"
-                            className="form-control"
+                            className="form-control border border-dark"
                             id="confirmPassword"
                             name="confirmPassword"
                             value={formData.confirmPassword}
                             onChange={handleChange}
                             required
+                            
                         />
                         {errors.confirmPassword && (
                             <div className="text-danger">{errors.confirmPassword}</div>
@@ -197,43 +201,46 @@ const RegistrationForm = () => {
                 <div className="row g-3 d-flex justify-content-center align-items-center">
                     <div className="col-md-4 mb-2">
                         <input
-                            placeholder="Enter the Email"
+                            placeholder="Email"
                             type="email"
-                            className="form-control"
+                            className="form-control border border-dark"
                             id="email"
                             name="email"
                             value={formData.email}
                             onChange={handleChange}
                             required
+                            
                         />
                         {errors.email && <div className="text-danger">{errors.email}</div>}
                     </div>
                     <div className="col-md-4 mb-2">
                         <input
-                            placeholder="Enter the Mobile Number"
+                            placeholder="Mobile Number"
                             type="tel"
-                            className="form-control"
+                            className="form-control border border-dark"
                             id="mobileNumber"
                             name="mobileNumber"
                             value={formData.mobileNumber}
                             onChange={handleChange}
                             required
+                            
                         />
                         {errors.mobileNumber && (
                             <div className="text-danger">{errors.mobileNumber}</div>
                         )}
                     </div>
                 </div>
-                <div className="mb-3  d-flex justify-content-center align-items-center">
+                <div className="mb-2   d-flex justify-content-center align-items-center">
                     <div className="form-check">
                         <input
                             type="radio"
-                            className="form-check-input"
+                            className="form-check-input border border-dark"
                             id="user"
                             name="userType"
                             value="user"
                             checked={formData.userType === 'user'}
                             onChange={handleUserTypeChange}
+                           
                         />
                         <label className="form-check-label" htmlFor="user">
                             User
@@ -242,12 +249,13 @@ const RegistrationForm = () => {
                     <div className="form-check">
                         <input
                             type="radio"
-                            className="form-check-input"
+                            className="form-check-input m-1 border border-dark"
                             id="admin"
                             name="userType"
                             value="admin"
                             checked={formData.userType === 'admin'}
                             onChange={handleUserTypeChange}
+                            
                         />
                         <label className="form-check-label" htmlFor="admin">
                             Admin

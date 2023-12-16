@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Modal, Form, Row, Col, Table,FormControl ,Alert} from 'react-bootstrap';
+import { Button, Modal, Form, Row, Col, Table, FormControl, Alert } from 'react-bootstrap';
 import Swal from 'sweetalert2';
 import moment from 'moment';
 
@@ -30,13 +30,14 @@ function Projects() {
       remarks: '',
     });
   };
-
+  //project search function
   const filteredProjects = projects.filter(
     (project) =>
       project.projectName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       project.assignedTo.toLowerCase().includes(searchTerm.toLowerCase()) ||
       project.status.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
   useEffect(() => {
     // Fetch the projects when the component mounts
     fetchProjects();
@@ -123,99 +124,102 @@ function Projects() {
     handleShowModal();
   };
 
-  // const handleDeleteProject = (projectId) => {
-  //   // Make a DELETE request to delete the project
-  //   fetch(`http://localhost:8082/api/projects/delete/${projectId}`, {
-  //     method: 'DELETE',
-  //   })
-  //     .then((response) => {
-  //       if (response.ok) {
-  //         console.log('Project deleted successfully');
-  //         Swal.fire({
-  //           icon: 'success',
-  //           title: 'Project deleted successfully',
-  //           text: 'Project deleted successfully!',
-  //           customClass: {
-  //             popup: 'max-width-100',
-  //           },
-  //         });
-  //         // Fetch the updated list of projects after deletion
-  //         fetchProjects();
-  //       } else {
-  //         console.error('Error deleting project:', response.status);
-  //         Swal.fire({
-  //           icon: 'error',
-  //           title: 'Error deleting project',
-  //           text: 'An error occurred during deletion. Please try again.',
-  //           customClass: {
-  //             popup: 'max-width-100',
-  //           },
-  //         });
-  //       }
-  //     })
-  //     .catch((error) => {
-  //       console.error('Error deleting project:', error);
-  //       Swal.fire({
-  //         icon: 'error',
-  //         title: 'Error deleting project',
-  //         text: 'An error occurred during deletion. Please try again.',
-  //         customClass: {
-  //           popup: 'max-width-100',
-  //         },
-  //       });
-  //     });
-  // };
+  const handleDeleteProject = (projectId) => {
+    // Make a DELETE request to delete the project
+    fetch(`http://localhost:8082/api/projects/delete/${projectId}`, {
+      method: 'DELETE',
+    })
+      .then((response) => {
+        if (response.ok) {
+          console.log('Project deleted successfully');
+          Swal.fire({
+            icon: 'success',
+            title: 'Project deleted successfully',
+            text: 'Project deleted successfully!',
+            customClass: {
+              popup: 'max-width-100',
+            },
+          });
+          // Fetch the updated list of projects after deletion
+          fetchProjects();
+        } else {
+          console.error('Error deleting project:', response.status);
+          Swal.fire({
+            icon: 'error',
+            title: 'Error deleting project',
+            text: 'An error occurred during deletion. Please try again.',
+            customClass: {
+              popup: 'max-width-100',
+            },
+          });
+        }
+      })
+      .catch((error) => {
+        console.error('Error deleting project:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error deleting project',
+          text: 'An error occurred during deletion. Please try again.',
+          customClass: {
+            popup: 'max-width-100',
+          },
+        });
+      });
+  };
 
   return (
     <div>
+
+       <h4 className=' mb-2 text-center '>Projects Component</h4>
       <FormControl
         type="text"
         placeholder="Search by Project Name, Assigned To, or Status"
-        className="mb-4 "
+        className="mb-4"
         style={{ border: '1px solid black' }}
         onChange={(e) => setSearchTerm(e.target.value)}
       />
- {filteredProjects.length === 0 && searchTerm !== '' ? (
-    <Alert variant="danger text-center" className="mb-3">
-      No results found for "{searchTerm}".
-    </Alert>
-  ) : (
-    <Table striped bordered hover>
-      <thead>
-        <th>Project Name</th>
-        <th>Assigned To</th>
-        <th>Action Item</th>
-        <th>Status</th>
-        <th>Start Date</th>
-        <th>Closed Date</th>
-        <th>Remarks</th>
-        <th>Actions</th>
-      </thead>
-      <tbody>
-        {filteredProjects.map((project) => (
-          <tr key={project.id}>
-            <td>{project.projectName}</td>
-            <td>{project.assignedTo}</td>
-            <td>{project.actionItem}</td>
-            <td>{project.status}</td>
-            <td>{moment(project.startDate).format('DD-MM-YYYY')}</td>
-            <td>{moment(project.closedDate).format('DD-MM-YYYY')}</td>
-            <td style={{ maxWidth: '200px', overflowX: 'auto' }}>{project.remarks}</td>
-            <td>
-              <Button variant="primary" className='mb-1' onClick={() => handleUpdateProject(project.id)}>
-                Update
-              </Button>
-              {' '}
-              {/* <Button variant="danger" onClick={() => handleDeleteProject(project.id)}>
-                Delete
-              </Button> */}
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </Table>
-  )}
 
+      {filteredProjects.length === 0 && searchTerm !== '' ? (
+        <Alert variant="danger text-center" className="mb-3">
+          No results found for "{searchTerm}".
+        </Alert>
+      ) : (
+        <Table striped bordered hover style={{ border: '  black' }}>
+          <thead>
+            <tr>
+            <th className="text-center border border-dark h6" >Project Name</th>
+            <th className="text-center border border-dark h6">Assigned To</th>
+            <th className="text-center border border-dark h6" >Status</th>
+            <th className="text-center border border-dark h6 " >Planned Start
+              Date</th>
+            <th className="text-center border border-dark h6" >Planned Closed Date</th>
+            <th className="text-center border border-dark h6" >Comments</th>
+            <th className="  border border-dark h6" >Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredProjects.map((project) => (
+              <tr key={project.id}>
+                <td className="text-center">{project.projectName}</td>
+                <td className="text-center">{project.assignedTo}</td>
+
+                <td className="text-center">{project.status}</td>
+                <td className="text-center">{moment(project.startDate).format('DD-MM-YYYY')}</td>
+                <td className="text-center">{moment(project.closedDate).format('DD-MM-YYYY')}</td>
+                <td style={{ maxWidth: '200px', overflowX: 'auto' }}>{project.remarks}</td>
+                <td>
+                  {/* <Button variant="primary" className='mb-1' onClick={() => handleUpdateProject(project.id)}>
+                    Update
+                  </Button> */}
+                   <i class="bi bi-pencil fs-4 d-flex justify-content-center align-items-center"  onClick={() => handleUpdateProject(project.id)}></i>
+                  {' '}
+                  
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
+      )}
       {/* Modal for creating or updating a project */}
       <Modal show={showModal} onHide={handleCloseModal}>
         <Modal.Header closeButton>
@@ -224,13 +228,15 @@ function Projects() {
         <Modal.Body>
           <Form>
             <Row>
-              <Col>
+              <Col md={4}> <Form.Label >Project Name</Form.Label></Col>
+              <Col  md={8}>
+              
                 <Form.Group controlId="formProjectName">
-                  <Form.Label>Project Name</Form.Label>
                   <Form.Control
                     type="text"
-                    placeholder="Enter project name"
+                    
                     value={selectedProject.projectName}
+                    className="border border-dark mb-3"
                     onChange={(e) =>
                       setSelectedProject({
                         ...selectedProject,
@@ -240,13 +246,18 @@ function Projects() {
                   />
                 </Form.Group>
               </Col>
-              <Col>
+            </Row>
+
+            <Row>
+            <Col  md={4}> <Form.Label >Assigned Person</Form.Label></Col>
+              <Col  md={8}>
                 <Form.Group controlId="formAssignedTo">
-                  <Form.Label>Assigned To</Form.Label>
+                 
                   <Form.Control
                     type="text"
-                    placeholder="Enter assigned person"
+                    
                     value={selectedProject.assignedTo}
+                    className='border border-dark mb-3'
                     onChange={(e) =>
                       setSelectedProject({
                         ...selectedProject,
@@ -258,30 +269,16 @@ function Projects() {
               </Col>
             </Row>
 
-            <Row>
-              <Col>
-                <Form.Group controlId="formActionItem">
-                  <Form.Label>Action Item</Form.Label>
-                  <Form.Control
-                    type="text"
-                    placeholder="Enter action item"
-                    value={selectedProject.actionItem}
-                    onChange={(e) =>
-                      setSelectedProject({
-                        ...selectedProject,
-                        actionItem: e.target.value,
-                      })
-                    }
-                  />
-                </Form.Group>
-              </Col>
-              <Col>
+              <Row>
+              <Col md={4}> <Form.Label >Status</Form.Label></Col>
+              <Col  md={8}>
                 <Form.Group controlId="formStatus">
-                  <Form.Label>Status</Form.Label>
+                  
                   <Form.Control
                     type="text"
-                    placeholder="Enter status"
+                   
                     value={selectedProject.status}
+                    className='border border-dark mb-3'
                     onChange={(e) =>
                       setSelectedProject({
                         ...selectedProject,
@@ -294,11 +291,15 @@ function Projects() {
             </Row>
 
             <Row>
-              <Col>
+            <Col  md={4}> <Form.Label >Planned Start Date</Form.Label></Col>
+              <Col  md={8}>
                 <Form.Group controlId="formStartDate">
-                  <Form.Label>Start Date</Form.Label>
+                  
                   <Form.Control
                     type="date"
+                    className='border border-dark mb-3'
+    
+                    placeholder='Planned Start Date'
                     value={selectedProject.startDate}
                     onChange={(e) =>
                       setSelectedProject({
@@ -307,13 +308,19 @@ function Projects() {
                       })
                     }
                   />
+
                 </Form.Group>
               </Col>
-              <Col>
+              </Row>
+              <Row>
+              <Col  md={4}> <Form.Label >Planned End date</Form.Label></Col>
+              <Col  md={8}>
                 <Form.Group controlId="formClosedDate">
-                  <Form.Label>Closed Date</Form.Label>
+
                   <Form.Control
                     type="date"
+                    placeholder='Planned Closed Date'
+                    className='border border-dark mb-3'
                     value={selectedProject.closedDate}
                     onChange={(e) =>
                       setSelectedProject({
@@ -327,13 +334,15 @@ function Projects() {
             </Row>
 
             <Row>
-              <Col>
+            <Col  md={4} className="sans-serif-bold"> <Form.Label >Remarks</Form.Label></Col>
+              <Col  md={8}>
                 <Form.Group controlId="formRemarks">
-                  <Form.Label>Remarks</Form.Label>
+                 
                   <Form.Control
                     as="textarea"
-                    rows={3}
-                    placeholder="Enter remarks"
+                    rows={2}
+                    placeholder="Remarks"
+                    className='border border-dark mb-3'
                     value={selectedProject.remarks}
                     onChange={(e) =>
                       setSelectedProject({
@@ -347,7 +356,7 @@ function Projects() {
             </Row>
           </Form>
         </Modal.Body>
-        <Modal.Footer>
+        <Modal.Footer className=' d-flex justify-content-center align-items-center'>
           <Button variant="secondary" onClick={handleCloseModal}>
             Close
           </Button>
