@@ -32,8 +32,8 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public List<Task> getTasksByModule(Module module) {
-        return taskRepository.findByModule(module);
+    public List<Task> getTasksByModule(Long moduleId) {
+        return taskRepository.findByModuleId(moduleId);
     }
 
 	@Override

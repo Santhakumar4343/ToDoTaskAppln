@@ -28,14 +28,37 @@ const Modules = () => {
       });
   }, []);
 
+  // useEffect(() => {
+  //   // Fetch all modules on component mount and when modules change
+  //   fetchModules();
+  // }, []);
+
+  // const fetchModules = () => {
+  //   // Make a GET request to fetch modules
+  //   axios.get('http://localhost:8082/api/modules/getAllModules')
+  //     .then((response) => {
+  //       // Set the fetched modules to the state
+  //       setModules(response.data);
+  //     })
+  //     .catch((error) => {
+  //       console.error('Error fetching modules:', error);
+  //       // Handle the error
+  //     });
+
+  // };
   useEffect(() => {
-    // Fetch all modules on component mount and when modules change
+    // Fetch all modules on component mount and when modules or selectedProject change
     fetchModules();
-  }, []);
+  }, [selectedProject]); // Include selectedProject in the dependency array
 
   const fetchModules = () => {
+    // Include selectedProject as a query parameter
+    const apiUrl = selectedProject
+      ? `http://localhost:8082/api/modules/getModuleByPId/${selectedProject}`
+      : 'http://localhost:8082/api/modules/getAllModules';
+
     // Make a GET request to fetch modules
-    axios.get('http://localhost:8082/api/modules/getAllModules')
+    axios.get(apiUrl)
       .then((response) => {
         // Set the fetched modules to the state
         setModules(response.data);
@@ -45,6 +68,7 @@ const Modules = () => {
         // Handle the error
       });
   };
+
   const filteredModules = modules.filter(
     (module) =>
       module.moduleName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -158,10 +182,10 @@ const Modules = () => {
           fetchModules();
 
         } else {
-          console.error('Error deleting Module:', response.status);
+          console.error('Error deleting project:', response.status);
           Swal.fire({
             icon: 'error',
-            title: 'Error deleting Module',
+            title: 'Error deleting project',
             text: 'An error occurred during deletion. Please try again.',
             customClass: {
               popup: 'max-width-100',
@@ -170,7 +194,7 @@ const Modules = () => {
         }
       })
       .catch((error) => {
-        console.error('Error deleting Module:', error);
+        console.error('Error deleting project:', error);
         Swal.fire({
           icon: 'error',
           title: 'Error deleting project',
@@ -204,7 +228,7 @@ const Modules = () => {
       />
       {filteredModules.length > 0 ? (
         <>
-          <Table striped bordered hover className="text-center border border-dark " >
+          <Table striped bordered hover className="text-center border border-dark" >
             <thead>
               <tr>
                 <th className='h6'>Module Name</th>
@@ -231,14 +255,14 @@ const Modules = () => {
                       onClick={() => handleUpdateModule(module.id)}
                     >
                       Update
+                    </Button>{' '}
+                    <Button
+                      variant="danger"
+                      onClick={() => handleDeleteModule(module.id)}
+                    >
+                      Delete
                     </Button> */}
                     <i className="bi bi-pencil fs-4" onClick={() => handleUpdateModule(module.id)}></i>
-                    {/* <Button
-                      variant="danger"
-                    
-                    > 
-                      Delete
-              </Button>*/}
                     {' '}
                     <i class="bi bi-trash3 fs-4 m-2" onClick={() => handleDeleteModule(module.id)}></i>
                   </td>
@@ -255,7 +279,7 @@ const Modules = () => {
 
 
 
-      {/* Modal for creating a module */}
+
       <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
           <Modal.Title>Create/Update Module</Modal.Title>

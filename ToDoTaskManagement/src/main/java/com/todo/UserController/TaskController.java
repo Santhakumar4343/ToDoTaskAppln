@@ -77,14 +77,26 @@ public class TaskController {
         // Save the updated task
         return taskService.updateTask(task);
     }
-    @GetMapping("/getTaskById/{taskId}")
-    public Task getTaskById(@PathVariable Long taskId) {
-    	return taskService.getTaskById(taskId);
+//    @GetMapping("/getTaskByModule/{moduleId}")
+//    public Task getTaskById(@PathVariable Long moduleId) {
+//    	return taskService.getTaskById(moduleId);
+//    }
+//    @GetMapping("/getAllTasks")
+//    public List<Task> getAllTasks() {
+//    	return taskService.getAllTasks();
+//    }
+    
+    @GetMapping("/getTaskByModule/{moduleId}")
+    public List<Task> getTasksByModule(@PathVariable Long moduleId) {
+        // Assuming taskService.getTasksByModule returns a list of tasks
+        return taskService.getTasksByModule(moduleId);
     }
+
     @GetMapping("/getAllTasks")
     public List<Task> getAllTasks() {
-    	return taskService.getAllTasks();
+        return taskService.getAllTasks();
     }
+
     @DeleteMapping("/deleteTaskById/{taskId}")
     public void deleteTask(@PathVariable Long taskId) {
     	taskService.deleteTask(taskId);

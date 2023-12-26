@@ -3,6 +3,7 @@ import { Button, Modal, Form, Table, FormControl, Alert, Row, Col } from 'react-
 import moment from 'moment';
 import Swal from 'sweetalert2';
 import axios from 'axios';
+
 const Task = () => {
   const [showModal, setShowModal] = useState(false);
   const [modules, setModules] = useState([]);
@@ -46,18 +47,26 @@ const Task = () => {
   useEffect(() => {
     // Fetch tasks when the selected module changes
     fetchTasks();
-  }, []);
+  }, [selectedModule]);
 
   const fetchTasks = () => {
+    const apiUrl = selectedModule
+      ? `http://localhost:8082/api/tasks/getTaskByModule/${selectedModule}`
+      : 'http://localhost:8082/api/tasks/getAllTasks';
 
-    axios.get(`http://localhost:8082/api/tasks/getAllTasks`)
+    axios.get(apiUrl)
       .then(response => {
-        setTasks(response.data);
+        // Ensure that the response data is an array before setting it to state
+        if (Array.isArray(response.data)) {
+          setTasks(response.data);
+        } else {
+          console.error('Error: Response data is not an array', response.data);
+          setTasks([]);
+        }
       })
       .catch(error => {
         console.error('Error fetching tasks:', error);
       });
-
   };
 
   const handleCreateTask = () => {
@@ -108,7 +117,6 @@ const Task = () => {
     formData.append('priority', priority);
     formData.append('remarks',remarks);
 
-
     const requestUrl = selectedTaskId
       ? `http://localhost:8082/api/tasks/updateTask/${selectedTaskId}`
       : `http://localhost:8082/api/tasks/saveTask/${selectedProject}/${selectedModule}`;
@@ -149,13 +157,15 @@ const Task = () => {
         });
       });
   };
-  //search filter 
-  const filteredTasks = tasks.filter(
-    (task) =>
-      task.taskName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      task.priority.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      task.status.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+
+  const filteredTasks = tasks && Array.isArray(tasks)
+    ? tasks.filter(task =>
+        task.taskName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        task.priority.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        task.status.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    : [];
+
   const handleDeleteTask = (taskId) => {
     axios.delete(`http://localhost:8082/api/tasks/deleteTaskById/${taskId}`)
       .then(response => {
@@ -185,7 +195,7 @@ const Task = () => {
 
   return (
     <div>
-<h4 className='text-center '>Tasks Component </h4>
+      <h4 className='text-center '>Tasks Component </h4>
       <select id="projectDropdown" onChange={(e) => setSelectedProject(e.target.value)}>
         <option value="">-- Select Project --</option>
         {projects.map(project => (
@@ -214,11 +224,10 @@ const Task = () => {
           No results found for "{searchTerm}".
         </Alert>
       ) : (
-
         <Table striped bordered hover className='text-center border border-dark'>
           <thead>
             <tr>
-            <th className='h6'>Task Name</th>
+              <th className='h6'>Task Name</th>
               <th className='h6'>Status</th>
               <th className='h6'>Planned Start Date</th>
               <th className='h6'>Planned Closed Date</th>
@@ -234,20 +243,12 @@ const Task = () => {
                 <td>{task.status}</td>
                 <td>{moment(task.startDate).format('YYYY-MM-DD')}</td>
                 <td>{moment(task.endDate).format('YYYY-MM-DD')}</td>
-
                 <td>{task.priority}</td>
                 <td>{task.remarks}</td>
                 <td>
-                  {/* <Button variant="primary" className="mb-1" onClick={() => handleUpdateTask(task.id)}>
-                    Update
-                  </Button>
+                  <i className="bi bi-pencil fs-4" onClick={() => handleUpdateTask(task.id)}></i>
                   {' '}
-                  <Button variant="danger" onClick={() => handleDeleteTask(task.id)}>
-                    Delete
-                  </Button> */}
-                   <i className="bi bi-pencil fs-4"  onClick={() => handleUpdateTask(task.id)}></i>
-                   {' '}
-                   <i class="bi bi-trash3 fs-4 m-2"  onClick={() => handleDeleteTask(task.id)}></i>
+                  <i className="bi bi-trash3 fs-4 m-2" onClick={() => handleDeleteTask(task.id)}></i>
                 </td>
               </tr>
             ))}
@@ -263,7 +264,6 @@ const Task = () => {
             <Row>
               <Col md={4}><Form.Label>Task Name</Form.Label></Col>
               <Col md={8}><Form.Group controlId="formTaskName">
-
                 <Form.Control
                   type="text"
                   className='border border-black mb-3'
@@ -272,7 +272,6 @@ const Task = () => {
                 />
               </Form.Group></Col>
             </Row>
-
             <Row>
               <Col md={4}> <Form.Label>Start Date</Form.Label></Col>
               <Col md={8}><Form.Group controlId="formStartDate">
@@ -287,7 +286,6 @@ const Task = () => {
             <Row>
               <Col md={4}><Form.Label>End Date</Form.Label></Col>
               <Col md={8}><Form.Group controlId="formEndDate">
-
                 <Form.Control
                   type="date"
                   className='border border-black mb-3'
@@ -296,11 +294,9 @@ const Task = () => {
                 />
               </Form.Group></Col>
             </Row>
-
             <Row>
-              <Col md={4}>  <Form.Label>Status</Form.Label></Col>
-              <Col md={8}>  <Form.Group controlId="formStatus">
-
+              <Col md={4}> <Form.Label>Status</Form.Label></Col>
+              <Col md={8}><Form.Group controlId="formStatus">
                 <Form.Control
                   type="text"
                   className='border border-black mb-3'
@@ -309,11 +305,9 @@ const Task = () => {
                 />
               </Form.Group></Col>
             </Row>
-
             <Row>
               <Col md={4}><Form.Label>Priority</Form.Label></Col>
-              <Col md={8}>  <Form.Group controlId="formPriority">
-
+              <Col md={8}><Form.Group controlId="formPriority">
                 <Form.Control
                   type="text"
                   className='border border-black mb-3'
@@ -324,8 +318,7 @@ const Task = () => {
             </Row>
             <Row>
               <Col md={4}><Form.Label>Remarks</Form.Label></Col>
-              <Col md={8}>  <Form.Group controlId="formPriority">
-
+              <Col md={8}><Form.Group controlId="formPriority">
                 <Form.Control
                   type="text"
                   className='border border-black mb-3'
@@ -334,7 +327,6 @@ const Task = () => {
                 />
               </Form.Group></Col>
             </Row>
-
           </Form>
         </Modal.Body>
         <Modal.Footer className='d-flex algin-items-center justify-content-center'>
@@ -351,4 +343,3 @@ const Task = () => {
 };
 
 export default Task;
-

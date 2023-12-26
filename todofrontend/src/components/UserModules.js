@@ -29,13 +29,18 @@ const Modules = () => {
   }, []);
 
   useEffect(() => {
-    // Fetch all modules on component mount and when modules change
+    // Fetch all modules on component mount and when modules or selectedProject change
     fetchModules();
-  }, []);
+  }, [selectedProject]); // Include selectedProject in the dependency array
 
-  const fetchModules = () => {
+  const fetchModules = (selectedProject) => {
+    // Include selectedProject as a query parameter
+    const apiUrl = selectedProject
+      ? `http://localhost:8082/api/modules/getModuleByPId/${selectedProject}`
+      : 'http://localhost:8082/api/modules/getAllModules';
+
     // Make a GET request to fetch modules
-    axios.get('http://localhost:8082/api/modules/getAllModules')
+    axios.get(apiUrl)
       .then((response) => {
         // Set the fetched modules to the state
         setModules(response.data);

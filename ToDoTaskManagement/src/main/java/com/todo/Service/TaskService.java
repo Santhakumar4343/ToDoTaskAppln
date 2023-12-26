@@ -8,7 +8,7 @@ public interface TaskService {
 	 Task saveTask(Task task);
 	    Task updateTask(Task task);
 	    void deleteTask(Long taskId);
-	    List<Task> getTasksByModule(Module module);
+	    List<Task> getTasksByModule(Long moduleId);
 		Task getTaskById(Long taskId);
 		List<Task> getAllTasks();
 }
