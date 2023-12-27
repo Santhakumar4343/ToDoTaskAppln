@@ -40,21 +40,25 @@ const Login = () => {
     const handleOtpVerification = async () => {
         try {
             setLoading(true);
-
+    
             const formData = new FormData();
             formData.append('otp', otp);
-
+    
             const response = await fetch('http://localhost:8082/api/users/verify-otp', {
                 method: 'POST',
                 body: formData,
             });
-
+    
             if (response.ok) {
                 const userData = await response.json();
                 const userTypeLowerCase = userData.userType.toLowerCase();
+                const username = userData.username; // Extract the username from the response
+    
                 if (userTypeLowerCase === 'user') {
-                    navigate('/user-dashboard');
+                    // Navigate to the user dashboard with state (username)
+                    navigate('/user-dashboard', { state: { username } });
                 } else if (userTypeLowerCase === 'admin') {
+                    // Navigate to the admin dashboard if needed
                     navigate('/admin-dashboard');
                 } else {
                     console.error('Unknown userType:', userData.userType);
@@ -69,6 +73,8 @@ const Login = () => {
             setShowModal(false);
         }
     };
+    
+
     return (
         <div className="container ">
             

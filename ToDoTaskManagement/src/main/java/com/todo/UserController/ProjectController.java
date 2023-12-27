@@ -83,5 +83,9 @@ public class ProjectController {
     public List<Project> getAllProjects() {
         return projectService.getAllProjects();
     }
+    @GetMapping("/getUserProjects")
+    public List<Project> getUserProjects(@RequestParam String username) {
+        return projectService.getUserProjects(username);
+    }
 }
 

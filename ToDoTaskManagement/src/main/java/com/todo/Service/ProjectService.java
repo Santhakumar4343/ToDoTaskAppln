@@ -10,4 +10,5 @@ public interface ProjectService {
 	    void deleteProject(Long projectId);
 	    Project getProject(Long projectId);
 	    List<Project> getAllProjects();
+	    public List<Project> getUserProjects(String username);
 }

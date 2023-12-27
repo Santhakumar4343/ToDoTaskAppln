@@ -11,6 +11,10 @@ import Logo from "./components/logoOine.jpg";
 import Projects from './components/Projects';
 import Modules from './components/Modules';
 import Task from './components/Task';
+import SuperUserLogin from './components/SuperUser/SuperUserLogin';
+import SuperUserDashboard from './components/SuperUser/SuperUserDashboard';
+import Users from './components/SuperUser/Users';
+import Admins from './components/SuperUser/Admins';
 function Home() {
   const fadeIn = useSpring({
     opacity: 1,
@@ -56,7 +60,7 @@ function App() {
  
   return (
     <Router>
-      <div className="container-fluid">
+      <div className="container-fluid " style={{ backgroundColor: '', minHeight: '100vh' }}>
         <header className="text-center mt-4">
           
           <div className="col-md-2">
@@ -73,12 +77,15 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/registration" element={<Registration />} />
-            <Route path="/user-dashboard" element={<UserDashBoard />} />
+            <Route path="/user-dashboard/*" element={<UserDashBoard />} />
             <Route path="/admin-dashboard" element={<AdminDashBoard />} />
             <Route path="/admin-dashboard/projects" element={<Projects />} />
             <Route path="/admin-dashboard/modules" element={<Modules />} />
             <Route path="/admin-dashboard/tasks" element={<Task />} />
-
+            <Route path="/superuser" element={<SuperUserLogin />} />
+            <Route path="/superuserdashboard/*" element={<SuperUserDashboard />} />
+           
+           
           </Routes>
         </div>
       </div>

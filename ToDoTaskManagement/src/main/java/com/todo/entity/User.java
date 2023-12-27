@@ -1,10 +1,14 @@
 package com.todo.entity;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToMany;
 
 @Entity
 
@@ -22,6 +26,8 @@ public class User {
 	private String email;
 	private String mobileNumber;
 	private String userType;
+	@ManyToMany(mappedBy = "users")
+    private Set<Project> projects = new HashSet<>();
 
 	public User() {
 		super();

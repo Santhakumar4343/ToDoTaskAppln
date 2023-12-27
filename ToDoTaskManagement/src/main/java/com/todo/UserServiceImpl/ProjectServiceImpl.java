@@ -46,5 +46,9 @@ public class ProjectServiceImpl implements ProjectService {
     public List<Project> getAllProjects() {
         return projectRepository.findAll();
     }
+    public List<Project> getUserProjects(String username) {
+        return projectRepository.findByAssignedTo(username);
+    }
+
 }
 

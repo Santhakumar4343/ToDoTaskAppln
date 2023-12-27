@@ -1,55 +1,147 @@
-import React, { useState, useEffect } from 'react';
-import { Button, Modal, Form, Table, FormControl, Alert, Col, Row } from 'react-bootstrap';
-import moment from 'moment';
+import React, { useState, useEffect } from "react";
+import {
+  Button,
+  Modal,
+  Form,
+  Table,
+  FormControl,
+  Alert,
+  Col,
+  Row,
+} from "react-bootstrap";
+import moment from "moment";
 import Swal from "sweetalert2";
-import axios from 'axios';
+import axios from "axios";
+import { useLocation } from "react-router";
 
 const Modules = () => {
   const [showModal, setShowModal] = useState(false);
   const [projects, setProjects] = useState([]);
-  const [selectedProject, setSelectedProject] = useState('');
-  const [moduleName, setModuleName] = useState('');
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
-  const [status, setStatus] = useState('');
-  const [remarks, setRemarks] = useState('');
+  const [selectedProject, setSelectedProject] = useState("");
+  const [moduleName, setModuleName] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [status, setStatus] = useState("");
+  const [remarks, setRemarks] = useState("");
   const [modules, setModules] = useState([]);
   const [selectedModuleId, setSelectedModuleId] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const location = useLocation();
+  const { state: { username } = {} } = location;
 
   useEffect(() => {
-    // Fetch all projects on component mount
-    axios.get('http://localhost:8082/api/projects/getAllProjects')
-      .then(response => {
-        setProjects(response.data);
-      })
-      .catch(error => {
-        console.error('Error fetching projects:', error);
-      });
-  }, []);
+    // Fetch the projects for the specific user when the component mounts
+    fetchUserProjects(username);
+  }, [username]);
 
-  useEffect(() => {
-    // Fetch all modules on component mount and when modules or selectedProject change
-    fetchModules();
-  }, [selectedProject]); // Include selectedProject in the dependency array
+  const fetchUserProjects = (username) => {
+    console.log("Fetching projects for user:", username);
 
-  const fetchModules = (selectedProject) => {
-    // Include selectedProject as a query parameter
-    const apiUrl = selectedProject
-      ? `http://localhost:8082/api/modules/getModuleByPId/${selectedProject}`
-      : 'http://localhost:8082/api/modules/getAllModules';
+    // Make a GET request to fetch user-specific projects
+    fetch(
+      `http://localhost:8082/api/projects/getUserProjects?username=${username}`
+    )
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("Fetched projects:", data);
 
-    // Make a GET request to fetch modules
-    axios.get(apiUrl)
-      .then((response) => {
-        // Set the fetched modules to the state
-        setModules(response.data);
+        // Set the fetched projects to the state
+        setProjects(data);
+
+        // Set the first project as the selected project
+        if (data.length > 0) {
+          setSelectedProject(data[0]);
+
+          // Fetch modules and tasks for all projects
+          fetchModulesForAllProjects(data);
+        }
       })
       .catch((error) => {
-        console.error('Error fetching modules:', error);
+        console.error("Error fetching user projects:", error);
         // Handle the error
       });
   };
+
+  const fetchModulesForAllProjects = async (projects) => {
+  // Create a Set to keep track of unique module IDs
+  const uniqueModuleIds = new Set();
+
+  // Create an array to store promises for each project
+  const fetchPromises = projects.map(async (project) => {
+    const newModules = await fetchModules(project.id);
+
+    // Filter out modules that are already present in the Set
+    const filteredModules = newModules.filter(
+      (newModule) => !uniqueModuleIds.has(newModule.id)
+    );
+
+    // Add new module IDs to the Set
+    filteredModules.forEach((newModule) => {
+      uniqueModuleIds.add(newModule.id);
+    });
+   
+    return filteredModules;
+  });
+
+  // Wait for all promises to resolve
+  const modulesArrays = await Promise.all(fetchPromises);
+
+  // Flatten the array of arrays into a single array
+  const allModules = modulesArrays.flat();
+
+  // Set the fetched modules to the state
+  setModules(allModules);
+};
+
+  
+
+  
+
+const fetchModules = async (projectId) => {
+  try {
+    // Include projectId as a query parameter
+    const apiUrl = projectId
+      ? `http://localhost:8082/api/modules/getModuleByPId/${projectId}`
+      : "http://localhost:8082/api/modules/getAllModules";
+
+    // Make a GET request to fetch modules
+    const response = await axios.get(apiUrl);
+
+    // Use functional update to ensure the latest state is used
+    setModules((prevModules) => {
+      // Filter out modules that are already present in the state
+      const newModules = response.data.filter(
+        (newModule) =>
+          !prevModules.some(
+            (existingModule) => existingModule.id === newModule.id
+          )
+      );
+
+      // Return the new state
+      return [...prevModules, ...newModules];
+    });
+
+    return response.data; // Return the new modules for further processing if needed
+  } catch (error) {
+    console.error("Error fetching modules:", error);
+    // Handle the error
+  }
+};
+
+
+  
+  
+  
+useEffect(() => {
+  console.log("Selected Project Changed:", selectedProject);
+  // Fetch all modules on component mount and when selectedProject changes
+  if (selectedProject) {
+    fetchModules(selectedProject.id);
+  }
+}, [selectedProject]);
+
+
+
 
   const filteredModules = modules.filter(
     (module) =>
@@ -58,16 +150,15 @@ const Modules = () => {
       module.remarks.toLowerCase().includes(searchTerm.toLowerCase())
   );
   const handleCreateModule = () => {
-
-    setModuleName('');
-    setStartDate('');
-    setEndDate('');
-    setStatus('');
-    setRemarks('');
+    setModuleName("");
+    setStartDate("");
+    setEndDate("");
+    setStatus("");
+    setRemarks("");
     setSelectedModuleId(null);
     // Make sure a project is selected before creating a module
     if (!selectedProject) {
-      alert('Please select a project');
+      alert("Please select a project");
       return;
     }
 
@@ -94,12 +185,12 @@ const Modules = () => {
   const handleSaveModule = () => {
     // Prepare module data using FormData
     const formData = new FormData();
-    formData.append('projectId', selectedProject);
-    formData.append('moduleName', moduleName);
-    formData.append('startDate', startDate);
-    formData.append('endDate', endDate);
-    formData.append('status', status);
-    formData.append('remarks', remarks);
+    formData.append("projectId", selectedProject);
+    formData.append("moduleName", moduleName);
+    formData.append("startDate", startDate);
+    formData.append("endDate", endDate);
+    formData.append("status", status);
+    formData.append("remarks", remarks);
 
     // Determine whether to create or update based on selectedModuleId
     const requestUrl = selectedModuleId
@@ -107,40 +198,46 @@ const Modules = () => {
       : `http://localhost:8082/api/modules/saveModule/${selectedProject}`;
 
     // Use 'PUT' for updating
-    const method = selectedModuleId ? 'PUT' : 'POST';
+    const method = selectedModuleId ? "PUT" : "POST";
 
     // Send a request to create or update a module
     axios({
-      method,  // Use 'PUT' or 'POST' based on the condition
+      method, // Use 'PUT' or 'POST' based on the condition
       url: requestUrl,
       data: formData,
       headers: {
-        'Content-Type': 'multipart/form-data',
+        "Content-Type": "multipart/form-data",
       },
     })
-      .then(response => {
-        console.log('Module saved successfully:', response.data);
+      .then((response) => {
+        console.log("Module saved successfully:", response.data);
         Swal.fire({
-          icon: 'success',
-          title: 'Module ' + (selectedModuleId ? 'Updated' : 'Created') + ' Successfully',
-          text: `The module has been ${selectedModuleId ? 'updated' : 'created'} successfully!`,
+          icon: "success",
+          title:
+            "Module " +
+            (selectedModuleId ? "Updated" : "Created") +
+            " Successfully",
+          text: `The module has been ${
+            selectedModuleId ? "updated" : "created"
+          } successfully!`,
           customClass: {
-            popup: 'max-width-100',
+            popup: "max-width-100",
           },
         });
         setShowModal(false);
         fetchModules(); // Fetch modules again to update the table
-
       })
-      .catch(error => {
-        console.error('Error saving module:', error);
+      .catch((error) => {
+        console.error("Error saving module:", error);
         setShowModal(false);
         Swal.fire({
-          icon: 'error',
-          title: 'Operation Failed',
-          text: `An error occurred during the ${selectedModuleId ? 'update' : 'creation'} of the module. Please try again.`,
+          icon: "error",
+          title: "Operation Failed",
+          text: `An error occurred during the ${
+            selectedModuleId ? "update" : "creation"
+          } of the module. Please try again.`,
           customClass: {
-            popup: 'max-width-100',
+            popup: "max-width-100",
           },
         });
       });
@@ -148,41 +245,40 @@ const Modules = () => {
   const handleDeleteModule = (moduleId) => {
     // Make a DELETE request to delete the project
     fetch(`http://localhost:8082/api/modules/deleteModule/${moduleId}`, {
-      method: 'DELETE',
+      method: "DELETE",
     })
       .then((response) => {
         if (response.ok) {
-          console.log('Module deleted successfully');
+          console.log("Module deleted successfully");
           Swal.fire({
-            icon: 'success',
-            title: 'Module deleted successfully',
-            text: 'Module deleted successfully!',
+            icon: "success",
+            title: "Module deleted successfully",
+            text: "Module deleted successfully!",
             customClass: {
-              popup: 'max-width-100',
+              popup: "max-width-100",
             },
           });
           fetchModules();
-
         } else {
-          console.error('Error deleting project:', response.status);
+          console.error("Error deleting project:", response.status);
           Swal.fire({
-            icon: 'error',
-            title: 'Error deleting project',
-            text: 'An error occurred during deletion. Please try again.',
+            icon: "error",
+            title: "Error deleting project",
+            text: "An error occurred during deletion. Please try again.",
             customClass: {
-              popup: 'max-width-100',
+              popup: "max-width-100",
             },
           });
         }
       })
       .catch((error) => {
-        console.error('Error deleting project:', error);
+        console.error("Error deleting project:", error);
         Swal.fire({
-          icon: 'error',
-          title: 'Error deleting project',
-          text: 'An error occurred during deletion. Please try again.',
+          icon: "error",
+          title: "Error deleting project",
+          text: "An error occurred during deletion. Please try again.",
           customClass: {
-            popup: 'max-width-100',
+            popup: "max-width-100",
           },
         });
       });
@@ -190,46 +286,64 @@ const Modules = () => {
 
   return (
     <div>
-      <h4 className='text-center '>Modules Component </h4>
-      <select id="projectDropdown" onChange={(e) => setSelectedProject(e.target.value)}>
-        <option value="" className=''>-- Select Project --</option>
-        {projects.map(project => (
-          <option key={project.id} value={project.id}>{project.projectName}</option>
+      <h4 className="text-center ">Modules Component </h4>
+      <select
+        id="projectDropdown"
+        onChange={(e) => setSelectedProject(e.target.value)}
+      >
+        <option value="" className="">
+          -- Select Project --
+        </option>
+        {projects.map((project) => (
+          <option key={project.id} value={project.id}>
+            {project.projectName}
+          </option>
         ))}
       </select>
 
-      <Button variant="success" className="mb-3 m-2" onClick={handleCreateModule}>
+      <Button
+        variant="success"
+        className="mb-3 m-2"
+        onClick={handleCreateModule}
+      >
         Create Module
       </Button>
       <FormControl
         type="text"
         placeholder="Search by Module Name, Remarks, or Status"
         className="mb-3 "
-        style={{ border: '1px solid black' }}
+        style={{ border: "1px solid black" }}
         onChange={(e) => setSearchTerm(e.target.value)}
       />
       {filteredModules.length > 0 ? (
         <>
-          <Table striped bordered hover className="text-center border border-dark" >
+          <Table
+            striped
+            bordered
+            hover
+            className="text-center border border-dark"
+          >
             <thead>
               <tr>
-                <th className='h6'>Module Name</th>
-                <th className='h6'>Status</th>
-                <th className='h6'>Planned Start Date</th>
-                <th className='h6'>Planned Closed Date</th>
-                <th className='h6'>Comments</th>
-                <th className='h6'>Actions</th>
+                <th className="h6">Module Name</th>
+                <th className="h6">Status</th>
+                <th className="h6">Planned Start Date</th>
+                <th className="h6">Planned Closed Date</th>
+                <th className="h6">Comments</th>
+                <th className="h6">Actions</th>
               </tr>
             </thead>
             <tbody>
-              {filteredModules.map((module) => (
-                <tr key={module.id}>
+              {filteredModules.map((module, index) => (
+                <tr key={index}>
                   <td>{module.moduleName}</td>
                   <td>{module.status}</td>
-                  <td>{moment(module.startDate).format('YYYY-MM-DD')}</td>
-                  <td>{moment(module.endDate).format('YYYY-MM-DD')}</td>
+                  <td>{moment(module.startDate).format("YYYY-MM-DD")}</td>
+                  <td>{moment(module.endDate).format("YYYY-MM-DD")}</td>
 
-                  <td style={{ maxWidth: '200px', overflowX: 'auto' }}>{module.remarks}</td>
+                  <td style={{ maxWidth: "200px", overflowX: "auto" }}>
+                    {module.remarks}
+                  </td>
                   <td>
                     {/* <Button
                       variant="primary"
@@ -244,9 +358,14 @@ const Modules = () => {
                     >
                       Delete
                     </Button> */}
-                    <i className="bi bi-pencil fs-4" onClick={() => handleUpdateModule(module.id)}></i>
-                    {' '}
-                    <i class="bi bi-trash3 fs-4 m-2" onClick={() => handleDeleteModule(module.id)}></i>
+                    <i
+                      className="bi bi-pencil fs-4"
+                      onClick={() => handleUpdateModule(module.id)}
+                    ></i>{" "}
+                    <i
+                      class="bi bi-trash3 fs-4 m-2"
+                      onClick={() => handleDeleteModule(module.id)}
+                    ></i>
                   </td>
                 </tr>
               ))}
@@ -259,9 +378,6 @@ const Modules = () => {
         </Alert>
       )}
 
-
-
-
       <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
           <Modal.Title>Create/Update Module</Modal.Title>
@@ -269,8 +385,10 @@ const Modules = () => {
         <Modal.Body>
           <Form>
             <Row>
-              <Col md={4}><Form.Label>Module Name</Form.Label></Col>
-              <Col md={8} >
+              <Col md={4}>
+                <Form.Label>Module Name</Form.Label>
+              </Col>
+              <Col md={8}>
                 <Form.Group controlId="formModuleName">
                   <Form.Control
                     type="text"
@@ -282,60 +400,73 @@ const Modules = () => {
               </Col>
             </Row>
             <Row>
-              <Col md={4}><Form.Label>Start Date</Form.Label></Col>
-              <Col md={8}><Form.Group controlId="formStartDate">
-
-                <Form.Control
-                  type="date"
-                  className=" mb-3 border border-dark"
-                  value={startDate}
-                  onChange={(e) => setStartDate(e.target.value)}
-                />
-              </Form.Group></Col>
+              <Col md={4}>
+                <Form.Label>Start Date</Form.Label>
+              </Col>
+              <Col md={8}>
+                <Form.Group controlId="formStartDate">
+                  <Form.Control
+                    type="date"
+                    className=" mb-3 border border-dark"
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                  />
+                </Form.Group>
+              </Col>
             </Row>
 
             <Row>
-              <Col md={4}> <Form.Label>End Date</Form.Label></Col>
-              <Col md={8}> <Form.Group controlId="formEndDate">
-
-                <Form.Control
-                  type="date"
-                  className=" mb-3 border border-dark"
-                  value={endDate}
-                  onChange={(e) => setEndDate(e.target.value)}
-                />
-              </Form.Group></Col>
+              <Col md={4}>
+                {" "}
+                <Form.Label>End Date</Form.Label>
+              </Col>
+              <Col md={8}>
+                {" "}
+                <Form.Group controlId="formEndDate">
+                  <Form.Control
+                    type="date"
+                    className=" mb-3 border border-dark"
+                    value={endDate}
+                    onChange={(e) => setEndDate(e.target.value)}
+                  />
+                </Form.Group>
+              </Col>
             </Row>
 
             <Row>
-              <Col md={4}><Form.Label>Status</Form.Label></Col>
-              <Col md={8}><Form.Group controlId="formStatus">
-
-                <Form.Control
-                  type="text"
-                  className=" mb-3 border border-dark"
-                  value={status}
-                  onChange={(e) => setStatus(e.target.value)}
-                />
-              </Form.Group></Col>
+              <Col md={4}>
+                <Form.Label>Status</Form.Label>
+              </Col>
+              <Col md={8}>
+                <Form.Group controlId="formStatus">
+                  <Form.Control
+                    type="text"
+                    className=" mb-3 border border-dark"
+                    value={status}
+                    onChange={(e) => setStatus(e.target.value)}
+                  />
+                </Form.Group>
+              </Col>
             </Row>
 
             <Row>
-              <Col md={4}><Form.Label>Remarks</Form.Label></Col>
-              <Col md={8}><Form.Group controlId="formRemarks">
-
-                <Form.Control
-                  type="text"
-                  className=" mb-3 border border-dark"
-                  value={remarks}
-                  onChange={(e) => setRemarks(e.target.value)}
-                />
-              </Form.Group></Col>
+              <Col md={4}>
+                <Form.Label>Remarks</Form.Label>
+              </Col>
+              <Col md={8}>
+                <Form.Group controlId="formRemarks">
+                  <Form.Control
+                    type="text"
+                    className=" mb-3 border border-dark"
+                    value={remarks}
+                    onChange={(e) => setRemarks(e.target.value)}
+                  />
+                </Form.Group>
+              </Col>
             </Row>
-
           </Form>
         </Modal.Body>
-        <Modal.Footer className="d-flex justify-content-center align-content-center" >
+        <Modal.Footer className="d-flex justify-content-center align-content-center">
           <Button variant="secondary" onClick={() => setShowModal(false)}>
             Close
           </Button>
