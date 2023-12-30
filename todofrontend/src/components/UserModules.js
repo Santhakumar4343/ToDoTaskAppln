@@ -315,16 +315,27 @@ useEffect(() => {
         style={{ border: "1px solid black" }}
         onChange={(e) => setSearchTerm(e.target.value)}
       />
-      {filteredModules.length > 0 ? (
-        <>
-          <Table
+   {filteredModules.length === 0 ? (
+        searchTerm !== "" ? (
+          <Alert variant="danger text-center" className="mb-3">
+            No results found for "{searchTerm}".
+          </Alert>
+        ) : (
+          <Alert variant="info text-center" className="mb-3">
+            No Modules found.
+          </Alert>
+        )
+      ) : (
+       <Table
             striped
             bordered
             hover
             className="text-center border border-dark"
           >
             <thead>
+
               <tr>
+              <th className="h6">Project Name</th>
                 <th className="h6">Module Name</th>
                 <th className="h6">Status</th>
                 <th className="h6">Planned Start Date</th>
@@ -336,6 +347,7 @@ useEffect(() => {
             <tbody>
               {filteredModules.map((module, index) => (
                 <tr key={index}>
+                   <td>{module.project.projectName}</td>
                   <td>{module.moduleName}</td>
                   <td>{module.status}</td>
                   <td>{moment(module.startDate).format("YYYY-MM-DD")}</td>
@@ -371,13 +383,7 @@ useEffect(() => {
               ))}
             </tbody>
           </Table>
-        </>
-      ) : (
-        <Alert variant="danger text-center" className="mb-3">
-          No results found for "{searchTerm}".
-        </Alert>
       )}
-
       <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
           <Modal.Title>Create/Update Module</Modal.Title>

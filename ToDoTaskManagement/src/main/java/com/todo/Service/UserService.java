@@ -3,6 +3,7 @@ package com.todo.Service;
 
 import java.util.List;
 
+import com.todo.entity.SuperUser;
 import com.todo.entity.User;
 
 import jakarta.security.auth.message.AuthException;
@@ -22,8 +23,8 @@ public interface UserService {
 
  void generateOtpAndSendEmail(User user);
  
-
+  void sendOtpToSuperUser(User user);
  public User verifyOtpWithoutUsername(String otp) throws AuthException;
 
-
+ //public User verifyOtp(String username, String otp) throws AuthException;
 }

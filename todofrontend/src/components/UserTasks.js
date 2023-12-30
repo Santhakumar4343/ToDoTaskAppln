@@ -354,6 +354,8 @@ const Task = () => {
           >
             <thead>
               <tr>
+              <th className="h6">Project Name</th>
+              <th className="h6">Module Name</th>
                 <th className="h6">Task Name</th>
                 <th className="h6">Status</th>
                 <th className="h6">Planned Start Date</th>
@@ -366,6 +368,8 @@ const Task = () => {
             <tbody>
               {filteredTasks.map((task) => (
                 <tr key={task.id}>
+                   <td>{task.module.project.projectName}</td>
+                  <td>{task.module.moduleName}</td>
                   <td>{task.taskName}</td>
                   <td>{task.status}</td>
                   <td>{moment(task.startDate).format("YYYY-MM-DD")}</td>

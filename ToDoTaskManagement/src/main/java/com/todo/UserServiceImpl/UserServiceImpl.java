@@ -1,5 +1,6 @@
 package com.todo.UserServiceImpl;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -34,16 +35,38 @@ public class UserServiceImpl implements UserService {
      Optional<User> optionalUser = userRepository.findById(userId);
      return optionalUser.orElse(null);
  }
+ 
  @Override
  public User createUser(User user) {
-     
+     // Check if a user with the same employeeId already exists
      if (userRepository.existsByEmployeeId(user.getEmployeeId())) {
          throw new RuntimeException("User with this employeeId already exists");
      }
 
-     
-     return userRepository.save(user);
+     // Save the user
+     User createdUser = userRepository.save(user);
+
+     // Send OTP to the SuperUser's email
+     sendOtpToSuperUser(createdUser);
+
+     return createdUser;
  }
+   @Override
+ public void sendOtpToSuperUser(User user) {
+     // Retrieve the SuperUser's email from your database or configuration
+     String superUserEmail = "p.devamatha2001@gmail.com"; // Replace with actual SuperUser's email
+
+     // Generate a random 6-digit OTP
+     String otp = String.format("%06d", new Random().nextInt(1000000));
+
+     // Save the OTP to the cache or database (if needed)
+     // Here, we'll assume you have a method to save the OTP to the database.
+
+     // Send the OTP via email to the SuperUser
+     sendOtpEmail(superUserEmail, otp);
+ }
+
+
 
  @Override
  public User updateUser(Long userId, User updatedUser) {
@@ -98,17 +121,17 @@ public class UserServiceImpl implements UserService {
 // }
 
  public User login(String username, String password) throws AuthException {
-     // Authenticate the user
-     User user = userRepository.findByUsernameAndPassword(username, password);
+	    // Authenticate the user
+	    User user = userRepository.findByUsernameAndPassword(username, password);
 
-     if (user != null) {
-         // Generate and send OTP
-         generateOtpAndSendEmail(user);
-         return user; // Return the authenticated user
-     } else {
-         throw new AuthException("Invalid login credentials");
-     }
- }
+	    if (user != null) {
+	        // Additional logic if needed (e.g., send OTP to email)
+	        return user; // Return the authenticated user
+	    } else {
+	        throw new AuthException("Invalid login credentials");
+	    }
+	}
+
  
 
  private void sendOtpEmail(String to, String otp) {
@@ -132,17 +155,36 @@ public class UserServiceImpl implements UserService {
 //     return false;
 // }
  
- @Override
  public User verifyOtpWithoutUsername(String otp) throws AuthException {
-     for (Map.Entry<String, String> entry : otpCache.entrySet()) {
-         if (entry.getValue().equals(otp)) {
-             otpCache.remove(entry.getKey());
-             // Retrieve and return the authenticated user details
-             return userRepository.findByUsername(entry.getKey());
-         }
-     }
-     throw new AuthException("Invalid OTP");
- }
+	    for (Iterator<Map.Entry<String, String>> iterator = otpCache.entrySet().iterator(); iterator.hasNext();) {
+	        Map.Entry<String, String> entry = iterator.next();
+	        if (entry.getValue().equals(otp)) {
+	            iterator.remove(); // Remove the entry from the cache
+	            // Retrieve or create user details based on your logic
+	            User user = new User(); // Replace with your logic or return a DTO if needed
+	            return user;
+	        }
+	    }
+	    throw new AuthException("Invalid OTP");
+	}
+
+ public boolean verifyOtpForSuperUser(VerificationRequest verificationRequest) {
+	    // Retrieve the SuperUser's email from your database or configuration
+	    String superUserEmail = "p.devamatha2001@gmail.com"; // Replace with actual SuperUser's email
+
+	    // Retrieve the user-provided OTP and username from the request
+	    String enteredOtp = verificationRequest.getOtp();
+	    String enteredUsername = verificationRequest.getUsername();
+
+	    // Retrieve the saved OTP from your cache or database based on the username
+	    String savedOtp = // Retrieve the saved OTP for the given username
+
+	    // Compare the entered OTP with the saved OTP
+	    return enteredOtp.equals(savedOtp);
+	}
+
+
+
 
 }
 

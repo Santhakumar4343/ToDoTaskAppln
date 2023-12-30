@@ -1,149 +1,110 @@
-import React, { useState } from 'react';
-import { Modal, Button, Form, Spinner } from 'react-bootstrap';
-import {  useNavigate } from 'react-router-dom';
+import React, { useState } from "react";
+import { Form, Button, Spinner } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
+
 const Login = () => {
-    const [showModal, setShowModal] = useState(false);
-    const [username, setUsername] = useState('');
-    const [password, setPassword] = useState('');
-    const [otp, setOtp] = useState('');
-    const [loading, setLoading] = useState(false);
-    const navigate = useNavigate();
-    const handleLogin = async () => {
-        try {
-            setLoading(true);
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
-            const formData = new FormData();
-            formData.append('username', username);
-            formData.append('password', password);
+  const handleLogin = async () => {
+    try {
+      setLoading(true);
 
-            const response = await fetch('http://localhost:8082/api/users/login', {
-                method: 'POST',
-                body: formData,
-            });
+      const formData = new FormData();
+      formData.append("username", username);
+      formData.append("password", password);
 
-            if (response.ok) {
-                setShowModal(true);
-            } else {
-                console.error('Login failed:', response.statusText);
-            }
-        } catch (error) {
-            console.error('Login failed:', error);
-        } finally {
-            setLoading(false);
+      const response = await fetch("http://localhost:8082/api/users/login", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (response.ok) {
+        const userData = await response.json();
+        const userTypeLowerCase = userData.userType.toLowerCase();
+        const userUsername = userData.username;
+
+        if (userTypeLowerCase === "user") {
+          // Navigate to the user dashboard with state (username)
+          navigate("/user-dashboard", { state: { username: userUsername } });
+        } else if (userTypeLowerCase === "admin") {
+          // Navigate to the admin dashboard if needed
+          navigate("/admin-dashboard");
+        } else {
+          console.error("Unknown userType:", userData.userType);
         }
-    };
+      } else {
+        console.error("Login failed:", response.statusText);
+      }
+    } catch (error) {
+      console.error("Login failed:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    const handleCancel = () => {
+  return (
+    <div className="container">
+      <Form
+        className="mx-auto mt-5"
+        style={{
+          maxWidth: "300px",
+          border: "1px solid black",
+          padding: "20px",
+          marginTop: "100px",
+          textAlign: "center",
+          borderRadius: "2px",
+        }}
+      >
+        <h4>Login</h4>
+        <Form.Group controlId="formUsername">
+          <Form.Control
+            type="text"
+            placeholder="Username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            style={{ border: "1px solid black" }}
+          />
+        </Form.Group>
 
-        navigate('/');
-    };
-    const handleOtpVerification = async () => {
-        try {
-            setLoading(true);
-    
-            const formData = new FormData();
-            formData.append('otp', otp);
-    
-            const response = await fetch('http://localhost:8082/api/users/verify-otp', {
-                method: 'POST',
-                body: formData,
-            });
-    
-            if (response.ok) {
-                const userData = await response.json();
-                const userTypeLowerCase = userData.userType.toLowerCase();
-                const username = userData.username; // Extract the username from the response
-    
-                if (userTypeLowerCase === 'user') {
-                    // Navigate to the user dashboard with state (username)
-                    navigate('/user-dashboard', { state: { username } });
-                } else if (userTypeLowerCase === 'admin') {
-                    // Navigate to the admin dashboard if needed
-                    navigate('/admin-dashboard');
-                } else {
-                    console.error('Unknown userType:', userData.userType);
-                }
-            } else {
-                console.error('OTP verification failed:', response.statusText);
-            }
-        } catch (error) {
-            console.error('OTP verification failed:', error);
-        } finally {
-            setLoading(false);
-            setShowModal(false);
-        }
-    };
-    
+        <Form.Group controlId="formPassword" className="mt-4">
+          <Form.Control
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            style={{ border: "1px solid black" }}
+          />
+        </Form.Group>
 
-    return (
-        <div className="container ">
-            
-            <Form className="mx-auto mt-5" style={{ maxWidth: '300px', border: '1px solid black', padding: '20px', marginTop: '100px', textAlign: 'center' ,borderRadius:"2px"}}>
-               <h4>Login </h4>
-                <Form.Group controlId="formUsername">
-                    <Form.Control type="text" placeholder="username" value={username} onChange={(e) => setUsername(e.target.value)} style={{ border: '1px solid black' }}/>
-                </Form.Group>
-
-                <Form.Group controlId="formPassword" className="mt-4">
-                    <Form.Control type="password" placeholder="password" value={password} onChange={(e) => setPassword(e.target.value)} style={{ border: '1px solid black' }}  />
-                </Form.Group>
-
-                <div className=" mt-2  ">
-                    <Button type="submit" variant="primary" className="mt-2  w-50 mr-2" disabled={loading} onClick={handleLogin}>
-                        {loading ? (
-                            <>
-                                <Spinner animation="border" size="sm" className="me-2" style={{ border: '1px solid black' }}/>
-                                Loading...
-                            </>
-                        ) : (
-                            'Login'
-                        )}
-                    </Button>
-
-                </div>
-            </Form>
-            <div className="d-flex justify-content-center align-items-center mt-4">
-    <Button className="w-20 " onClick={handleCancel}>
-    Cancel
-    </Button>
-</div>
-
-
-
-            <Modal centered show={showModal} onHide={() => setShowModal(false)} >
-                <Modal.Header closeButton>
-                    <Modal.Title>Enter OTP</Modal.Title>
-                </Modal.Header>
-                <Modal.Body style={{ border: 'none' }}>
-                    <Form.Group controlId="formOtp">
-                        <Form.Control
-                            type="text"
-                            placeholder="Enter OTP"
-                            className='border border-dark'
-                            value={otp}
-                            onChange={(e) => setOtp(e.target.value)}
-                        />
-                    </Form.Group>
-                </Modal.Body>
-                <Modal.Footer style={{ marginRight: "150px" }}>
-                    <Button variant="secondary" onClick={() => setShowModal(false)} >
-                        Close
-                    </Button>
-                    <Button type="submit" variant="primary" disabled={loading} onClick={handleOtpVerification}>
-                        {loading ? (
-                            <>
-                                <Spinner animation="border" size="sm" className="me-2" />
-                                Loading...
-                            </>
-                        ) : (
-                            'Verify OTP'
-                        )}
-                    </Button>
-                </Modal.Footer>
-            </Modal>
-
+        <div className="mt-2">
+          <Button
+            type="submit"
+            variant="primary"
+            className="w-50"
+            disabled={loading}
+            onClick={handleLogin}
+          >
+            {loading ? (
+              <>
+                <Spinner
+                  animation="border"
+                  size="sm"
+                  className="me-2"
+                  style={{ border: "1px solid black" }}
+                />
+                Loading...
+              </>
+            ) : (
+              "Login"
+            )}
+          </Button>
         </div>
-    );
+      </Form>
+    </div>
+  );
 };
 
 export default Login;
