@@ -2,6 +2,7 @@ package com.todo.UserController;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 //UserController.java
 
@@ -32,7 +33,7 @@ public class UserController {
 	private UserServiceImpl userService;
 	 @Autowired
 	    private UserRepository userRepository;
-
+	 private final Map<String, String> otpCache = new ConcurrentHashMap<>();
 	    @GetMapping("/userType/{type}")
 	    public ResponseEntity<List<User>> getUsersByUserType(@PathVariable String type) {
 	        List<User> users = userRepository.findByUserType(type);
@@ -106,47 +107,61 @@ public class UserController {
 	}
 
 
-// @PostMapping("/verify-otp")
-// public ResponseEntity<String> verifyOtpWithoutUsername(@RequestParam String otp) {
-//     boolean otpVerified = userService.verifyOtpWithoutUsername(otp);
-//	 if (otpVerified) {
-//	     return new ResponseEntity<>("OTP verified. Login successful.", HttpStatus.OK);
-//	 } else {
-//	     return new ResponseEntity<>("Invalid OTP.", HttpStatus.UNAUTHORIZED);
-//	 }
-// }
-	@PostMapping("/verify-otp")
-	public ResponseEntity<?> verifyOtpWithoutUsername(@RequestBody Map<String, String> requestBody) {
-		 try {
-		String otp = requestBody.get("otp");
-	   
-	        System.out.println("Received OTP: " + otp);
 
-	        // Verify OTP and get user details
-	        User user = userService.verifyOtpWithoutUsername(otp);
-
-	        // Save the user in the database
-	        userService.createUser(user);
-
-	        System.out.println("User details: " + user);
-
-	        // If OTP is verified and user is saved, return user details in the response
-	        return new ResponseEntity<>(user, HttpStatus.OK);
-	    } catch (AuthException e) {
-	        return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
-	    }
-	}
+	
 
 
 	@PostMapping("/send-otp")
 	public ResponseEntity<String> sendOtpToSuperUser(@RequestBody User user) {
 	    try {
+	    	
 	        userService.sendOtpToSuperUser(user);
 	        return new ResponseEntity<>("OTP sent to SuperUser's email", HttpStatus.OK);
 	    } catch (Exception e) {
 	        return new ResponseEntity<>("Failed to send OTP to SuperUser's email", HttpStatus.INTERNAL_SERVER_ERROR);
 	    }
 	}
+	
+   
+
+//	@PostMapping("/verify-otp")
+//	public ResponseEntity<String> verifyOtp(@RequestBody Map<String, String> otpVerificationRequest) {
+//	    try {
+//	        String username = otpVerificationRequest.get("username");
+//	        String enteredOtp = otpVerificationRequest.get("otp");
+//	        System.out.println("Received OTP verification request with payload: " +
+//	                "username=" + username + ", otp=" + enteredOtp);
+//
+//	        // Retrieve the stored OTP from the cache
+//	        String storedOtp = otpCache.get(username);
+//	        System.out.println("Stored OTP: " + storedOtp);
+//
+//	        // Check if the storedOtp is null or empty
+//	        if (storedOtp == null || storedOtp.isEmpty()) {
+//	            return new ResponseEntity<>("Invalid OTP (Cache is empty)", HttpStatus.BAD_REQUEST);
+//	        }
+//
+//	        // Compare the entered OTP with the stored OTP
+//	        if (storedOtp.equals(enteredOtp)) {
+//	            // OTP verification successful
+//	            return new ResponseEntity<>("OTP verified successfully", HttpStatus.OK);
+//	        } else {
+//	            // OTP verification failed
+//	            return new ResponseEntity<>("Invalid OTP (Mismatch)", HttpStatus.BAD_REQUEST);
+//	        }
+//	    } catch (Exception e) {
+//	        e.printStackTrace();
+//	        return new ResponseEntity<>("Failed to verify OTP", HttpStatus.INTERNAL_SERVER_ERROR);
+//	    }
+//	}
+	 @PostMapping("/verify-otp")
+	    public ResponseEntity<String> verifyOtp(@RequestBody Map<String, String> otpVerificationRequest) {
+	        String username = otpVerificationRequest.get("username");
+	        String enteredOtp = otpVerificationRequest.get("otp");
+	        return userService.verifyOtp(username, enteredOtp);
+	    }
+
+
 
 
 }

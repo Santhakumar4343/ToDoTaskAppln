@@ -11,7 +11,7 @@ const RegistrationForm = () => {
   const [otp, setOtp] = useState("");
   const [showOtpModal, setShowOtpModal] = useState(false);
 
-  // Declare formData at the beginning of the component
+
   const [formData, setFormData] = useState({
     username: "",
     password: "",
@@ -26,13 +26,12 @@ const RegistrationForm = () => {
     try {
       const response = await axios.post(
         "http://localhost:8082/api/users/verify-otp",
-        { otp: otp }
+        { username: formData.username, otp: otp }
       );
   
-      // Assuming your server returns a success message on OTP verification
-      if (response.data.message === "OTP verified successfully") {
+      if (response.data.message && response.data.message.toLowerCase().includes("otp verified successfully"))  {
         // Save the user in the database
-        await axios.post("http://localhost:8082/api/users/save", formData);
+        await saveUser();
   
         Swal.fire({
           icon: "success",
@@ -69,7 +68,19 @@ const RegistrationForm = () => {
       console.error("Error during registration:", error);
     } finally {
       setLoading(false);
-    };
+    }
+  };
+  
+  // Function to save the user in the database
+  const saveUser = async () => {
+    try {
+      // Assuming you have an endpoint to save the user after OTP verification
+      await axios.post("http://localhost:8082/api/users/save", formData);
+      console.log("User saved successfully!");
+    } catch (error) {
+      console.error("Error saving user:", error);
+      // Handle the error as needed
+    }
   };
   
 

@@ -3,7 +3,8 @@ package com.todo.Service;
 
 import java.util.List;
 
-import com.todo.entity.SuperUser;
+import org.springframework.http.ResponseEntity;
+
 import com.todo.entity.User;
 
 import jakarta.security.auth.message.AuthException;
@@ -21,10 +22,8 @@ public interface UserService {
  void deleteUser(Long userId);
  User login(String username, String password) throws AuthException;
 
- void generateOtpAndSendEmail(User user);
+ String generateOtpAndSendEmail(User user);
  
   void sendOtpToSuperUser(User user);
- public User verifyOtpWithoutUsername(String otp) throws AuthException;
-
- //public User verifyOtp(String username, String otp) throws AuthException;
+  public ResponseEntity<String> verifyOtp(String username, String enteredOtp);
 }
