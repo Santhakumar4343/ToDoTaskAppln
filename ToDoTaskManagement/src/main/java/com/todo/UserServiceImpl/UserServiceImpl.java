@@ -45,13 +45,8 @@ public class UserServiceImpl implements UserService {
      if (userRepository.existsByEmployeeId(user.getEmployeeId())) {
          throw new RuntimeException("User with this employeeId already exists");
      }
-
      // Save the user
      User createdUser = userRepository.save(user);
-
-     // Send OTP to the SuperUser's email
-     sendOtpToSuperUser(createdUser);
-
      return createdUser;
  }
  

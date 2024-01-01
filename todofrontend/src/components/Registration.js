@@ -22,6 +22,16 @@ const RegistrationForm = () => {
     userType: "user",
   });
 
+  const formDataForSave = new FormData();
+formDataForSave.append("username", formData.username);
+formDataForSave.append("password", formData.password);
+formDataForSave.append("confirmPassword", formData.confirmPassword);
+formDataForSave.append("employeeId", formData.employeeId);
+formDataForSave.append("email", formData.email);
+formDataForSave.append("mobileNumber", formData.mobileNumber);
+formDataForSave.append("userType", formData.userType);
+
+
   const handleOtpSubmit = async () => {
     try {
       const response = await axios.post(
@@ -29,7 +39,8 @@ const RegistrationForm = () => {
         { username: formData.username, otp: otp }
       );
   
-      if (response.data.message && response.data.message.toLowerCase().includes("otp verified successfully"))  {
+    console.log("dgdfdfgdfg",response)
+    if (response.data.toLowerCase().includes("otp verified successfully")){
         // Save the user in the database
         await saveUser();
   
@@ -41,7 +52,8 @@ const RegistrationForm = () => {
             popup: "max-width-100",
           },
         });
-  
+
+        navigate("/login");
         setShowOtpModal(false);
         console.log("User registration successful:", response.data);
       } else {
@@ -75,8 +87,9 @@ const RegistrationForm = () => {
   const saveUser = async () => {
     try {
       // Assuming you have an endpoint to save the user after OTP verification
-      await axios.post("http://localhost:8082/api/users/save", formData);
+      await axios.post("http://localhost:8082/api/users/save", formDataForSave);
       console.log("User saved successfully!");
+
     } catch (error) {
       console.error("Error saving user:", error);
       // Handle the error as needed
