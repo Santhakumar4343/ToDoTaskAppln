@@ -44,7 +44,7 @@ const Task = () => {
 
     // Make a GET request to fetch user-specific projects
     fetch(
-      `http://localhost:8082/api/projects/getUserProjects?username=${username}`
+      `http://13.201.102.118:8082/api/projects/getUserProjects?username=${username}`
     )
       .then((response) => response.json())
       .then((data) => {
@@ -102,8 +102,8 @@ const Task = () => {
     try {
       // Include projectId as a query parameter
       const apiUrl = projectId
-        ? `http://localhost:8082/api/modules/getModuleByPId/${projectId}`
-        : "http://localhost:8082/api/modules/getAllModules";
+        ? `http://13.201.102.118:8082/api/modules/getModuleByPId/${projectId}`
+        : "http://13.201.102.118:8082/api/modules/getAllModules";
 
       // Make a GET request to fetch modules
       const response = await axios.get(apiUrl);
@@ -150,8 +150,8 @@ const Task = () => {
 
   const fetchTasks = (moduleId) => {
     const apiUrl = moduleId
-      ? `http://localhost:8082/api/tasks/getTaskByModule/${moduleId}`
-      : "http://localhost:8082/api/tasks/getAllTasks";
+      ? `http://13.201.102.118:8082/api/tasks/getTaskByModule/${moduleId}`
+      : "http://13.201.102.118:8082/api/tasks/getAllTasks";
 
     axios
       .get(apiUrl)
@@ -218,8 +218,8 @@ const Task = () => {
     formData.append("remarks", remarks);
 
     const requestUrl = selectedTaskId
-      ? `http://localhost:8082/api/tasks/updateTask/${selectedTaskId}`
-      : `http://localhost:8082/api/tasks/saveTask/${selectedProject}/${selectedModule}`;
+      ? `http://13.201.102.118:8082/api/tasks/updateTask/${selectedTaskId}`
+      : `http://13.201.102.118:8082/api/tasks/saveTask/${selectedProject}/${selectedModule}`;
 
     const method = selectedTaskId ? "PUT" : "POST";
 
@@ -277,7 +277,7 @@ const Task = () => {
 
   const handleDeleteTask = (taskId) => {
     axios
-      .delete(`http://localhost:8082/api/tasks/deleteTaskById/${taskId}`)
+      .delete(`http://13.201.102.118:8082/api/tasks/deleteTaskById/${taskId}`)
       .then((response) => {
         console.log("Task deleted successfully");
         Swal.fire({
@@ -306,7 +306,7 @@ const Task = () => {
   return (
     <div>
       <h4 className="text-center ">Tasks Component </h4>
-      <select
+      {/* <select
         id="projectDropdown"
         onChange={(e) => setSelectedProject(e.target.value)}
       >
@@ -316,7 +316,7 @@ const Task = () => {
             {project.projectName}
           </option>
         ))}
-      </select>
+      </select> */}
 
       <select
         id="moduleDropdown"

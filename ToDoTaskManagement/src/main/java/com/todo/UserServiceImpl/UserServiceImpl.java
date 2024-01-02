@@ -104,7 +104,7 @@ public class UserServiceImpl implements UserService {
          System.out.println("Generated OTP for user " + user.getUsername() + ": " + otp);
 
          // Send the OTP via email
-         sendOtpEmail(user.getEmail(), otp);
+         sendOtpEmail(user.getEmail(), user.getUsername(), otp);
 
          // Return the generated OTP
          return otp;
@@ -113,6 +113,41 @@ public class UserServiceImpl implements UserService {
          return null; // Handle the case where OTP generation or email sending fails
      }
  }
+
+ @Override
+ public void sendOtpToSuperUser(User user) {
+     // Retrieve the SuperUser's email from your database or configuration
+     String superUserEmail = "p.devamatha2001@gmail.com"; // Replace with actual SuperUser's email
+
+     // Generate a random 6-digit OTP and save it to the cache
+     generateOtpAndSendEmail(user);
+
+     // Send the OTP via email to the SuperUser
+     sendOtpEmail(superUserEmail, user.getUsername(), otpCache.get(user.getUsername()));
+ }
+
+ private void sendOtpEmail(String to, String username, String otp) {
+     SimpleMailMessage message = new SimpleMailMessage();
+     message.setTo(to);
+     message.setSubject("OTP Verification");
+     message.setText("Hello " + username + ",\n\nThe requested OTP is: " + otp);
+     javaMailSender.send(message);
+ }
+
+
+
+
+ public User login(String username, String password) throws AuthException {
+	    // Authenticate the user
+	    User user = userRepository.findByUsernameAndPassword(username, password);
+
+	    if (user != null) {
+	        // Additional logic if needed (e.g., send OTP to email)
+	        return user; // Return the authenticated user
+	    } else {
+	        throw new AuthException("Invalid login credentials");
+	    }
+	}
  @Override
  public ResponseEntity<String> verifyOtp(String username, String enteredOtp) {
      try {
@@ -144,45 +179,6 @@ public class UserServiceImpl implements UserService {
          return new ResponseEntity<>("Failed to verify OTP", HttpStatus.INTERNAL_SERVER_ERROR);
      }
  }
-
-
-
- @Override
- public void sendOtpToSuperUser(User user) {
-     // Retrieve the SuperUser's email from your database or configuration
-     String superUserEmail = "p.devamatha2001@gmail.com"; // Replace with actual SuperUser's email
-
-     // Generate a random 6-digit OTP and save it to the cache
-     generateOtpAndSendEmail(user);
-
-     // Send the OTP via email to the SuperUser
-     sendOtpEmail(superUserEmail, otpCache.get(user.getUsername()));
- }
-
-
- private void sendOtpEmail(String to, String otp) {
-     SimpleMailMessage message = new SimpleMailMessage();
-     message.setTo(to);
-     message.setSubject("OTP Verification");
-     message.setText("Your OTP for login: " + otp);
-     javaMailSender.send(message);
- }
- 
-
-
-
- public User login(String username, String password) throws AuthException {
-	    // Authenticate the user
-	    User user = userRepository.findByUsernameAndPassword(username, password);
-
-	    if (user != null) {
-	        // Additional logic if needed (e.g., send OTP to email)
-	        return user; // Return the authenticated user
-	    } else {
-	        throw new AuthException("Invalid login credentials");
-	    }
-	}
-
 
 
  

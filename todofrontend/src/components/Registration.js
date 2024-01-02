@@ -10,7 +10,9 @@ const RegistrationForm = () => {
   const [errors, setErrors] = useState({});
   const [otp, setOtp] = useState("");
   const [showOtpModal, setShowOtpModal] = useState(false);
-
+  const [otpError, setOtpError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const [formData, setFormData] = useState({
     username: "",
@@ -23,31 +25,31 @@ const RegistrationForm = () => {
   });
 
   const formDataForSave = new FormData();
-formDataForSave.append("username", formData.username);
-formDataForSave.append("password", formData.password);
-formDataForSave.append("confirmPassword", formData.confirmPassword);
-formDataForSave.append("employeeId", formData.employeeId);
-formDataForSave.append("email", formData.email);
-formDataForSave.append("mobileNumber", formData.mobileNumber);
-formDataForSave.append("userType", formData.userType);
-
+  formDataForSave.append("username", formData.username);
+  formDataForSave.append("password", formData.password);
+  formDataForSave.append("confirmPassword", formData.confirmPassword);
+  formDataForSave.append("employeeId", formData.employeeId);
+  formDataForSave.append("email", formData.email);
+  formDataForSave.append("mobileNumber", formData.mobileNumber);
+  formDataForSave.append("userType", formData.userType);
 
   const handleOtpSubmit = async () => {
     try {
+      setOtpError("");
       const response = await axios.post(
-        "http://localhost:8082/api/users/verify-otp",
+        "http://13.201.102.118:8082/api/users/verify-otp",
         { username: formData.username, otp: otp }
       );
-  
-    console.log("dgdfdfgdfg",response)
-    if (response.data.toLowerCase().includes("otp verified successfully")){
+
+      console.log("dgdfdfgdfg", response.data.username);
+      if (response.data.toLowerCase().includes("otp verified successfully")) {
         // Save the user in the database
         await saveUser();
-  
+
         Swal.fire({
           icon: "success",
           title: "Registration Successful",
-          text: "User registration was successful!",
+          text: `USer registration  was successful!`,
           customClass: {
             popup: "max-width-100",
           },
@@ -58,6 +60,8 @@ formDataForSave.append("userType", formData.userType);
         console.log("User registration successful:", response.data);
       } else {
         // Handle OTP verification failure
+        setOtpError("Invalid OTP. Please try again.");
+        console.error("Invalid OTP:", response.data);
         Swal.fire({
           icon: "error",
           title: "OTP Verification Failed",
@@ -76,32 +80,30 @@ formDataForSave.append("userType", formData.userType);
           popup: "max-width-100",
         },
       });
-  
+
       console.error("Error during registration:", error);
     } finally {
       setLoading(false);
     }
   };
-  
+
   // Function to save the user in the database
   const saveUser = async () => {
     try {
       // Assuming you have an endpoint to save the user after OTP verification
-      await axios.post("http://localhost:8082/api/users/save", formDataForSave);
+      await axios.post("http://13.201.102.118:8082/api/users/save", formDataForSave);
       console.log("User saved successfully!");
-
     } catch (error) {
       console.error("Error saving user:", error);
       // Handle the error as needed
     }
   };
-  
 
   const handleCancel = () => {
     navigate("/");
   };
 
-  const handleChange = (e) => {
+  const handleChange = async (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
 
@@ -112,11 +114,38 @@ formDataForSave.append("userType", formData.userType);
       case "username":
         newErrors.username =
           value.length < 3 ? "Username must be 3 characters" : "";
+  
+        // Check if the username already exists
+        try {
+          const response = await axios.get(
+            "http://13.201.102.118:8082/api/users/allUsernames"
+          );
+  
+          if (response.data.includes(value)) {
+            newErrors.username = "Username already exists";
+          }
+        } catch (error) {
+          console.error("Error fetching usernames:", error);
+        }
         break;
-      case "employeeId":
-        // Implement uniqueness check here (e.g., make an API call to check if the employee ID is unique)
-        // If not unique, set newErrors.employeeId = 'Employee ID must be unique';
-        break;
+        case "employeeId":
+          newErrors.employeeId ="";
+            // Implement uniqueness check here (e.g., make an API call to check if the employee ID is unique)
+            // If not unique, set newErrors.employeeId = 'Employee ID must be unique';
+    
+          // Check if the employee ID already exists
+          try {
+            const response = await axios.get(
+              "http://13.201.102.118:8082/api/users/allEmployeeIds"
+            );
+    
+            if (response.data.includes(value)) {
+              newErrors.employeeId = "Employee ID already exists";
+            }
+          } catch (error) {
+            console.error("Error fetching employee IDs:", error);
+          }
+          break;
       case "password":
         newErrors.password =
           !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(
@@ -136,11 +165,26 @@ formDataForSave.append("userType", formData.userType);
             ? "Passwords do not match"
             : "";
         break;
-      case "email":
-        newErrors.email = !/^[a-z0-9.]+@[a-z]+\.[a-z]+$/.test(value)
-          ? "Invalid email format"
-          : "";
-        break;
+        case "email":
+          newErrors.email = !/^[a-z0-9.]+@[a-z]+\.[a-z]+$/.test(value)
+            ? "Invalid email format"
+            : "";
+    
+          // Check if the email already exists
+          try {
+            const response = await axios.get(
+              "http://13.201.102.118:8082/api/users/allEmails"
+            );
+    
+            if (response.data.includes(value)) {
+              newErrors.email = "Email already exists";
+            }
+          } catch (error) {
+            console.error("Error fetching emails:", error);
+          }
+          break;
+    
+    
       case "mobileNumber":
         newErrors.mobileNumber = !/^[6-9]\d{9}$/.test(value)
           ? "please enter a valid number"
@@ -181,7 +225,7 @@ formDataForSave.append("userType", formData.userType);
   };
   const sendOtpToSuperUser = async () => {
     try {
-      await axios.post("http://localhost:8082/api/users/send-otp", formData);
+      await axios.post("http://13.201.102.118:8082/api/users/send-otp", formData);
       // Assuming your server sends the OTP to the SuperUser's email
       console.log("OTP sent to SuperUser's email");
     } catch (error) {
@@ -223,7 +267,7 @@ formDataForSave.append("userType", formData.userType);
             <input
               placeholder="Employee ID"
               type="text"
-              className="form-control border border-dark"
+              className="form-control border border-dark "
               id="employeeId"
               name="employeeId"
               value={formData.employeeId}
@@ -237,31 +281,68 @@ formDataForSave.append("userType", formData.userType);
         </div>
         <div className="row g-3 d-flex justify-content-center align-items-center">
           <div className="col-md-4 mb-2">
-            <input
-              placeholder="Password"
-              type="password"
-              className="form-control border border-dark"
-              id="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              required
-            />
+            <div className="input-group">
+              <input
+                placeholder="Password"
+                type={showPassword ? "text" : "password"}
+                className="form-control border border-dark border-left-0"
+                id="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                required
+              />
+              <div className="input-group-append">
+                <div
+                  className="input-group-text cursor-pointer border border-dark rounded-left"
+                  style={{
+                    borderTopLeftRadius: "0",
+                    borderBottomLeftRadius: "0",
+                  }}
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? (
+                    <i className="bi bi-eye-fill"></i>
+                  ) : (
+                    <i className="bi bi-eye-slash-fill"></i>
+                  )}
+                </div>
+              </div>
+            </div>
             {errors.password && (
               <div className="text-danger">{errors.password}</div>
             )}
           </div>
+
           <div className="col-md-4 mb-2">
-            <input
-              placeholder="Confirm Password"
-              type="password"
-              className="form-control border border-dark"
-              id="confirmPassword"
-              name="confirmPassword"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              required
-            />
+            <div className="input-group">
+              <input
+                placeholder="Confirm Password"
+                type={showConfirmPassword ? "text" : "password"}
+                className="form-control border border-dark border-right-0 rounded-right"
+                id="confirmPassword"
+                name="confirmPassword"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                required
+              />
+              <div className="input-group-append">
+                <div
+                  className="input-group-text cursor-pointer border border-dark rounded-left"
+                  style={{
+                    borderTopLeftRadius: "0",
+                    borderBottomLeftRadius: "0",
+                  }}
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                >
+                  {showConfirmPassword ? (
+                    <i className="bi bi-eye-fill"></i>
+                  ) : (
+                    <i className="bi bi-eye-slash-fill"></i>
+                  )}
+                </div>
+              </div>
+            </div>
             {errors.confirmPassword && (
               <div className="text-danger">{errors.confirmPassword}</div>
             )}

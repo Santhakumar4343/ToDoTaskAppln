@@ -1,22 +1,24 @@
 import React, { useState } from "react";
-import { Form, Button, Spinner } from "react-bootstrap";
+import { Form, Button, Spinner, Alert } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 
 const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null); // State for error message
   const navigate = useNavigate();
-
+  const [showPassword, setShowPassword] = useState(false); 
   const handleLogin = async () => {
     try {
       setLoading(true);
+      setError(null); // Clear previous error messages
 
       const formData = new FormData();
       formData.append("username", username);
       formData.append("password", password);
 
-      const response = await fetch("http://localhost:8082/api/users/login", {
+      const response = await fetch("http://13.201.102.118:8082/api/users/login", {
         method: "POST",
         body: formData,
       });
@@ -36,13 +38,26 @@ const Login = () => {
           console.error("Unknown userType:", userData.userType);
         }
       } else {
+        // Set error message for invalid credentials
+        setError("Invalid credentials");
         console.error("Login failed:", response.statusText);
+        setTimeout(() => {
+          setError(null);
+        }, 2000);
       }
     } catch (error) {
+      // Set error message for any other errors
+      setError("Login failed. Please try again later.");
       console.error("Login failed:", error);
+      setTimeout(() => {
+        setError(null);
+      }, 2000);
     } finally {
       setLoading(false);
     }
+  };
+  const handleCancel = () => {
+    navigate("/");
   };
 
   return (
@@ -70,20 +85,38 @@ const Login = () => {
         </Form.Group>
 
         <Form.Group controlId="formPassword" className="mt-4">
-          <Form.Control
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            style={{ border: "1px solid black" }}
-          />
+          <div className="input-group">
+            <Form.Control
+              type={showPassword ? "text" : "password"}
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              style={{ border: "1px solid black" }}
+            />
+            <div className="input-group-append">
+              <div
+                className="input-group-text cursor-pointer"
+                onClick={() => setShowPassword(!showPassword)}
+                style={{ border: "1px solid black", borderTopLeftRadius: "0", borderBottomLeftRadius: "0" }}
+              >
+                {showPassword ? (
+                  <i className="bi bi-eye-fill"></i>
+                ) : (
+                  <i className="bi bi-eye-slash-fill"></i>
+                )}
+              </div>
+            </div>
+          </div>
         </Form.Group>
+
+
+        {error && <Alert variant="danger">{error}</Alert>}
 
         <div className="mt-2">
           <Button
             type="submit"
             variant="primary"
-            className="w-50"
+            className="w-50 m-2"
             disabled={loading}
             onClick={handleLogin}
           >
@@ -92,7 +125,7 @@ const Login = () => {
                 <Spinner
                   animation="border"
                   size="sm"
-                  className="me-2"
+                  className="me-2 "
                   style={{ border: "1px solid black" }}
                 />
                 Loading...
@@ -101,6 +134,7 @@ const Login = () => {
               "Login"
             )}
           </Button>
+          <Button className=" btn btn-secondary w-50" onClick={handleCancel}>Cancel</Button>
         </div>
       </Form>
     </div>

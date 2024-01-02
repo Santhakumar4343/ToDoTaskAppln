@@ -34,17 +34,16 @@ function AdminDashBoard() {
           
           <ul className="list-unstyled">
             <li className=" mb-4">
-              <Link  to="/admin-dashboard/projects" onClick={(e) => handleNavLinkClick('projects', e)}className="text-decoration-none">
+              <Link  to="/admin-dashboard/projects" onClick={(e) => handleNavLinkClick('projects', e)} className="btn btn-link text-decoration-none text-dark fs-5">
                 Projects
               </Link>
             </li>
             <li className=" mb-4">
-              <Link to="/admin-dashboard/modules" onClick={(e) => handleNavLinkClick('modules', e)} className="text-decoration-none">
-                Modules
+              <Link to="/admin-dashboard/modules" onClick={(e) => handleNavLinkClick('modules', e)} className="btn btn-link text-decoration-none text-dark fs-5">Modules
               </Link>
             </li >
             <li className=" mb-4">
-              <Link to="/admin-dashboard/tasks" onClick={(e) => handleNavLinkClick('tasks', e)} className="text-decoration-none">
+              <Link to="/admin-dashboard/tasks" onClick={(e) => handleNavLinkClick('tasks', e)} className="btn btn-link text-decoration-none text-dark fs-5">
                 Tasks
               </Link>
             </li>

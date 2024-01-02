@@ -17,13 +17,15 @@ public class User {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-
+	@Column(unique = true)
 	private String username;
 	private String password;
 	private String confirmPassword;
 	@Column(unique = true)
 	private String employeeId;
+	@Column(unique = true)
 	private String email;
+	
 	private String mobileNumber;
 	private String userType;
 	@ManyToMany(mappedBy = "users")

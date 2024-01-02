@@ -160,7 +160,22 @@ public class UserController {
 	        String enteredOtp = otpVerificationRequest.get("otp");
 	        return userService.verifyOtp(username, enteredOtp);
 	    }
+	 @GetMapping("/allUsernames")
+	    public List<String> getAllUsernames() {
+	        return userRepository.findAllUsernames();
+	    }
 
+	    // Endpoint to get all emails
+	    @GetMapping("/allEmails")
+	    public List<String> getAllEmails() {
+	        return userRepository.findAllEmails();
+	    }
+
+	    // Endpoint to get all employee IDs
+	    @GetMapping("/allEmployeeIds")
+	    public List<String> getAllEmployeeIds() {
+	        return userRepository.findAllEmployeeIds();
+	    }
 
 
 

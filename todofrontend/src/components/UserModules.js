@@ -39,7 +39,7 @@ const Modules = () => {
 
     // Make a GET request to fetch user-specific projects
     fetch(
-      `http://localhost:8082/api/projects/getUserProjects?username=${username}`
+      `http://13.201.102.118:8082/api/projects/getUserProjects?username=${username}`
     )
       .then((response) => response.json())
       .then((data) => {
@@ -101,8 +101,8 @@ const fetchModules = async (projectId) => {
   try {
     // Include projectId as a query parameter
     const apiUrl = projectId
-      ? `http://localhost:8082/api/modules/getModuleByPId/${projectId}`
-      : "http://localhost:8082/api/modules/getAllModules";
+      ? `http://13.201.102.118:8082/api/modules/getModuleByPId/${projectId}`
+      : "http://13.201.102.118:8082/api/modules/getAllModules";
 
     // Make a GET request to fetch modules
     const response = await axios.get(apiUrl);
@@ -194,8 +194,8 @@ useEffect(() => {
 
     // Determine whether to create or update based on selectedModuleId
     const requestUrl = selectedModuleId
-      ? `http://localhost:8082/api/modules/updateModule/${selectedModuleId}`
-      : `http://localhost:8082/api/modules/saveModule/${selectedProject}`;
+      ? `http://13.201.102.118:8082/api/modules/updateModule/${selectedModuleId}`
+      : `http://13.201.102.118:8082/api/modules/saveModule/${selectedProject}`;
 
     // Use 'PUT' for updating
     const method = selectedModuleId ? "PUT" : "POST";
@@ -244,7 +244,7 @@ useEffect(() => {
   };
   const handleDeleteModule = (moduleId) => {
     // Make a DELETE request to delete the project
-    fetch(`http://localhost:8082/api/modules/deleteModule/${moduleId}`, {
+    fetch(`http://13.201.102.118:8082/api/modules/deleteModule/${moduleId}`, {
       method: "DELETE",
     })
       .then((response) => {

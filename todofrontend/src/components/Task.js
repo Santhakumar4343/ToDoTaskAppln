@@ -22,7 +22,7 @@ const Task = () => {
 
   useEffect(() => {
     // Fetch all projects on component mount
-    axios.get('http://localhost:8082/api/projects/getAllProjects')
+    axios.get('http://13.201.102.118:8082/api/projects/getAllProjects')
       .then(response => {
         setProjects(response.data);
       })
@@ -34,7 +34,7 @@ const Task = () => {
   useEffect(() => {
     // Fetch modules when the selected project changes
     if (selectedProject) {
-      axios.get(`http://localhost:8082/api/modules/getModuleByPId/${selectedProject}`)
+      axios.get(`http://13.201.102.118:8082/api/modules/getModuleByPId/${selectedProject}`)
         .then(response => {
           setModules(response.data);
         })
@@ -51,8 +51,8 @@ const Task = () => {
 
   const fetchTasks = () => {
     const apiUrl = selectedModule
-      ? `http://localhost:8082/api/tasks/getTaskByModule/${selectedModule}`
-      : 'http://localhost:8082/api/tasks/getAllTasks';
+      ? `http://13.201.102.118:8082/api/tasks/getTaskByModule/${selectedModule}`
+      : 'http://13.201.102.118:8082/api/tasks/getAllTasks';
 
     axios.get(apiUrl)
       .then(response => {
@@ -118,8 +118,8 @@ const Task = () => {
     formData.append('remarks',remarks);
 
     const requestUrl = selectedTaskId
-      ? `http://localhost:8082/api/tasks/updateTask/${selectedTaskId}`
-      : `http://localhost:8082/api/tasks/saveTask/${selectedProject}/${selectedModule}`;
+      ? `http://13.201.102.118:8082/api/tasks/updateTask/${selectedTaskId}`
+      : `http://13.201.102.118:8082/api/tasks/saveTask/${selectedProject}/${selectedModule}`;
 
     const method = selectedTaskId ? 'PUT' : 'POST';
 
@@ -167,7 +167,7 @@ const Task = () => {
     : [];
 
   const handleDeleteTask = (taskId) => {
-    axios.delete(`http://localhost:8082/api/tasks/deleteTaskById/${taskId}`)
+    axios.delete(`http://13.201.102.118:8082/api/tasks/deleteTaskById/${taskId}`)
       .then(response => {
         console.log('Task deleted successfully');
         Swal.fire({
@@ -227,6 +227,8 @@ const Task = () => {
         <Table striped bordered hover className='text-center border border-dark'>
           <thead>
             <tr>
+            <th className="h6">Project Name</th>
+              <th className="h6">Module Name</th>
               <th className='h6'>Task Name</th>
               <th className='h6'>Status</th>
               <th className='h6'>Planned Start Date</th>
@@ -239,6 +241,8 @@ const Task = () => {
           <tbody>
             {filteredTasks.map(task => (
               <tr key={task.id}>
+                  <td>{task.module.project.projectName}</td>
+                  <td>{task.module.moduleName}</td>
                 <td>{task.taskName}</td>
                 <td>{task.status}</td>
                 <td>{moment(task.startDate).format('YYYY-MM-DD')}</td>

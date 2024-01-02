@@ -61,7 +61,7 @@ function Projects() {
 
     // Make a GET request to fetch user-specific projects
     fetch(
-      `http://localhost:8082/api/projects/getUserProjects?username=${username}`
+      `http://13.201.102.118:8082/api/projects/getUserProjects?username=${username}`
     )
       .then((response) => response.json())
       .then((data) => {
@@ -84,8 +84,8 @@ function Projects() {
     });
 
     const apiUrl = selectedProject.id
-      ? `http://localhost:8082/api/projects/update/${selectedProject.id}`
-      : "http://localhost:8082/api/projects/save";
+      ? `http://13.201.102.118:8082/api/projects/update/${selectedProject.id}`
+      : "http://13.201.102.118:8082/api/projects/save";
 
     const method = selectedProject.id ? "PUT" : "POST";
 
@@ -150,7 +150,7 @@ function Projects() {
 
   const handleDeleteProject = (projectId) => {
     // Make a DELETE request to delete the project
-    fetch(`http://localhost:8082/api/projects/delete/${projectId}`, {
+    fetch(`http://13.201.102.118:8082/api/projects/delete/${projectId}`, {
       method: "DELETE",
     })
       .then((response) => {
@@ -194,13 +194,13 @@ function Projects() {
   return (
     <div>
       <h4 className="text-center ">Projects Component</h4>
-      <Button variant="success" className="mb-3" onClick={handleShowModal}>
+      {/* <Button variant="success" className="mb-3" onClick={handleShowModal}>
         Create Project
-      </Button>
+      </Button> */}
       <FormControl
         type="text"
         placeholder="Search by Project Name, Assigned To, or Status"
-        className="mb-4 "
+        className="mb-4 mt-4 "
         style={{ border: "1px solid black" }}
         onChange={(e) => setSearchTerm(e.target.value)}
       />
