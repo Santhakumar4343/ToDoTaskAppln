@@ -1,40 +1,26 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import UserProjects from "./UserProjects";
 import UserModules from "./UserModules";
 import UserTasks from "./UserTasks";
+import { Dropdown } from "react-bootstrap";
 
 function UserDashBoard() {
   const [selectedNavLink, setSelectedNavLink] = useState("projects");
-  const [showLogoutPopover, setShowLogoutPopover] = useState(false);
-  const navigate = useNavigate();
+  const Navigate = useNavigate();
 
-  useEffect(() => {
-    const handleLogout = () => {
-      setShowLogoutPopover(false);
-      navigate("/");
-    };
-
-    // Add your logic to check if the user is logged in
-    // If not logged in, you can perform a redirect here as well
-
-    window.addEventListener("popstate", handleLogout);
-
-    return () => {
-      window.removeEventListener("popstate", handleLogout);
-    };
-  }, [navigate]);
+  const handleLogout = () => {
+    window.history.replaceState(null, '', '/');
+    Navigate('/');
+  }
 
   const handleNavLinkClick = (navLink, event) => {
     event.preventDefault();
     setSelectedNavLink(navLink);
   };
 
-  const handleLogout = () => {
-    setShowLogoutPopover(false);
-    navigate("/");
-  };
+ 
 
   const renderContent = () => {
     switch (selectedNavLink) {
@@ -97,27 +83,18 @@ function UserDashBoard() {
           className="col-md-9"
           style={{ padding: "20px", position: "relative" }}
         >
-          <div
-            className="position-absolute top-2 end-0 mt-3 me-2 mt-2"
-            style={{ cursor: "pointer" }}
-            onMouseEnter={() => setShowLogoutPopover(true)}
-            onMouseLeave={() => setShowLogoutPopover(false)}
-          >
-            <i className="bi bi-person-circle fs-3"></i>
-            {showLogoutPopover && (
-              <div
-                className="popover fade show bs-popover-end"
-                role="tooltip"
-                style={{ zIndex: "1060" }}
-              >
-                <div className="arrow"></div>
-                <div className="popover-body">
-                  <p className="text-danger" onClick={handleLogout}>
-                    Logout
-                  </p>
-                </div>
-              </div>
-            )}
+          <div className="d-flex justify-content-end">
+            <Dropdown>
+              <Dropdown.Toggle variant="secondary" id="userDropdown">
+                <i className="bi bi-person-circle fs-7"></i>
+              </Dropdown.Toggle>
+              <Dropdown.Menu>
+
+                <Dropdown.Item onClick={handleLogout} style={{ fontSize: '14px' }}>Logout</Dropdown.Item>
+
+                {/* Add other options if needed, like Profile */}
+              </Dropdown.Menu>
+            </Dropdown>
           </div>
           {renderContent()}
         </div>

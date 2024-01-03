@@ -22,7 +22,7 @@ function SuperUserLogin() {
 
       // Make a request to reset the password
       const resetResponse = await axios.post(
-        `http://13.201.102.118:8082/api/superuser/reset-password/1`,
+        `http://localhost:8082/api/superuser/reset-password/1`,
         {
           newPassword: newPassword,
         }
@@ -69,7 +69,7 @@ function SuperUserLogin() {
 
     try {
       const response = await axios.get(
-        "http://13.201.102.118:8082/api/superuser/get/1"
+        "http://localhost:8082/api/superuser/get/1"
       );
       const userData = response.data;
 

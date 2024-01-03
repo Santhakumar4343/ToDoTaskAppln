@@ -91,6 +91,40 @@ public class UserServiceImpl implements UserService {
 //     // Send the OTP via email
 //     sendOtpEmail(user.getEmail(), otp);
 // }
+// @Override
+// public String generateOtpAndSendEmail(User user) {
+//     try {
+//         // Generate a random 6-digit OTP
+//         String otp = String.format("%06d", new Random().nextInt(1000000));
+//
+//         // Save the OTP to the cache
+//         otpCache.put(user.getUsername(), otp);
+//
+//         // Log the generated OTP for debugging (you can remove this in production)
+//         System.out.println("Generated OTP for user " + user.getUsername() + ": " + otp);
+//
+//         // Send the OTP via email
+//         sendOtpEmail(user.getEmail(), user.getUsername(), otp);
+//
+//         // Return the generated OTP
+//         return otp;
+//     } catch (Exception e) {
+//         e.printStackTrace();
+//         return null; // Handle the case where OTP generation or email sending fails
+//     }
+// }
+//
+// @Override
+// public void sendOtpToSuperUser(User user) {
+//     // Retrieve the SuperUser's email from your database or configuration
+//     String superUserEmail = "santhakumar41k@gmail.com"; // Replace with actual SuperUser's email
+//
+//     // Generate a random 6-digit OTP and save it to the cache
+//     generateOtpAndSendEmail(user);
+//
+//     // Send the OTP via email to the SuperUser
+//     sendOtpEmail(superUserEmail, user.getUsername(), otpCache.get(user.getUsername()));
+// }
  @Override
  public String generateOtpAndSendEmail(User user) {
      try {
@@ -103,28 +137,27 @@ public class UserServiceImpl implements UserService {
          // Log the generated OTP for debugging (you can remove this in production)
          System.out.println("Generated OTP for user " + user.getUsername() + ": " + otp);
 
-         // Send the OTP via email
-         sendOtpEmail(user.getEmail(), user.getUsername(), otp);
-
          // Return the generated OTP
          return otp;
      } catch (Exception e) {
          e.printStackTrace();
-         return null; // Handle the case where OTP generation or email sending fails
+         return null; // Handle the case where OTP generation fails
      }
  }
 
  @Override
  public void sendOtpToSuperUser(User user) {
      // Retrieve the SuperUser's email from your database or configuration
-     String superUserEmail = "p.devamatha2001@gmail.com"; // Replace with actual SuperUser's email
+     String superUserEmail = "santhakumar41k@gmail.com"; // Replace with actual SuperUser's email
 
      // Generate a random 6-digit OTP and save it to the cache
-     generateOtpAndSendEmail(user);
+     String otp = generateOtpAndSendEmail(user);
 
      // Send the OTP via email to the SuperUser
-     sendOtpEmail(superUserEmail, user.getUsername(), otpCache.get(user.getUsername()));
+     sendOtpEmail(superUserEmail, user.getUsername(), otp);
  }
+
+ // Rest of your code remains unchanged
 
  private void sendOtpEmail(String to, String username, String otp) {
      SimpleMailMessage message = new SimpleMailMessage();

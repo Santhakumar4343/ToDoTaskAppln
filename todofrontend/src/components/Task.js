@@ -22,7 +22,7 @@ const Task = () => {
 
   useEffect(() => {
     // Fetch all projects on component mount
-    axios.get('http://13.201.102.118:8082/api/projects/getAllProjects')
+    axios.get('http://localhost:8082/api/projects/getAllProjects')
       .then(response => {
         setProjects(response.data);
       })
@@ -34,7 +34,7 @@ const Task = () => {
   useEffect(() => {
     // Fetch modules when the selected project changes
     if (selectedProject) {
-      axios.get(`http://13.201.102.118:8082/api/modules/getModuleByPId/${selectedProject}`)
+      axios.get(`http://localhost:8082/api/modules/getModuleByPId/${selectedProject}`)
         .then(response => {
           setModules(response.data);
         })
@@ -51,8 +51,8 @@ const Task = () => {
 
   const fetchTasks = () => {
     const apiUrl = selectedModule
-      ? `http://13.201.102.118:8082/api/tasks/getTaskByModule/${selectedModule}`
-      : 'http://13.201.102.118:8082/api/tasks/getAllTasks';
+      ? `http://localhost:8082/api/tasks/getTaskByModule/${selectedModule}`
+      : 'http://localhost:8082/api/tasks/getAllTasks';
 
     axios.get(apiUrl)
       .then(response => {
@@ -118,8 +118,8 @@ const Task = () => {
     formData.append('remarks',remarks);
 
     const requestUrl = selectedTaskId
-      ? `http://13.201.102.118:8082/api/tasks/updateTask/${selectedTaskId}`
-      : `http://13.201.102.118:8082/api/tasks/saveTask/${selectedProject}/${selectedModule}`;
+      ? `http://localhost:8082/api/tasks/updateTask/${selectedTaskId}`
+      : `http://localhost:8082/api/tasks/saveTask/${selectedProject}/${selectedModule}`;
 
     const method = selectedTaskId ? 'PUT' : 'POST';
 
@@ -167,7 +167,7 @@ const Task = () => {
     : [];
 
   const handleDeleteTask = (taskId) => {
-    axios.delete(`http://13.201.102.118:8082/api/tasks/deleteTaskById/${taskId}`)
+    axios.delete(`http://localhost:8082/api/tasks/deleteTaskById/${taskId}`)
       .then(response => {
         console.log('Task deleted successfully');
         Swal.fire({

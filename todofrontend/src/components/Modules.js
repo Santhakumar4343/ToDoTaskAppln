@@ -19,7 +19,7 @@ const Modules = () => {
 
   useEffect(() => {
     // Fetch all projects on component mount
-    axios.get('http://13.201.102.118:8082/api/projects/getAllProjects')
+    axios.get('http://localhost:8082/api/projects/getAllProjects')
       .then(response => {
         setProjects(response.data);
       })
@@ -35,7 +35,7 @@ const Modules = () => {
 
   // const fetchModules = () => {
   //   // Make a GET request to fetch modules
-  //   axios.get('http://13.201.102.118:8082/api/modules/getAllModules')
+  //   axios.get('http://localhost:8082/api/modules/getAllModules')
   //     .then((response) => {
   //       // Set the fetched modules to the state
   //       setModules(response.data);
@@ -54,8 +54,8 @@ const Modules = () => {
   const fetchModules = () => {
     // Include selectedProject as a query parameter
     const apiUrl = selectedProject
-      ? `http://13.201.102.118:8082/api/modules/getModuleByPId/${selectedProject}`
-      : 'http://13.201.102.118:8082/api/modules/getAllModules';
+      ? `http://localhost:8082/api/modules/getModuleByPId/${selectedProject}`
+      : 'http://localhost:8082/api/modules/getAllModules';
 
     // Make a GET request to fetch modules
     axios.get(apiUrl)
@@ -121,8 +121,8 @@ const Modules = () => {
 
     // Determine whether to create or update based on selectedModuleId
     const requestUrl = selectedModuleId
-      ? `http://13.201.102.118:8082/api/modules/updateModule/${selectedModuleId}`
-      : `http://13.201.102.118:8082/api/modules/saveModule/${selectedProject}`;
+      ? `http://localhost:8082/api/modules/updateModule/${selectedModuleId}`
+      : `http://localhost:8082/api/modules/saveModule/${selectedProject}`;
 
     // Use 'PUT' for updating
     const method = selectedModuleId ? 'PUT' : 'POST';
@@ -165,7 +165,7 @@ const Modules = () => {
   };
   const handleDeleteModule = (moduleId) => {
     // Make a DELETE request to delete the project
-    fetch(`http://13.201.102.118:8082/api/modules/deleteModule/${moduleId}`, {
+    fetch(`http://localhost:8082/api/modules/deleteModule/${moduleId}`, {
       method: 'DELETE',
     })
       .then((response) => {

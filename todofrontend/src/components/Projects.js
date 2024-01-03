@@ -21,7 +21,7 @@ function Projects() {
 
   useEffect(() => {
     // Fetch the list of users when the component mounts
-    fetch("http://13.201.102.118:8082/api/users/userType/user")
+    fetch("http://localhost:8082/api/users/userType/user")
       .then((response) => response.json())
       .then((data) => {
         setUsers(data);
@@ -68,7 +68,7 @@ function Projects() {
 
   const fetchProjects = () => {
     // Make a GET request to fetch projects
-    fetch("http://13.201.102.118:8082/api/projects/getAllProjects")
+    fetch("http://localhost:8082/api/projects/getAllProjects")
       .then((response) => response.json())
       .then((data) => {
         // Set the fetched projects to the state
@@ -89,8 +89,8 @@ function Projects() {
     });
 
     const apiUrl = selectedProject.id
-      ? `http://13.201.102.118:8082/api/projects/update/${selectedProject.id}`
-      : "http://13.201.102.118:8082/api/projects/save";
+      ? `http://localhost:8082/api/projects/update/${selectedProject.id}`
+      : "http://localhost:8082/api/projects/save";
 
     const method = selectedProject.id ? "PUT" : "POST";
 
@@ -155,7 +155,7 @@ function Projects() {
 
   const handleDeleteProject = (projectId) => {
     // Make a DELETE request to delete the project
-    fetch(`http://13.201.102.118:8082/api/projects/delete/${projectId}`, {
+    fetch(`http://localhost:8082/api/projects/delete/${projectId}`, {
       method: "DELETE",
     })
       .then((response) => {
