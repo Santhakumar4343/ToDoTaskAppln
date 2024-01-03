@@ -243,46 +243,67 @@ useEffect(() => {
       });
   };
   const handleDeleteModule = (moduleId) => {
-    // Make a DELETE request to delete the project
-    fetch(`http://localhost:8082/api/modules/deleteModule/${moduleId}`, {
-      method: "DELETE",
-    })
-      .then((response) => {
-        if (response.ok) {
-          console.log("Module deleted successfully");
-          Swal.fire({
-            icon: "success",
-            title: "Module deleted successfully",
-            text: "Module deleted successfully!",
-            customClass: {
-              popup: "max-width-100",
-            },
+    Swal.fire({
+      title: 'Are you sure?',
+      text: 'Once deleted, you will not be able to recover this module!',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Yes, delete it!',
+      cancelButtonText: 'Cancel',
+      customClass: {
+        popup: 'max-width-100',
+      },
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // Make a DELETE request to delete the module
+        fetch(`http://localhost:8082/api/modules/deleteModule/${moduleId}`, {
+          method: 'DELETE',
+        })
+          .then((response) => {
+            if (response.ok) {
+              console.log('Module deleted successfully');
+              // Close the initial confirmation dialog
+              Swal.close();
+              // Inform the user about the successful deletion
+              Swal.fire({
+                icon: 'success',
+                title: 'Module Deleted',
+                text: 'The module has been deleted successfully!',
+                customClass: {
+                  popup: 'max-width-100',
+                },
+              });
+              // Fetch the updated list of modules after deletion
+              fetchModules();
+            } else {
+              console.error('Error deleting module:', response.status);
+              Swal.fire({
+                icon: 'error',
+                title: 'Error Deleting Module',
+                text: 'An error occurred during deletion. Please try again.',
+                customClass: {
+                  popup: 'max-width-100',
+                },
+              });
+            }
+          })
+          .catch((error) => {
+            console.error('Error deleting module:', error);
+            Swal.fire({
+              icon: 'error',
+              title: 'Error Deleting Module',
+              text: 'An error occurred during deletion. Please try again.',
+              customClass: {
+                popup: 'max-width-100',
+              },
+            });
           });
-          fetchModules();
-        } else {
-          console.error("Error deleting project:", response.status);
-          Swal.fire({
-            icon: "error",
-            title: "Error deleting project",
-            text: "An error occurred during deletion. Please try again.",
-            customClass: {
-              popup: "max-width-100",
-            },
-          });
-        }
-      })
-      .catch((error) => {
-        console.error("Error deleting project:", error);
-        Swal.fire({
-          icon: "error",
-          title: "Error deleting project",
-          text: "An error occurred during deletion. Please try again.",
-          customClass: {
-            popup: "max-width-100",
-          },
-        });
-      });
+      }
+    });
   };
+  
 
   return (
     <div>

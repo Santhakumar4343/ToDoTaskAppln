@@ -275,34 +275,54 @@ const Task = () => {
         )
       : [];
 
-  const handleDeleteTask = (taskId) => {
-    axios
-      .delete(`http://localhost:8082/api/tasks/deleteTaskById/${taskId}`)
-      .then((response) => {
-        console.log("Task deleted successfully");
+      const handleDeleteTask = (taskId) => {
         Swal.fire({
-          icon: "success",
-          title: "Task deleted successfully",
-          text: "Task deleted successfully!",
+          title: 'Are you sure?',
+          text: 'Once deleted, you will not be able to recover this task!',
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#d33',
+          cancelButtonColor: '#3085d6',
+          confirmButtonText: 'Yes, delete it!',
+          cancelButtonText: 'Cancel',
           customClass: {
-            popup: "max-width-100",
+            popup: 'max-width-100',
           },
+        }).then((result) => {
+          if (result.isConfirmed) {
+            // Make a DELETE request to delete the task
+            axios.delete(`http://localhost:8082/api/tasks/deleteTaskById/${taskId}`)
+              .then(response => {
+                console.log('Task deleted successfully');
+                // Close the initial confirmation dialog
+                Swal.close();
+                // Inform the user about the successful deletion
+                Swal.fire({
+                  icon: 'success',
+                  title: 'Task Deleted',
+                  text: 'The task has been deleted successfully!',
+                  customClass: {
+                    popup: 'max-width-100',
+                  },
+                });
+                // Fetch the updated list of tasks after deletion
+                fetchTasks();
+              })
+              .catch(error => {
+                console.error('Error deleting task:', error);
+                Swal.fire({
+                  icon: 'error',
+                  title: 'Error Deleting Task',
+                  text: 'An error occurred during deletion. Please try again.',
+                  customClass: {
+                    popup: 'max-width-100',
+                  },
+                });
+              });
+          }
         });
-        fetchTasks();
-      })
-      .catch((error) => {
-        console.error("Error deleting task:", error);
-        Swal.fire({
-          icon: "error",
-          title: "Error deleting task",
-          text: "An error occurred during deletion. Please try again.",
-          customClass: {
-            popup: "max-width-100",
-          },
-        });
-      });
-  };
-
+      };
+      
   return (
     <div>
       <h4 className="text-center ">Tasks Component </h4>

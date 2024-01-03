@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.todo.Service.ModuleService;
-import com.todo.Service.TaskService;
+import com.todo.UserServiceImpl.TaskServiceImpl;
 import com.todo.entity.Modules;
 import com.todo.entity.Task;
 
@@ -27,7 +27,7 @@ public class TaskController {
     private ModuleService moduleService;
 
     @Autowired
-    private TaskService taskService;
+    private TaskServiceImpl taskService;
 
     @PostMapping("/saveTask/{projectId}/{moduleId}")
     public Task createTaskForModule(
