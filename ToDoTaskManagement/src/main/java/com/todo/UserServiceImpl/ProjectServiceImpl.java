@@ -1,6 +1,7 @@
 package com.todo.UserServiceImpl;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -49,6 +50,22 @@ public class ProjectServiceImpl implements ProjectService {
     public List<Project> getUserProjects(String username) {
         return projectRepository.findByAssignedTo(username);
     }
+    public void assignUserToProject(Long projectId, String assignedTo) {
+        Optional<Project> optionalProject = projectRepository.findById(projectId);
 
+        if (optionalProject.isPresent()) {
+            Project project = optionalProject.get();
+            List<String> assignedToList = project.getAssignedTo();
+
+            // Add the user to the list if not already present
+            if (!assignedToList.contains(assignedTo)) {
+                assignedToList.add(assignedTo);
+                project.setAssignedTo(assignedToList);
+                projectRepository.save(project);
+            }
+        } else {
+            throw new RuntimeException("Project not found with ID: " + projectId);
+        }
+    }
 }
 

@@ -32,7 +32,7 @@ function Projects() {
   }, []);
   const [selectedProject, setSelectedProject] = useState({
     projectName: "",
-    assignedTo: "",
+    assignedTo: [],
     actionItem: "",
     status: "",
     startDate: "",
@@ -83,8 +83,11 @@ function Projects() {
   const handleSaveProject = () => {
     const formData = new FormData();
 
-    // Append each field to the FormData
     Object.entries(selectedProject).forEach(([key, value]) => {
+      // Convert assignedTo array to a comma-separated string
+      if (key === "assignedTo" && Array.isArray(value)) {
+        value = value.join(',');
+      }
       formData.append(key, value);
     });
 
@@ -107,9 +110,8 @@ function Projects() {
               "Project " +
               (selectedProject.id ? "Updated" : "Created") +
               " Successfully",
-            text: `The project has been ${
-              selectedProject.id ? "updated" : "created"
-            } successfully!`,
+            text: `The project has been ${selectedProject.id ? "updated" : "created"
+              } successfully!`,
             customClass: {
               popup: "max-width-100",
             },
@@ -125,9 +127,8 @@ function Projects() {
           Swal.fire({
             icon: "error",
             title: "Operation Failed",
-            text: `An error occurred during the ${
-              selectedProject.id ? "update" : "creation"
-            } of the project. Please try again.`,
+            text: `An error occurred during the ${selectedProject.id ? "update" : "creation"
+              } of the project. Please try again.`,
             customClass: {
               popup: "max-width-100",
             },
@@ -214,6 +215,83 @@ function Projects() {
       }
     });
   };
+  const [showAssignUserModal, setShowAssignUserModal] = useState(false);
+
+  // Function to handle showing the assign user modal
+  const handleShowAssignUserModal = () => setShowAssignUserModal(true);
+
+  // Function to handle closing the assign user modal
+  const handleCloseAssignUserModal = () => setShowAssignUserModal(false);
+
+  // Function to handle assigning a user to the project
+  const handleAssignUser = (projectId) => {
+    // Set the selected project for assigning users
+    const selectedProject = projects.find((project) => project.id === projectId);
+    setSelectedProject(selectedProject);
+
+    // Show the assign user modal
+    handleShowAssignUserModal();
+  };
+  const handleSaveAssignUser = () => {
+    // Make sure there are assigned users to save
+    if (selectedProject.assignedTo.length === 0) {
+      // Handle the case where no users are selected
+      console.error('No users selected for assignment.');
+      return;
+    }
+  
+    // Prepare the form data
+    const formData = new FormData();
+    formData.append('assignedTo', selectedProject.assignedTo.join(',')); // Convert the array to a comma-separated string
+  
+    // Make a PUT request to your backend API to assign users to the project
+    fetch(`http://localhost:8082/api/projects/assign-user/${selectedProject.id}`, {
+      method: 'PUT',
+      body: formData,
+    })
+    .then(response => {
+      if (response.ok) {
+        // Show success message if the request is successful
+        Swal.fire({
+          icon: "success",
+          title: "Users Assigned",
+          text: "Users have been assigned to the project successfully!",
+          customClass: {
+            popup: "max-width-100",
+          },
+        });
+  
+        // Optionally, you may want to update the frontend with the latest data
+        // Fetch the updated list of projects or update the state accordingly
+      } else {
+        // Show error message if the request is not successful
+        Swal.fire({
+          icon: "error",
+          title: "Assignment Failed",
+          text: "An error occurred during the assignment. Please try again.",
+          customClass: {
+            popup: "max-width-100",
+          },
+        });
+      }
+    })
+    .catch(error => {
+      console.error('Error assigning users:', error);
+      // Handle the error
+      Swal.fire({
+        icon: "error",
+        title: "Assignment Failed",
+        text: "An error occurred during the assignment. Please try again.",
+        customClass: {
+          popup: "max-width-100",
+        },
+      });
+    })
+    .finally(() => {
+      // Close the modal after handling the assignment
+      handleCloseAssignUserModal();
+    });
+  };
   
   return (
     <div>
@@ -249,6 +327,7 @@ function Projects() {
               <th className=" border border-dark h6">Planned Closed Date</th>
               <th className=" border border-dark h6">Comments</th>
               <th className=" border border-dark h6">Actions</th>
+            
             </tr>
           </thead>
           <tbody>
@@ -282,6 +361,12 @@ function Projects() {
                     class="bi bi-trash3 fs-4 m-2"
                     onClick={() => handleDeleteProject(project.id)}
                   ></i>
+                   <Button
+            variant="primary"
+            onClick={() => handleAssignUser(project.id)}
+          >
+            Assign User
+          </Button>
                 </td>
               </tr>
             ))}
@@ -324,6 +409,24 @@ function Projects() {
               </Col>
               <Col md={8}>
                 <Form.Group controlId="formAssignedTo">
+                  {/* <Form.Control
+                    as="select"
+                    value={selectedProject.assignedTo}
+                    className="border border-dark mb-3"
+                    onChange={(e) =>
+                      setSelectedProject({
+                        ...selectedProject,
+                        assignedTo: Array.from(e.target.selectedOptions, (option) => option.value),
+                      })
+                    }
+                    multiple // Enable multiple selection
+                  >
+                    {users.map((user) => (
+                      <option key={user.id} value={user.username}>
+                        {user.username}
+                      </option>
+                    ))}
+                  </Form.Control> */}
                   <Form.Control
                     as="select"
                     value={selectedProject.assignedTo}
@@ -331,7 +434,7 @@ function Projects() {
                     onChange={(e) =>
                       setSelectedProject({
                         ...selectedProject,
-                        assignedTo: e.target.value,
+                        assignedTo: Array.from(e.target.selectedOptions, (option) => option.value),
                       })
                     }
                   >
@@ -342,6 +445,7 @@ function Projects() {
                       </option>
                     ))}
                   </Form.Control>
+
                 </Form.Group>
               </Col>
             </Row>
@@ -444,6 +548,47 @@ function Projects() {
           </Button>
           <Button variant="primary" onClick={handleSaveProject}>
             {selectedProject.id ? "Update Project" : "Save Project"}
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+
+      <Modal show={showAssignUserModal} onHide={handleCloseAssignUserModal}>
+        <Modal.Header closeButton>
+          <Modal.Title>Assign Users to Project</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form>
+            <Form.Group controlId="formAssignUser">
+              <Form.Label>Select Users</Form.Label>
+              <Form.Control
+                as="select"
+                multiple
+                onChange={(e) =>
+                  setSelectedProject({
+                    ...selectedProject,
+                    assignedTo: Array.from(
+                      e.target.selectedOptions,
+                      (option) => option.value
+                    ),
+                  })
+                }
+              >
+                {users.map((user) => (
+                  <option key={user.id} value={user.username}>
+                    {user.username}
+                  </option>
+                ))}
+              </Form.Control>
+            </Form.Group>
+          </Form>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleCloseAssignUserModal}>
+            Close
+          </Button>
+          <Button variant="primary" onClick={handleSaveAssignUser}>
+            Assign User
           </Button>
         </Modal.Footer>
       </Modal>

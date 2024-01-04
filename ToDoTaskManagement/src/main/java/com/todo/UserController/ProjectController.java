@@ -5,16 +5,20 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.todo.Service.ProjectService;
+
+import com.todo.UserServiceImpl.ProjectServiceImpl;
 import com.todo.entity.Project;
 
 @RestController
@@ -22,12 +26,12 @@ import com.todo.entity.Project;
 public class ProjectController {
 
     @Autowired
-    private ProjectService projectService;
+    private ProjectServiceImpl projectService;
 
     @PostMapping("/save")
     public Project saveProject(
             @RequestParam String projectName,
-            @RequestParam String assignedTo,
+            @RequestParam  List<String> assignedTo,
             
             @RequestParam String status,
             @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date startDate,
@@ -51,7 +55,7 @@ public class ProjectController {
     public Project updateProject(
     		@PathVariable Long projectId,
             @RequestParam(required = false) String projectName,
-            @RequestParam(required = false) String assignedTo,
+            @RequestParam(required = false)  List<String> assignedTo,
            
             @RequestParam(required = false) String status,
             @RequestParam (required = false)@DateTimeFormat(pattern = "yyyy-MM-dd") Date startDate,
@@ -86,6 +90,18 @@ public class ProjectController {
     @GetMapping("/getUserProjects")
     public List<Project> getUserProjects(@RequestParam String username) {
         return projectService.getUserProjects(username);
+    }
+    @PutMapping("/assign-user/{projectId}")
+    public ResponseEntity<String> assignUserToProject(
+            @PathVariable Long projectId,
+            @RequestParam String assignedTo) {
+
+        try {
+            projectService.assignUserToProject(projectId, assignedTo);
+            return new ResponseEntity<>("User assigned successfully", HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Error assigning user: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }
 
