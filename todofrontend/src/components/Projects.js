@@ -53,13 +53,15 @@ function Projects() {
       remarks: "",
     });
   };
-  //project search function
-  const filteredProjects = projects.filter(
-    (project) =>
-      project.projectName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      project.assignedTo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      project.status.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+
+  //filter Project
+  const filteredProjects = projects.filter((project) =>
+  project.assignedTo.some((user) =>
+    user.toLowerCase().includes(searchTerm.toLowerCase())
+  ) ||
+  project.projectName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  project.status.toLowerCase().includes(searchTerm.toLowerCase())
+);
 
   useEffect(() => {
     // Fetch the projects when the component mounts
@@ -239,32 +241,45 @@ function Projects() {
       console.error('No users selected for assignment.');
       return;
     }
-  
+
     // Prepare the form data
     const formData = new FormData();
     formData.append('assignedTo', selectedProject.assignedTo.join(',')); // Convert the array to a comma-separated string
-  
+
     // Make a PUT request to your backend API to assign users to the project
     fetch(`http://localhost:8082/api/projects/assign-user/${selectedProject.id}`, {
       method: 'PUT',
       body: formData,
     })
-    .then(response => {
-      if (response.ok) {
-        // Show success message if the request is successful
-        Swal.fire({
-          icon: "success",
-          title: "Users Assigned",
-          text: "Users have been assigned to the project successfully!",
-          customClass: {
-            popup: "max-width-100",
-          },
-        });
-  
-        // Optionally, you may want to update the frontend with the latest data
-        // Fetch the updated list of projects or update the state accordingly
-      } else {
-        // Show error message if the request is not successful
+      .then(response => {
+        if (response.ok) {
+          // Show success message if the request is successful
+          Swal.fire({
+            icon: "success",
+            title: "Users Assigned",
+            text: "Users have been assigned to the project successfully!",
+            customClass: {
+              popup: "max-width-100",
+            },
+          });
+
+          // Optionally, you may want to update the frontend with the latest data
+          // Fetch the updated list of projects or update the state accordingly
+        } else {
+          // Show error message if the request is not successful
+          Swal.fire({
+            icon: "error",
+            title: "Assignment Failed",
+            text: "An error occurred during the assignment. Please try again.",
+            customClass: {
+              popup: "max-width-100",
+            },
+          });
+        }
+      })
+      .catch(error => {
+        console.error('Error assigning users:', error);
+        // Handle the error
         Swal.fire({
           icon: "error",
           title: "Assignment Failed",
@@ -273,26 +288,13 @@ function Projects() {
             popup: "max-width-100",
           },
         });
-      }
-    })
-    .catch(error => {
-      console.error('Error assigning users:', error);
-      // Handle the error
-      Swal.fire({
-        icon: "error",
-        title: "Assignment Failed",
-        text: "An error occurred during the assignment. Please try again.",
-        customClass: {
-          popup: "max-width-100",
-        },
+      })
+      .finally(() => {
+        // Close the modal after handling the assignment
+        handleCloseAssignUserModal();
       });
-    })
-    .finally(() => {
-      // Close the modal after handling the assignment
-      handleCloseAssignUserModal();
-    });
   };
-  
+
   return (
     <div>
       <h4 className="text-center ">Projects Component</h4>
@@ -327,14 +329,21 @@ function Projects() {
               <th className=" border border-dark h6">Planned Closed Date</th>
               <th className=" border border-dark h6">Comments</th>
               <th className=" border border-dark h6">Actions</th>
-            
+
             </tr>
           </thead>
           <tbody>
             {filteredProjects.map((project) => (
               <tr key={project.id}>
                 <td className="text-center">{project.projectName}</td>
-                <td className="text-center">{project.assignedTo}</td>
+                <td className="text-center">
+                  <ol>
+                    {project.assignedTo.map((user, index) => (
+                      <li key={index}>{user}</li>
+                    ))}
+                  </ol>
+                </td>
+
 
                 <td className="text-center">{project.status}</td>
                 <td className="text-center">
@@ -358,15 +367,16 @@ function Projects() {
                     Delete
                   </Button> */}
                   <i
-                    class="bi bi-trash3 fs-4 m-2"
+                    class="bi bi-trash3 fs-4 m-2 text-danger"
                     onClick={() => handleDeleteProject(project.id)}
                   ></i>
-                   <Button
+                  {/* <Button
             variant="primary"
             onClick={() => handleAssignUser(project.id)}
           >
             Assign User
-          </Button>
+          </Button> */}
+                  <i class="bi bi-person-plus fs-4" onClick={() => handleAssignUser(project.id)}></i>
                 </td>
               </tr>
             ))}
@@ -563,7 +573,7 @@ function Projects() {
               <Form.Label>Select Users</Form.Label>
               <Form.Control
                 as="select"
-                multiple
+
                 onChange={(e) =>
                   setSelectedProject({
                     ...selectedProject,

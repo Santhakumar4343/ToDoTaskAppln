@@ -62,9 +62,11 @@ function AdminDashBoard() {
               <Dropdown.Toggle variant="secondary" id="userDropdown">
                 <i className="bi bi-person-circle fs-7"></i>
               </Dropdown.Toggle>
-              <Dropdown.Menu>
+              <Dropdown.Menu style={{width:"1px"}}>
 
-                <Dropdown.Item onClick={handleLogout} style={{ fontSize: '14px' }}>Logout</Dropdown.Item>
+              <Dropdown.Item onClick={handleLogout} style={{ fontSize: '14px', color: 'red',fontSize:"bold"  }}>
+      Logout
+    </Dropdown.Item>
 
                 {/* Add other options if needed, like Profile */}
               </Dropdown.Menu>

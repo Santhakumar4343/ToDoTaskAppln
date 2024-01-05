@@ -1,7 +1,9 @@
 package com.todo.entity;
 
 import java.util.Date;
+import java.util.List;
 
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -21,6 +23,8 @@ public class Task {
     private String status;
     private String priority;
     private String remarks;
+    @ElementCollection
+    private List<String> assignedTo;
 
     @ManyToOne
     @JoinColumn(name = "module_id")
@@ -32,7 +36,7 @@ public class Task {
 	}
 
 	public Task(Long id, String taskName, Date startDate, Date endDate, String status, String priority, String remarks,
-			Modules module) {
+			List<String> assignedTo, Modules module) {
 		super();
 		this.id = id;
 		this.taskName = taskName;
@@ -41,6 +45,7 @@ public class Task {
 		this.status = status;
 		this.priority = priority;
 		this.remarks = remarks;
+		this.assignedTo = assignedTo;
 		this.module = module;
 	}
 
@@ -100,6 +105,14 @@ public class Task {
 		this.remarks = remarks;
 	}
 
+	public List<String> getAssignedTo() {
+		return assignedTo;
+	}
+
+	public void setAssignedTo(List<String> assignedTo) {
+		this.assignedTo = assignedTo;
+	}
+
 	public Modules getModule() {
 		return module;
 	}
@@ -108,6 +121,14 @@ public class Task {
 		this.module = module;
 	}
 
+	@Override
+	public String toString() {
+		return "Task [id=" + id + ", taskName=" + taskName + ", startDate=" + startDate + ", endDate=" + endDate
+				+ ", status=" + status + ", priority=" + priority + ", remarks=" + remarks + ", assignedTo="
+				+ assignedTo + ", module=" + module + "]";
+	}
+
+	
 	
     
     

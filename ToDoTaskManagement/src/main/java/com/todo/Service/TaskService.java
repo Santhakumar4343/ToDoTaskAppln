@@ -2,6 +2,7 @@ package com.todo.Service;
 
 import java.util.List;
 
+
 import com.todo.entity.Task;
 
 public interface TaskService {
@@ -11,4 +12,6 @@ public interface TaskService {
 	    List<Task> getTasksByModule(Long moduleId);
 		Task getTaskById(Long taskId);
 		List<Task> getAllTasks();
+		 public List<Task> getUserTasks(String username);
 }
+

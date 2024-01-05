@@ -3,7 +3,11 @@ package com.todo.entity;
 import java.util.Date;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -14,6 +18,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 
 @Entity
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class Modules {
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,9 +30,8 @@ public class Modules {
     private String status;
     private String remarks;
     private String priority;
-
-
-    
+    @ElementCollection
+    private List<String> assignedTo;
     @ManyToOne
     @JoinColumn(name = "project_id")
     private Project project;
@@ -43,8 +47,9 @@ public class Modules {
 	}
 
 
+
 	public Modules(Long id, String moduleName, Date startDate, Date endDate, String status, String remarks,
-			String priority, Project project) {
+			String priority, List<String> assignedTo, Project project, List<Task> tasks) {
 		super();
 		this.id = id;
 		this.moduleName = moduleName;
@@ -53,8 +58,11 @@ public class Modules {
 		this.status = status;
 		this.remarks = remarks;
 		this.priority = priority;
+		this.assignedTo = assignedTo;
 		this.project = project;
+		this.tasks = tasks;
 	}
+
 
 
 	public Long getId() {
@@ -62,9 +70,11 @@ public class Modules {
 	}
 
 
+
 	public void setId(Long id) {
 		this.id = id;
 	}
+
 
 
 	public String getModuleName() {
@@ -72,9 +82,11 @@ public class Modules {
 	}
 
 
+
 	public void setModuleName(String moduleName) {
 		this.moduleName = moduleName;
 	}
+
 
 
 	public Date getStartDate() {
@@ -82,9 +94,11 @@ public class Modules {
 	}
 
 
+
 	public void setStartDate(Date startDate) {
 		this.startDate = startDate;
 	}
+
 
 
 	public Date getEndDate() {
@@ -92,9 +106,11 @@ public class Modules {
 	}
 
 
+
 	public void setEndDate(Date endDate) {
 		this.endDate = endDate;
 	}
+
 
 
 	public String getStatus() {
@@ -102,9 +118,11 @@ public class Modules {
 	}
 
 
+
 	public void setStatus(String status) {
 		this.status = status;
 	}
+
 
 
 	public String getRemarks() {
@@ -112,9 +130,11 @@ public class Modules {
 	}
 
 
+
 	public void setRemarks(String remarks) {
 		this.remarks = remarks;
 	}
+
 
 
 	public String getPriority() {
@@ -122,9 +142,23 @@ public class Modules {
 	}
 
 
+
 	public void setPriority(String priority) {
 		this.priority = priority;
 	}
+
+
+
+	public List<String> getAssignedTo() {
+		return assignedTo;
+	}
+
+
+
+	public void setAssignedTo(List<String> assignedTo) {
+		this.assignedTo = assignedTo;
+	}
+
 
 
 	public Project getProject() {
@@ -132,10 +166,34 @@ public class Modules {
 	}
 
 
+
 	public void setProject(Project project) {
 		this.project = project;
 	}
 
+
+
+	public List<Task> getTasks() {
+		return tasks;
+	}
+
+
+
+	public void setTasks(List<Task> tasks) {
+		this.tasks = tasks;
+	}
+
+
+
+	@Override
+	public String toString() {
+		return "Modules [id=" + id + ", moduleName=" + moduleName + ", startDate=" + startDate + ", endDate=" + endDate
+				+ ", status=" + status + ", remarks=" + remarks + ", priority=" + priority + ", assignedTo="
+				+ assignedTo + ", project=" + project + ", tasks=" + tasks + "]";
+	}
+
+
+	
 
 	
 }

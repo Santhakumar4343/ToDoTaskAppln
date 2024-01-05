@@ -5,6 +5,8 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.todo.Service.ModuleService;
+import com.todo.UserServiceImpl.ModuleServiceImpl;
 import com.todo.UserServiceImpl.TaskServiceImpl;
 import com.todo.entity.Modules;
 import com.todo.entity.Task;
@@ -24,7 +27,7 @@ import com.todo.entity.Task;
 public class TaskController {
 
     @Autowired
-    private ModuleService moduleService;
+    private ModuleServiceImpl moduleService;
 
     @Autowired
     private TaskServiceImpl taskService;
@@ -34,6 +37,7 @@ public class TaskController {
     		@PathVariable Long projectId,
             @PathVariable Long moduleId,
             @RequestParam String taskName,
+            @RequestParam  List<String> assignedTo,
             @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date startDate,
             @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date endDate,
             @RequestParam String status,
@@ -45,6 +49,7 @@ public class TaskController {
         Task task = new Task();
         task.setModule(module);
         task.setTaskName(taskName);
+        task.setAssignedTo(assignedTo);
         task.setStartDate(startDate);
         task.setEndDate(endDate);
         task.setStatus(status);
@@ -58,6 +63,7 @@ public class TaskController {
     public Task updateTask(
             @PathVariable Long taskId,
             @RequestParam String taskName,
+            @RequestParam  List<String> assignedTo,
             @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date startDate,
             @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date endDate,
             @RequestParam String status,
@@ -69,6 +75,7 @@ public class TaskController {
         // Update the task fields
         task.setTaskName(taskName);
         task.setStartDate(startDate);
+        task.setAssignedTo(assignedTo);
         task.setEndDate(endDate);
         task.setStatus(status);
         task.setRemarks(remarks);
@@ -97,8 +104,24 @@ public class TaskController {
         return taskService.getAllTasks();
     }
 
-    @DeleteMapping("/deleteTaskById/{taskId}")
+    @DeleteMapping("/deleteTask/{taskId}")
     public void deleteTask(@PathVariable Long taskId) {
     	taskService.deleteTask(taskId);
     }
+   
+    @PutMapping("/assign-user/{taskId}")
+    public ResponseEntity<String> assignUserToTask(
+            @PathVariable Long taskId,
+            @RequestParam String assignedTo) {
+
+        try {
+        	taskService.assignUserToTask(taskId, assignedTo);
+            return new ResponseEntity<>("User assigned successfully", HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Error assigning user: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
 }
+
+

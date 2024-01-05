@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.todo.Service.ModuleService;
 import com.todo.Service.ProjectService;
+import com.todo.UserServiceImpl.ModuleServiceImpl;
 import com.todo.entity.Modules;
 import com.todo.entity.Project;
 
@@ -28,12 +30,12 @@ public class ModuleController {
 	private ProjectService projectService; 
 
 	@Autowired
-	private ModuleService moduleService;
+	private ModuleServiceImpl moduleService;
 
 	@PostMapping("/saveModule/{projectId}")
 	public Modules createModuleForProject(@PathVariable Long projectId,
             @RequestParam String moduleName,
-  
+            @RequestParam  List<String> assignedTo,
             @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date startDate,
             @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date endDate,
             @RequestParam String status,
@@ -42,6 +44,7 @@ public class ModuleController {
 		 Modules module = new Modules();
 	        module.setProject(project);
 	        module.setModuleName(moduleName);
+	        module.setAssignedTo(assignedTo);
 	        module.setStartDate(startDate);
 	        module.setEndDate(endDate);
 	        module.setStatus(status);
@@ -53,13 +56,14 @@ public class ModuleController {
     public Modules updateModule(
             @PathVariable Long moduleId,
             @RequestParam String moduleName,
+            @RequestParam(required = false)  List<String> assignedTo,
             @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date startDate,
             @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date endDate,
             @RequestParam String status,
             @RequestParam String remarks) {
         // Retrieve the module from the service
         Modules module = moduleService.getModuleById(moduleId);
-
+module.setAssignedTo(assignedTo);
         // Update the module fields
         module.setModuleName(moduleName);
         module.setStatus(status);
@@ -99,5 +103,18 @@ public class ModuleController {
 	         return ResponseEntity.notFound().build();
 	     }
 	 }
+	 
+	 @PutMapping("/assign-user/{moduleId}")
+	    public ResponseEntity<String> assignUserToProject(
+	            @PathVariable Long moduleId,
+	            @RequestParam String assignedTo) {
+
+	        try {
+	        	moduleService.assignUserToModules(moduleId, assignedTo);
+	            return new ResponseEntity<>("User assigned successfully", HttpStatus.OK);
+	        } catch (Exception e) {
+	            return new ResponseEntity<>("Error assigning user: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+	        }
+	    }
 	
 }

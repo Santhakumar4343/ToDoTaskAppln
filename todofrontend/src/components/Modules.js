@@ -16,7 +16,21 @@ const Modules = () => {
   const [modules, setModules] = useState([]);
   const [selectedModuleId, setSelectedModuleId] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [assignedTo, setAssignedTo] = useState([]);
 
+  const [users, setUsers] = useState([]);
+
+  useEffect(() => {
+    // Fetch the list of users when the component mounts
+    fetch("http://localhost:8082/api/users/userType/user")
+      .then((response) => response.json())
+      .then((data) => {
+        setUsers(data);
+      })
+      .catch((error) => {
+        console.error("Error fetching users:", error);
+      });
+  }, []);
   useEffect(() => {
     // Fetch all projects on component mount
     axios.get('http://localhost:8082/api/projects/getAllProjects')
@@ -75,6 +89,7 @@ const Modules = () => {
       module.status.toLowerCase().includes(searchTerm.toLowerCase()) ||
       module.remarks.toLowerCase().includes(searchTerm.toLowerCase())
   );
+  
   const handleCreateModule = () => {
 
     setModuleName('');
@@ -118,7 +133,7 @@ const Modules = () => {
     formData.append('endDate', endDate);
     formData.append('status', status);
     formData.append('remarks', remarks);
-
+    formData.append('assignedTo', assignedTo.join(','));
     // Determine whether to create or update based on selectedModuleId
     const requestUrl = selectedModuleId
       ? `http://localhost:8082/api/modules/updateModule/${selectedModuleId}`
@@ -224,7 +239,85 @@ const Modules = () => {
       }
     });
   };
-  
+
+  const [showAssignUserModal, setShowAssignUserModal] = useState(false);
+  // ... other state variables
+
+  // Function to handle showing the assign user modal for modules
+  const handleAssignUser = (moduleId) => {
+    // Set the selected module for assigning users
+    const selectedModule = modules.find((module) => module.id === moduleId);
+    setSelectedModuleId(moduleId);
+    setAssignedTo(selectedModule.assignedTo);
+    setShowAssignUserModal(true);
+  };
+
+
+  // Function to handle closing the assign user modal for modules
+  const handleCloseAssignUserModal = () => setShowAssignUserModal(false);
+
+  // Function to handle assigning a user to the module
+  const handleAssignUserToModule = () => {
+    // Make sure there are assigned users to save
+    if (assignedTo.length === 0) {
+      // Handle the case where no users are selected
+      console.error('No users selected for assignment.');
+      return;
+    }
+
+    // Prepare the form data
+    const formData = new FormData();
+    formData.append('assignedTo', assignedTo.join(',')); // Convert the array to a comma-separated string
+
+    // Make a PUT request to your backend API to assign users to the module
+    axios
+      .put(`http://localhost:8082/api/modules/assign-user/${selectedModuleId}`, formData)
+      .then((response) => {
+        if (response.status === 200) {
+          // Show success message if the request is successful
+          Swal.fire({
+            icon: 'success',
+            title: 'Users Assigned',
+            text: 'Users have been assigned to the module successfully!',
+            customClass: {
+              popup: 'max-width-100',
+            },
+          });
+
+          // Optionally, you may want to update the frontend with the latest data
+          // Fetch the updated list of modules or update the state accordingly
+          fetchModules();
+        } else {
+          // Show error message if the request is not successful
+          console.error('Error assigning users to module:', response.status);
+          Swal.fire({
+            icon: 'error',
+            title: 'Assignment Failed',
+            text: 'An error occurred during the assignment. Please try again.',
+            customClass: {
+              popup: 'max-width-100',
+            },
+          });
+        }
+      })
+      .catch((error) => {
+        console.error('Error assigning users to module:', error);
+        // Handle the error
+        Swal.fire({
+          icon: 'error',
+          title: 'Assignment Failed',
+          text: 'An error occurred during the assignment. Please try again.',
+          customClass: {
+            popup: 'max-width-100',
+          },
+        });
+      })
+      .finally(() => {
+        // Close the modal after handling the assignment
+        handleCloseAssignUserModal();
+      });
+  };
+
 
   return (
     <div>
@@ -248,11 +341,12 @@ const Modules = () => {
       />
       {filteredModules.length > 0 ? (
         <>
-          <Table striped bordered hover className="text-center border border-dark" >
+          <Table striped bordered hover className="text-center  border border-dark " style={{ borderRadius: '10px  !important' }} >
             <thead>
               <tr>
-              <th className='h6'>project Name </th>
+                <th className='h6'>project Name </th>
                 <th className='h6'>Module Name</th>
+                <th className=" border border-dark h6">Assigned To</th>
                 <th className='h6'>Status</th>
                 <th className='h6'>Planned Start Date</th>
                 <th className='h6'>Planned Closed Date</th>
@@ -263,8 +357,16 @@ const Modules = () => {
             <tbody>
               {filteredModules.map((module) => (
                 <tr key={module.id}>
-                   <td>{module.project.projectName}</td>
+                  <td>{module.project.projectName}</td>
                   <td>{module.moduleName}</td>
+                  <td className="text-center">
+                    <ol>
+                      {module.assignedTo.map((user, index) => (
+                        <li key={index}>{user}</li>
+                      ))}
+                    </ol>
+                  </td>
+
                   <td>{module.status}</td>
                   <td>{moment(module.startDate).format('YYYY-MM-DD')}</td>
                   <td>{moment(module.endDate).format('YYYY-MM-DD')}</td>
@@ -286,7 +388,15 @@ const Modules = () => {
                     </Button> */}
                     <i className="bi bi-pencil fs-4" onClick={() => handleUpdateModule(module.id)}></i>
                     {' '}
-                    <i class="bi bi-trash3 fs-4 m-2" onClick={() => handleDeleteModule(module.id)}></i>
+                    <i class="bi bi-trash3 fs-4 m-2 text-danger" onClick={() => handleDeleteModule(module.id)}></i>
+                    {/* <Button
+                      variant="primary"
+                      onClick={() => handleAssignUser(module.id)}
+                    >
+                      Assign User
+                    </Button> */}
+                    <i class="bi bi-person-plus fs-4" onClick={() => handleAssignUser(module.id)}></i>
+
                   </td>
                 </tr>
               ))}
@@ -319,6 +429,29 @@ const Modules = () => {
                     onChange={(e) => setModuleName(e.target.value)}
                   />
                 </Form.Group>
+              </Col>
+            </Row>
+            <Row>
+              <Col md={4}><Form.Label>Module Name</Form.Label></Col>
+              <Col md={8} >
+                <Form.Group controlId="formAssignedTo">
+                  <Form.Control
+                    as="select"
+                    value={assignedTo}
+                    className="border border-dark mb-3"
+                    onChange={(e) => setAssignedTo(Array.from(e.target.selectedOptions, (option) => option.value))}
+
+                  >
+
+                    <option value="">Select Assigned To</option>
+                    {users.map((user) => (
+                      <option key={user.id} value={user.username}>
+                        {user.username}
+                      </option>
+                    ))}
+                  </Form.Control>
+                </Form.Group>
+
               </Col>
             </Row>
             <Row>
@@ -381,6 +514,38 @@ const Modules = () => {
           </Button>
           <Button variant="primary" onClick={handleSaveModule}>
             Save Module
+          </Button>
+        </Modal.Footer>
+      </Modal>
+      <Modal show={showAssignUserModal} onHide={handleCloseAssignUserModal}>
+        <Modal.Header closeButton>
+          <Modal.Title>Assign Users to Module</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form>
+            <Form.Group controlId="formAssignUser">
+              <Form.Label>Select Users</Form.Label>
+              <Form.Control
+                as="select"
+
+                value={assignedTo}
+                onChange={(e) => setAssignedTo(Array.from(e.target.selectedOptions, (option) => option.value))}
+              >
+                {users.map((user) => (
+                  <option key={user.id} value={user.username}>
+                    {user.username}
+                  </option>
+                ))}
+              </Form.Control>
+            </Form.Group>
+          </Form>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleCloseAssignUserModal}>
+            Close
+          </Button>
+          <Button variant="primary" onClick={handleAssignUserToModule}>
+            Assign User
           </Button>
         </Modal.Footer>
       </Modal>
