@@ -148,7 +148,7 @@ public class UserServiceImpl implements UserService {
  @Override
  public void sendOtpToSuperUser(User user) {
      // Retrieve the SuperUser's email from your database or configuration
-     String superUserEmail = "santhakumar41k@gmail.com"; // Replace with actual SuperUser's email
+     String superUserEmail = "santhakumar6787@gmail.com"; // Replace with actual SuperUser's email
 
      // Generate a random 6-digit OTP and save it to the cache
      String otp = generateOtpAndSendEmail(user);

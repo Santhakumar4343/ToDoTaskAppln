@@ -83,12 +83,16 @@ const Modules = () => {
       });
   };
 
-  const filteredModules = modules.filter(
-    (module) =>
-      module.moduleName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      module.status.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      module.remarks.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredModules = modules.filter((module) => {
+    const lowerSearchTerm = searchTerm.toLowerCase();
+  
+    return (
+      (module.moduleName && module.moduleName.toLowerCase().includes(lowerSearchTerm)) ||
+      (module.status && module.status.toLowerCase().includes(lowerSearchTerm)) ||
+      (module.remarks && module.remarks.toLowerCase().includes(lowerSearchTerm))
+    );
+  });
+  
   
   const handleCreateModule = () => {
 

@@ -1,5 +1,6 @@
 package com.todo.UserController;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -16,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.todo.Service.ModuleService;
+import com.todo.Repository.TaskRepository;
 import com.todo.UserServiceImpl.ModuleServiceImpl;
 import com.todo.UserServiceImpl.TaskServiceImpl;
 import com.todo.entity.Modules;
@@ -31,7 +32,8 @@ public class TaskController {
 
     @Autowired
     private TaskServiceImpl taskService;
-
+@Autowired
+private TaskRepository taskRepository;
     @PostMapping("/saveTask/{projectId}/{moduleId}")
     public Task createTaskForModule(
     		@PathVariable Long projectId,
@@ -75,7 +77,29 @@ public class TaskController {
         // Update the task fields
         task.setTaskName(taskName);
         task.setStartDate(startDate);
+        
+        
+        
+//        Task existingTask =taskRepository.getTaskById(taskId);
+//
+//        // If the existing project is not found, you may want to handle this scenario accordingly
+//
+//        // Create a new list to preserve the existing assignedTo values
+//        List<String> updatedAssignedTo = new ArrayList<>(existingTask.getAssignedTo());
+//
+//        // Append new users if provided
+//        if (assignedTo != null) {
+//            updatedAssignedTo.addAll(assignedTo);
+//        }
+//
+//        // Set the updated assignedTo list
+//        task.setAssignedTo(updatedAssignedTo);
+        
         task.setAssignedTo(assignedTo);
+        
+        
+        
+        
         task.setEndDate(endDate);
         task.setStatus(status);
         task.setRemarks(remarks);

@@ -1,5 +1,6 @@
 package com.todo.UserController;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.todo.Repository.ModuleRepository;
 import com.todo.Service.ModuleService;
 import com.todo.Service.ProjectService;
 import com.todo.UserServiceImpl.ModuleServiceImpl;
@@ -27,94 +29,103 @@ import com.todo.entity.Project;
 public class ModuleController {
 
 	@Autowired
-	private ProjectService projectService; 
-
+	private ProjectService projectService;
+@Autowired
+private ModuleRepository moduleRepository;
 	@Autowired
 	private ModuleServiceImpl moduleService;
 
 	@PostMapping("/saveModule/{projectId}")
-	public Modules createModuleForProject(@PathVariable Long projectId,
-            @RequestParam String moduleName,
-            @RequestParam  List<String> assignedTo,
-            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date startDate,
-            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date endDate,
-            @RequestParam String status,
-            @RequestParam String remarks) {
+	public Modules createModuleForProject(@PathVariable Long projectId, @RequestParam String moduleName,
+			@RequestParam List<String> assignedTo, @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date startDate,
+			@RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date endDate, @RequestParam String status,
+			@RequestParam String remarks) {
 		Project project = projectService.getProject(projectId);
-		 Modules module = new Modules();
-	        module.setProject(project);
-	        module.setModuleName(moduleName);
-	        module.setAssignedTo(assignedTo);
-	        module.setStartDate(startDate);
-	        module.setEndDate(endDate);
-	        module.setStatus(status);
-	        module.setRemarks(remarks);
+		Modules module = new Modules();
+		module.setProject(project);
+		module.setModuleName(moduleName);
+		module.setAssignedTo(assignedTo);
+		module.setStartDate(startDate);
+		module.setEndDate(endDate);
+		module.setStatus(status);
+		module.setRemarks(remarks);
 
-	        return moduleService.saveModule(module);
+		return moduleService.saveModule(module);
 	}
+
 	@PutMapping("/updateModule/{moduleId}")
-    public Modules updateModule(
-            @PathVariable Long moduleId,
-            @RequestParam String moduleName,
-            @RequestParam(required = false)  List<String> assignedTo,
-            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date startDate,
-            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date endDate,
-            @RequestParam String status,
-            @RequestParam String remarks) {
-        // Retrieve the module from the service
-        Modules module = moduleService.getModuleById(moduleId);
-module.setAssignedTo(assignedTo);
-        // Update the module fields
-        module.setModuleName(moduleName);
-        module.setStatus(status);
-        module.setRemarks(remarks);
-       module.setStartDate(startDate);
-       module.setEndDate(endDate);
-        // Save the updated module
-        return moduleService.updateModule(module);
-    }
+	public Modules updateModule(@PathVariable Long moduleId, @RequestParam String moduleName,
+			@RequestParam(required = false) List<String> assignedTo,
+			@RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date startDate,
+			@RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date endDate, @RequestParam String status,
+			@RequestParam String remarks) {
+		// Retrieve the module from the service
+		Modules module = moduleService.getModuleById(moduleId);
+		 Modules existingModule = moduleRepository.getModuleById(moduleId);
+
+	        // If the existing project is not found, you may want to handle this scenario accordingly
+
+	        // Create a new list to preserve the existing assignedTo values
+	        List<String> updatedAssignedTo = new ArrayList<>(existingModule.getAssignedTo());
+
+	        // Append new users if provided
+	        if (assignedTo != null) {
+	            updatedAssignedTo.addAll(assignedTo);
+	        }
+
+	        // Set the updated assignedTo list
+	        module.setAssignedTo(updatedAssignedTo);
+		//module.setAssignedTo(assignedTo);
+		
+		// Update the module fields
+		module.setModuleName(moduleName);
+		module.setStatus(status);
+		module.setRemarks(remarks);
+		module.setStartDate(startDate);
+		module.setEndDate(endDate);
+		// Save the updated module
+		return moduleService.updateModule(module);
+	}
+
 	@GetMapping("/getAllModules")
 	public List<Modules> getModuleAll() {
-		
-    	 return moduleService.getAllModules();
-     }
+
+		return moduleService.getAllModules();
+	}
+
 	@DeleteMapping("/deleteModule/{moduleId}")
 	public void deleteModule(@PathVariable Long moduleId) {
-		
-    	  moduleService.deleteModule(moduleId);
-     }
-	
-	 
-	 @GetMapping("/getModuleByPId/{projectId}")
-	 public ResponseEntity<List<Modules>> getModulesByProject(@PathVariable Long projectId) {
-	     
 
-	     // Create a Project instance and set the ID
-	     Project project = new Project();
-	     project.setId(projectId);
+		moduleService.deleteModule(moduleId);
+	}
 
-	     // Call the service method to get modules by project
-	     List<Modules> modules = moduleService.getModulesByProject(project);
+	@GetMapping("/getModuleByPId/{projectId}")
+	public ResponseEntity<List<Modules>> getModulesByProject(@PathVariable Long projectId) {
 
-	     // Check if modules were found
-	     if (!modules.isEmpty()) {
-	         return ResponseEntity.ok(modules);
-	     } else {
-	         return ResponseEntity.notFound().build();
-	     }
-	 }
-	 
-	 @PutMapping("/assign-user/{moduleId}")
-	    public ResponseEntity<String> assignUserToProject(
-	            @PathVariable Long moduleId,
-	            @RequestParam String assignedTo) {
+		// Create a Project instance and set the ID
+		Project project = new Project();
+		project.setId(projectId);
 
-	        try {
-	        	moduleService.assignUserToModules(moduleId, assignedTo);
-	            return new ResponseEntity<>("User assigned successfully", HttpStatus.OK);
-	        } catch (Exception e) {
-	            return new ResponseEntity<>("Error assigning user: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-	        }
-	    }
-	
+		// Call the service method to get modules by project
+		List<Modules> modules = moduleService.getModulesByProject(project);
+
+		// Check if modules were found
+		if (!modules.isEmpty()) {
+			return ResponseEntity.ok(modules);
+		} else {
+			return ResponseEntity.notFound().build();
+		}
+	}
+
+	@PutMapping("/assign-user/{moduleId}")
+	public ResponseEntity<String> assignUserToProject(@PathVariable Long moduleId, @RequestParam String assignedTo) {
+
+		try {
+			moduleService.assignUserToModules(moduleId, assignedTo);
+			return new ResponseEntity<>("User assigned successfully", HttpStatus.OK);
+		} catch (Exception e) {
+			return new ResponseEntity<>("Error assigning user: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+
 }

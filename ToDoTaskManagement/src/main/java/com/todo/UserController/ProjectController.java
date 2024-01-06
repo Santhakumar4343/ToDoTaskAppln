@@ -1,5 +1,6 @@
 package com.todo.UserController;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -12,14 +13,15 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-
+import com.todo.Repository.ProjectRepository;
 import com.todo.UserServiceImpl.ProjectServiceImpl;
 import com.todo.entity.Project;
+
+import jakarta.persistence.EntityNotFoundException;
 
 @RestController
 @RequestMapping("/api/projects")
@@ -27,7 +29,10 @@ public class ProjectController {
 
     @Autowired
     private ProjectServiceImpl projectService;
+    @Autowired
+    private ProjectRepository projectRepository;
 
+    
     @PostMapping("/save")
     public Project saveProject(
             @RequestParam String projectName,
@@ -65,7 +70,22 @@ public class ProjectController {
         Project updatedProject = new Project();
         updatedProject.setId(projectId);
         updatedProject.setProjectName(projectName);
-        updatedProject.setAssignedTo(assignedTo);
+       // updatedProject.setAssignedTo(assignedTo);
+     // Retrieve the current project
+        Project existingProject = projectRepository.getProjectById(projectId);
+
+        // If the existing project is not found, you may want to handle this scenario accordingly
+
+        // Create a new list to preserve the existing assignedTo values
+        List<String> updatedAssignedTo = new ArrayList<>(existingProject.getAssignedTo());
+
+        // Append new users if provided
+        if (assignedTo != null) {
+            updatedAssignedTo.addAll(assignedTo);
+        }
+
+        // Set the updated assignedTo list
+        updatedProject.setAssignedTo(updatedAssignedTo);
        
         updatedProject.setStatus(status);
         updatedProject.setStartDate(startDate);

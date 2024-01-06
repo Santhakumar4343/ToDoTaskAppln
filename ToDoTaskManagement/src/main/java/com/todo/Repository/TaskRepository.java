@@ -12,4 +12,5 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
     List<Task> findByModuleId(Long moduleId);
     List<Task> findByAssignedTo(String assignedTo);
   	Optional<Task> findById(Long id);
+  Task	getTaskById(Long taskId);
 }

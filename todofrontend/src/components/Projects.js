@@ -54,14 +54,25 @@ function Projects() {
     });
   };
 
-  //filter Project
-  const filteredProjects = projects.filter((project) =>
-  project.assignedTo.some((user) =>
-    user.toLowerCase().includes(searchTerm.toLowerCase())
-  ) ||
-  project.projectName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-  project.status.toLowerCase().includes(searchTerm.toLowerCase())
-);
+//   //filter Project
+//   const filteredProjects = projects.filter((project) =>
+//   project.assignedTo.some((user) =>
+//     user.toLowerCase().includes(searchTerm.toLowerCase())
+//   ) ||
+//   project.projectName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+//   project.status.toLowerCase().includes(searchTerm.toLowerCase())
+// );
+const filteredProjects = projects.filter((project) => {
+  const projectName = project.projectName && project.projectName.toLowerCase();
+  const assignedTo = project.assignedTo && project.assignedTo.map((user) => user.toLowerCase());
+  const status = project.status && project.status.toLowerCase();
+
+  return (
+    (projectName && projectName.includes(searchTerm.toLowerCase())) ||
+    (assignedTo && assignedTo.some((user) => user.includes(searchTerm.toLowerCase()))) ||
+    (status && status.includes(searchTerm.toLowerCase()))
+  );
+});
 
   useEffect(() => {
     // Fetch the projects when the component mounts
