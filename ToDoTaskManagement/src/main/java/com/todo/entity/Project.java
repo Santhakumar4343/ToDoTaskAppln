@@ -34,8 +34,8 @@ public class Project {
 	private Date closedDate;
 	private String remarks;
 	private String priority;
-	@OneToMany(mappedBy = "project", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-	private List<Modules> modules;
+	 @OneToMany(cascade = CascadeType.ALL, mappedBy = "project")
+	    private List<Modules> modules;
 //	@ManyToMany
 //	@JoinTable(name = "user_project", joinColumns = @JoinColumn(name = "project_id"), inverseJoinColumns = @JoinColumn(name = "user_id"))
 //	private Set<User> users = new HashSet<>();
@@ -111,7 +111,6 @@ public List<Modules> getModules() {
 public void setModules(List<Modules> modules) {
 	this.modules = modules;
 }
-
 	
 
 	

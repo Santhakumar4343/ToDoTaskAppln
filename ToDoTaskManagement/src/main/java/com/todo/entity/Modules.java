@@ -35,17 +35,14 @@ public class Modules {
     @ManyToOne
     @JoinColumn(name = "project_id")
     private Project project;
-
-    @OneToMany(mappedBy = "module", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "module")
     private List<Task> tasks;
-
 
 
 	public Modules() {
 		super();
 		// TODO Auto-generated constructor stub
 	}
-
 
 
 	public Modules(Long id, String moduleName, Date startDate, Date endDate, String status, String remarks,
@@ -64,11 +61,9 @@ public class Modules {
 	}
 
 
-
 	public Long getId() {
 		return id;
 	}
-
 
 
 	public void setId(Long id) {
@@ -76,11 +71,9 @@ public class Modules {
 	}
 
 
-
 	public String getModuleName() {
 		return moduleName;
 	}
-
 
 
 	public void setModuleName(String moduleName) {
@@ -88,11 +81,9 @@ public class Modules {
 	}
 
 
-
 	public Date getStartDate() {
 		return startDate;
 	}
-
 
 
 	public void setStartDate(Date startDate) {
@@ -100,11 +91,9 @@ public class Modules {
 	}
 
 
-
 	public Date getEndDate() {
 		return endDate;
 	}
-
 
 
 	public void setEndDate(Date endDate) {
@@ -112,11 +101,9 @@ public class Modules {
 	}
 
 
-
 	public String getStatus() {
 		return status;
 	}
-
 
 
 	public void setStatus(String status) {
@@ -124,11 +111,9 @@ public class Modules {
 	}
 
 
-
 	public String getRemarks() {
 		return remarks;
 	}
-
 
 
 	public void setRemarks(String remarks) {
@@ -136,11 +121,9 @@ public class Modules {
 	}
 
 
-
 	public String getPriority() {
 		return priority;
 	}
-
 
 
 	public void setPriority(String priority) {
@@ -148,11 +131,9 @@ public class Modules {
 	}
 
 
-
 	public List<String> getAssignedTo() {
 		return assignedTo;
 	}
-
 
 
 	public void setAssignedTo(List<String> assignedTo) {
@@ -160,11 +141,9 @@ public class Modules {
 	}
 
 
-
 	public Project getProject() {
 		return project;
 	}
-
 
 
 	public void setProject(Project project) {
@@ -172,25 +151,15 @@ public class Modules {
 	}
 
 
-
 	public List<Task> getTasks() {
 		return tasks;
 	}
-
 
 
 	public void setTasks(List<Task> tasks) {
 		this.tasks = tasks;
 	}
 
-
-
-	@Override
-	public String toString() {
-		return "Modules [id=" + id + ", moduleName=" + moduleName + ", startDate=" + startDate + ", endDate=" + endDate
-				+ ", status=" + status + ", remarks=" + remarks + ", priority=" + priority + ", assignedTo="
-				+ assignedTo + ", project=" + project + ", tasks=" + tasks + "]";
-	}
 
 
 	

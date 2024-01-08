@@ -121,14 +121,6 @@ public class Task {
 		this.module = module;
 	}
 
-	@Override
-	public String toString() {
-		return "Task [id=" + id + ", taskName=" + taskName + ", startDate=" + startDate + ", endDate=" + endDate
-				+ ", status=" + status + ", priority=" + priority + ", remarks=" + remarks + ", assignedTo="
-				+ assignedTo + ", module=" + module + "]";
-	}
-
-	
 	
     
     

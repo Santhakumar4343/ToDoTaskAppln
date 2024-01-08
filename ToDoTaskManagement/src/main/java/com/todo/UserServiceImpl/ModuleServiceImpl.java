@@ -56,6 +56,7 @@ import com.todo.entity.Project;
 		public List<Modules> getUserModules(String username) {
 	        return moduleRepository.findByAssignedTo(username);
 	    }
+		
 		 public void assignUserToModules(Long moduleId, String assignedTo) {
 		        Optional<Modules> optionalModule = moduleRepository.findById(moduleId);
 

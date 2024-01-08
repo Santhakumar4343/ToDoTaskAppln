@@ -21,7 +21,7 @@ function Projects() {
 
   useEffect(() => {
     // Fetch the list of users when the component mounts
-    fetch("http://localhost:8082/api/users/userType/user")
+    fetch("http://13.233.111.56:8082/api/users/userType/user")
       .then((response) => response.json())
       .then((data) => {
         setUsers(data);
@@ -81,7 +81,7 @@ const filteredProjects = projects.filter((project) => {
 
   const fetchProjects = () => {
     // Make a GET request to fetch projects
-    fetch("http://localhost:8082/api/projects/getAllProjects")
+    fetch("http://13.233.111.56:8082/api/projects/getAllProjects")
       .then((response) => response.json())
       .then((data) => {
         // Set the fetched projects to the state
@@ -105,8 +105,8 @@ const filteredProjects = projects.filter((project) => {
     });
 
     const apiUrl = selectedProject.id
-      ? `http://localhost:8082/api/projects/update/${selectedProject.id}`
-      : "http://localhost:8082/api/projects/save";
+      ? `http://13.233.111.56:8082/api/projects/update/${selectedProject.id}`
+      : "http://13.233.111.56:8082/api/projects/save";
 
     const method = selectedProject.id ? "PUT" : "POST";
 
@@ -183,7 +183,7 @@ const filteredProjects = projects.filter((project) => {
     }).then((result) => {
       if (result.isConfirmed) {
         // Make a DELETE request to delete the project
-        fetch(`http://localhost:8082/api/projects/delete/${projectId}`, {
+        fetch(`http://13.233.111.56:8082/api/projects/delete/${projectId}`, {
           method: "DELETE",
         })
           .then((response) => {
@@ -258,7 +258,7 @@ const filteredProjects = projects.filter((project) => {
     formData.append('assignedTo', selectedProject.assignedTo.join(',')); // Convert the array to a comma-separated string
 
     // Make a PUT request to your backend API to assign users to the project
-    fetch(`http://localhost:8082/api/projects/assign-user/${selectedProject.id}`, {
+    fetch(`http://13.233.111.56:8082/api/projects/assign-user/${selectedProject.id}`, {
       method: 'PUT',
       body: formData,
     })

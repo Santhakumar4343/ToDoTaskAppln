@@ -133,6 +133,7 @@ private TaskRepository taskRepository;
     	taskService.deleteTask(taskId);
     }
    
+    
     @PutMapping("/assign-user/{taskId}")
     public ResponseEntity<String> assignUserToTask(
             @PathVariable Long taskId,
@@ -145,7 +146,11 @@ private TaskRepository taskRepository;
             return new ResponseEntity<>("Error assigning user: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
+    @GetMapping("/getUserTasks")
+    public List<Task> getUserTasks(@RequestParam String username) {
+        return taskService.getUserTasks(username);
+    }
+    
 }
 
 

@@ -61,7 +61,7 @@ function Projects() {
 
     // Make a GET request to fetch user-specific projects
     fetch(
-      `http://localhost:8082/api/projects/getUserProjects?username=${username}`
+      `http://13.233.111.56:8082/api/projects/getUserProjects?username=${username}`
     )
       .then((response) => response.json())
       .then((data) => {
@@ -84,8 +84,8 @@ function Projects() {
     });
 
     const apiUrl = selectedProject.id
-      ? `http://localhost:8082/api/projects/update/${selectedProject.id}`
-      : "http://localhost:8082/api/projects/save";
+      ? `http://13.233.111.56:8082/api/projects/update/${selectedProject.id}`
+      : "http://13.233.111.56:8082/api/projects/save";
 
     const method = selectedProject.id ? "PUT" : "POST";
 
@@ -164,7 +164,7 @@ function Projects() {
     }).then((result) => {
       if (result.isConfirmed) {
         // Make a DELETE request to delete the project
-        fetch(`http://localhost:8082/api/projects/delete/${projectId}`, {
+        fetch(`http://13.233.111.56:8082/api/projects/delete/${projectId}`, {
           method: "DELETE",
         })
           .then((response) => {
@@ -250,7 +250,7 @@ function Projects() {
               <th className=" border border-dark h6">Planned Start Date</th>
               <th className=" border border-dark h6">Planned Closed Date</th>
               <th className=" border border-dark h6">Comments</th>
-              <th className=" border border-dark h6">Actions</th>
+              {/* <th className=" border border-dark h6">Actions</th> */}
             </tr>
           </thead>
           <tbody>
@@ -269,22 +269,22 @@ function Projects() {
                 <td style={{ maxWidth: "200px", overflowX: "auto" }}>
                   {project.remarks}
                 </td>
-                <td>
+                {/* <td> */}
                   {/* <Button variant="primary" className='mb-1' >
                     Update
                   </Button>  */}
-                  <i
+                  {/* <i
                     class="bi bi-pencil fs-4"
                     onClick={() => handleUpdateProject(project.id)}
-                  ></i>{" "}
+                  ></i>{" "} */}
                   {/* <Button variant="danger" >
                     Delete
                   </Button> */}
-                  <i
+                  {/* <i
                     class="bi bi-trash3 fs-4 m-2"
                     onClick={() => handleDeleteProject(project.id)}
-                  ></i>
-                </td>
+                  ></i> */}
+                {/* </td> */}
               </tr>
             ))}
           </tbody>

@@ -30,8 +30,8 @@ public class ModuleController {
 
 	@Autowired
 	private ProjectService projectService;
-@Autowired
-private ModuleRepository moduleRepository;
+	@Autowired
+	private ModuleRepository moduleRepository;
 	@Autowired
 	private ModuleServiceImpl moduleService;
 
@@ -61,22 +61,23 @@ private ModuleRepository moduleRepository;
 			@RequestParam String remarks) {
 		// Retrieve the module from the service
 		Modules module = moduleService.getModuleById(moduleId);
-		 Modules existingModule = moduleRepository.getModuleById(moduleId);
+		Modules existingModule = moduleRepository.getModuleById(moduleId);
 
-	        // If the existing project is not found, you may want to handle this scenario accordingly
+		// If the existing project is not found, you may want to handle this scenario
+		// accordingly
 
-	        // Create a new list to preserve the existing assignedTo values
-	        List<String> updatedAssignedTo = new ArrayList<>(existingModule.getAssignedTo());
+		// Create a new list to preserve the existing assignedTo values
+		List<String> updatedAssignedTo = new ArrayList<>(existingModule.getAssignedTo());
 
-	        // Append new users if provided
-	        if (assignedTo != null) {
-	            updatedAssignedTo.addAll(assignedTo);
-	        }
+		// Append new users if provided
+		if (assignedTo != null) {
+			updatedAssignedTo.addAll(assignedTo);
+		}
 
-	        // Set the updated assignedTo list
-	        module.setAssignedTo(updatedAssignedTo);
-		//module.setAssignedTo(assignedTo);
-		
+		// Set the updated assignedTo list
+		module.setAssignedTo(updatedAssignedTo);
+		// module.setAssignedTo(assignedTo);
+
 		// Update the module fields
 		module.setModuleName(moduleName);
 		module.setStatus(status);
@@ -128,4 +129,13 @@ private ModuleRepository moduleRepository;
 		}
 	}
 
+//	@GetMapping("/getUserModules")
+//	public List<Modules> getModuleAll() {
+//
+//		return moduleService.getAllModules();
+//	}
+	@GetMapping("/getUserModules")
+	public List<Modules> getUserModules(@RequestParam String username) {
+		return moduleService.getUserModules(username);
+	}
 }
