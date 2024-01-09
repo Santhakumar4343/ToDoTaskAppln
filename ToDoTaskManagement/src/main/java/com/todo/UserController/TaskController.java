@@ -27,59 +27,49 @@ import com.todo.entity.Task;
 @RequestMapping("/api/tasks")
 public class TaskController {
 
-    @Autowired
-    private ModuleServiceImpl moduleService;
+	@Autowired
+	private ModuleServiceImpl moduleService;
 
-    @Autowired
-    private TaskServiceImpl taskService;
-@Autowired
-private TaskRepository taskRepository;
-    @PostMapping("/saveTask/{projectId}/{moduleId}")
-    public Task createTaskForModule(
-    		@PathVariable Long projectId,
-            @PathVariable Long moduleId,
-            @RequestParam String taskName,
-            @RequestParam  List<String> assignedTo,
-            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date startDate,
-            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date endDate,
-            @RequestParam String status,
-            @RequestParam String remarks,
-            
-            @RequestParam String priority) {
-        Modules module = moduleService.getModuleById(moduleId);
+	@Autowired
+	private TaskServiceImpl taskService;
+	@Autowired
+	private TaskRepository taskRepository;
 
-        Task task = new Task();
-        task.setModule(module);
-        task.setTaskName(taskName);
-        task.setAssignedTo(assignedTo);
-        task.setStartDate(startDate);
-        task.setEndDate(endDate);
-        task.setStatus(status);
-        task.setRemarks(remarks);
-        task.setPriority(priority);
+	@PostMapping("/saveTask/{projectId}/{moduleId}")
+	public Task createTaskForModule(@PathVariable Long projectId, @PathVariable Long moduleId,
+			@RequestParam String taskName, @RequestParam List<String> assignedTo,
+			@RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date startDate,
+			@RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date endDate, @RequestParam String status,
+			@RequestParam String remarks,
 
-        return taskService.saveTask(task);
-    }
+			@RequestParam String priority) {
+		Modules module = moduleService.getModuleById(moduleId);
 
-    @PutMapping("/updateTask/{taskId}")
-    public Task updateTask(
-            @PathVariable Long taskId,
-            @RequestParam String taskName,
-            @RequestParam  List<String> assignedTo,
-            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date startDate,
-            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date endDate,
-            @RequestParam String status,
-            @RequestParam String remarks,
-            @RequestParam String priority) {
-        // Retrieve the task from the service
-        Task task = taskService.getTaskById(taskId);
+		Task task = new Task();
+		task.setModule(module);
+		task.setTaskName(taskName);
+		task.setAssignedTo(assignedTo);
+		task.setStartDate(startDate);
+		task.setEndDate(endDate);
+		task.setStatus(status);
+		task.setRemarks(remarks);
+		task.setPriority(priority);
 
-        // Update the task fields
-        task.setTaskName(taskName);
-        task.setStartDate(startDate);
-        
-        
-        
+		return taskService.saveTask(task);
+	}
+
+	@PutMapping("/updateTask/{taskId}")
+	public Task updateTask(@PathVariable Long taskId, @RequestParam String taskName,
+			@RequestParam List<String> assignedTo, @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date startDate,
+			@RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date endDate, @RequestParam String status,
+			@RequestParam String remarks, @RequestParam String priority) {
+		// Retrieve the task from the service
+		Task task = taskService.getTaskById(taskId);
+
+		// Update the task fields
+		task.setTaskName(taskName);
+		task.setStartDate(startDate);
+
 //        Task existingTask =taskRepository.getTaskById(taskId);
 //
 //        // If the existing project is not found, you may want to handle this scenario accordingly
@@ -94,20 +84,17 @@ private TaskRepository taskRepository;
 //
 //        // Set the updated assignedTo list
 //        task.setAssignedTo(updatedAssignedTo);
-        
-        task.setAssignedTo(assignedTo);
-        
-        
-        
-        
-        task.setEndDate(endDate);
-        task.setStatus(status);
-        task.setRemarks(remarks);
-        task.setPriority(priority);
 
-        // Save the updated task
-        return taskService.updateTask(task);
-    }
+		task.setAssignedTo(assignedTo);
+
+		task.setEndDate(endDate);
+		task.setStatus(status);
+		task.setRemarks(remarks);
+		task.setPriority(priority);
+
+		// Save the updated task
+		return taskService.updateTask(task);
+	}
 //    @GetMapping("/getTaskByModule/{moduleId}")
 //    public Task getTaskById(@PathVariable Long moduleId) {
 //    	return taskService.getTaskById(moduleId);
@@ -116,41 +103,37 @@ private TaskRepository taskRepository;
 //    public List<Task> getAllTasks() {
 //    	return taskService.getAllTasks();
 //    }
-    
-    @GetMapping("/getTaskByModule/{moduleId}")
-    public List<Task> getTasksByModule(@PathVariable Long moduleId) {
-        // Assuming taskService.getTasksByModule returns a list of tasks
-        return taskService.getTasksByModule(moduleId);
-    }
 
-    @GetMapping("/getAllTasks")
-    public List<Task> getAllTasks() {
-        return taskService.getAllTasks();
-    }
+	@GetMapping("/getTaskByModule/{moduleId}")
+	public List<Task> getTasksByModule(@PathVariable Long moduleId) {
+		// Assuming taskService.getTasksByModule returns a list of tasks
+		return taskService.getTasksByModule(moduleId);
+	}
 
-    @DeleteMapping("/deleteTask/{taskId}")
-    public void deleteTask(@PathVariable Long taskId) {
-    	taskService.deleteTask(taskId);
-    }
-   
-    
-    @PutMapping("/assign-user/{taskId}")
-    public ResponseEntity<String> assignUserToTask(
-            @PathVariable Long taskId,
-            @RequestParam String assignedTo) {
+	@GetMapping("/getAllTasks")
+	public List<Task> getAllTasks() {
+		return taskService.getAllTasks();
+	}
 
-        try {
-        	taskService.assignUserToTask(taskId, assignedTo);
-            return new ResponseEntity<>("User assigned successfully", HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>("Error assigning user: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
-    @GetMapping("/getUserTasks")
-    public List<Task> getUserTasks(@RequestParam String username) {
-        return taskService.getUserTasks(username);
-    }
-    
+	@DeleteMapping("/deleteTaskById/{taskId}")
+	public void deleteTask(@PathVariable Long taskId) {
+		taskService.deleteTask(taskId);
+	}
+
+	@PutMapping("/assign-user/{taskId}")
+	public ResponseEntity<String> assignUserToTask(@PathVariable Long taskId, @RequestParam String assignedTo) {
+
+		try {
+			taskService.assignUserToTask(taskId, assignedTo);
+			return new ResponseEntity<>("User assigned successfully", HttpStatus.OK);
+		} catch (Exception e) {
+			return new ResponseEntity<>("Error assigning user: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+
+	@GetMapping("/getUserTasks")
+	public List<Task> getUserTasks(@RequestParam String username) {
+		return taskService.getUserTasks(username);
+	}
+
 }
-
-

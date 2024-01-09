@@ -63,19 +63,29 @@ public class ModuleController {
 		Modules module = moduleService.getModuleById(moduleId);
 		Modules existingModule = moduleRepository.getModuleById(moduleId);
 
-		// If the existing project is not found, you may want to handle this scenario
-		// accordingly
+		// If the existing module is not found, you may want to handle this scenario accordingly
 
 		// Create a new list to preserve the existing assignedTo values
 		List<String> updatedAssignedTo = new ArrayList<>(existingModule.getAssignedTo());
 
-		// Append new users if provided
+		// Append new users if provided and not already assigned
 		if (assignedTo != null) {
-			updatedAssignedTo.addAll(assignedTo);
+		    for (String user : assignedTo) {
+		        if (!updatedAssignedTo.contains(user)) {
+		            updatedAssignedTo.add(user);
+		        } else {
+		            // Handle the case where the user is already assigned
+		            // You can log an error or throw an exception based on your requirements
+		            // For example:
+		            // throw new IllegalArgumentException("User " + user + " is already assigned to the module.");
+		            System.err.println("User " + user + " is already assigned to the module.");
+		        }
+		    }
 		}
 
 		// Set the updated assignedTo list
 		module.setAssignedTo(updatedAssignedTo);
+
 		// module.setAssignedTo(assignedTo);
 
 		// Update the module fields

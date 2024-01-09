@@ -1,0 +1,5 @@
+/* styles.css */
+.icon-hover:hover {
+  transform: scale(1.2); /* Increase the icon size on hover */
+  cursor: pointer; /* Change cursor to pointer on hover (optional) */
+}

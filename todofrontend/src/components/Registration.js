@@ -37,7 +37,7 @@ const RegistrationForm = () => {
     try {
       setOtpError("");
       const response = await axios.post(
-        "http://localhost:8082/api/users/verify-otp",
+        "http://13.233.111.56:8082/api/users/verify-otp",
         { username: formData.username, otp: otp }
       );
 
@@ -91,7 +91,7 @@ const RegistrationForm = () => {
   const saveUser = async () => {
     try {
       // Assuming you have an endpoint to save the user after OTP verification
-      await axios.post("http://localhost:8082/api/users/save", formDataForSave);
+      await axios.post("http://13.233.111.56:8082/api/users/save", formDataForSave);
       console.log("User saved successfully!");
     } catch (error) {
       console.error("Error saving user:", error);
@@ -118,7 +118,7 @@ const RegistrationForm = () => {
         // Check if the username already exists
         try {
           const response = await axios.get(
-            "http://localhost:8082/api/users/allUsernames"
+            "http://13.233.111.56:8082/api/users/allUsernames"
           );
   
           if (response.data.includes(value)) {
@@ -136,7 +136,7 @@ const RegistrationForm = () => {
           // Check if the employee ID already exists
           try {
             const response = await axios.get(
-              "http://localhost:8082/api/users/allEmployeeIds"
+              "http://13.233.111.56:8082/api/users/allEmployeeIds"
             );
     
             if (response.data.includes(value)) {
@@ -146,19 +146,48 @@ const RegistrationForm = () => {
             console.error("Error fetching employee IDs:", error);
           }
           break;
-      case "password":
+         case "password":
         newErrors.password =
           !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(
             value
           )
             ? "Password must be 8 characters "
             : "";
-        newErrors.confirmPassword =
-          formData.confirmPassword && value !== formData.confirmPassword
-            ? "Passwords do not match"
-            : "";
+      //   newErrors.confirmPassword =
+      //     formData.confirmPassword && value !== formData.confirmPassword
+      //       ? "Passwords do not match"
+      //       : "";
+      //   break;
+      case "password":
+        const isPasswordValid = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(value)
+        ? "Password must be 8 characters "
+               : "";
+  
+        setErrors((prevErrors) => ({
+          ...prevErrors,
+          password: isPasswordValid
+            ? ''
+            : 'Password must be 8 characters and include at least one lowercase letter, one uppercase letter, one number, and one special character (!@#$%^&*)',
+        }));
+  
+        // Display SweetAlert2 alert for password validation error after 8 characters
+        if (!isPasswordValid && value.length >=8) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Invalid Password',
+            text:
+              'Password must be 8 characters and include at least:\n' +
+              'one lowercase letter (a-z)\n' +
+              'one uppercase letter (A-Z)\n' +
+              'one number (0-9)\n' +
+              'one special character (!@#$%^&*)',
+            customClass: {
+              popup: 'max-width-100',
+            },
+          });
+          
+        }
         break;
-
       case "confirmPassword":
         newErrors.confirmPassword =
           formData.password && value !== formData.password
@@ -173,7 +202,7 @@ const RegistrationForm = () => {
           // Check if the email already exists
           try {
             const response = await axios.get(
-              "http://localhost:8082/api/users/allEmails"
+              "http://13.233.111.56:8082/api/users/allEmails"
             );
     
             if (response.data.includes(value)) {
@@ -187,7 +216,7 @@ const RegistrationForm = () => {
     
       case "mobileNumber":
         newErrors.mobileNumber = !/^[6-9]\d{9}$/.test(value)
-          ? "please enter a valid number"
+          ? "please enter a valid 10 digit number"
           : "";
         break;
       default:
@@ -225,7 +254,7 @@ const RegistrationForm = () => {
   };
   const sendOtpToSuperUser = async () => {
     try {
-      await axios.post("http://localhost:8082/api/users/send-otp", formData);
+      await axios.post("http://13.233.111.56:8082/api/users/send-otp", formData);
       // Assuming your server sends the OTP to the SuperUser's email
       console.log("OTP sent to SuperUser's email");
     } catch (error) {

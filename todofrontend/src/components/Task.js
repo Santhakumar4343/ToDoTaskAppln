@@ -25,7 +25,7 @@ const Task = () => {
 
   useEffect(() => {
     // Fetch the list of users when the component mounts
-    fetch("http://localhost:8082/api/users/userType/user")
+    fetch("http://13.233.111.56:8082/api/users/userType/user")
       .then((response) => response.json())
       .then((data) => {
         setUsers(data);
@@ -36,7 +36,7 @@ const Task = () => {
   }, []);
   useEffect(() => {
     // Fetch all projects on component mount
-    axios.get('http://localhost:8082/api/projects/getAllProjects')
+    axios.get('http://13.233.111.56:8082/api/projects/getAllProjects')
       .then(response => {
         setProjects(response.data);
       })
@@ -48,7 +48,7 @@ const Task = () => {
   useEffect(() => {
     // Fetch modules when the selected project changes
     if (selectedProject) {
-      axios.get(`http://localhost:8082/api/modules/getModuleByPId/${selectedProject}`)
+      axios.get(`http://13.233.111.56:8082/api/modules/getModuleByPId/${selectedProject}`)
         .then(response => {
           setModules(response.data);
         })
@@ -65,8 +65,8 @@ const Task = () => {
 
   const fetchTasks = () => {
     const apiUrl = selectedModule
-      ? `http://localhost:8082/api/tasks/getTaskByModule/${selectedModule}`
-      : 'http://localhost:8082/api/tasks/getAllTasks';
+      ? `http://13.233.111.56:8082/api/tasks/getTaskByModule/${selectedModule}`
+      : 'http://13.233.111.56:8082/api/tasks/getAllTasks';
 
     axios.get(apiUrl)
       .then(response => {
@@ -132,8 +132,8 @@ const Task = () => {
     formData.append('remarks', remarks);
     formData.append('assignedTo', assignedTo.join(','));
     const requestUrl = selectedTaskId
-      ? `http://localhost:8082/api/tasks/updateTask/${selectedTaskId}`
-      : `http://localhost:8082/api/tasks/saveTask/${selectedProject}/${selectedModule}`;
+      ? `http://13.233.111.56:8082/api/tasks/updateTask/${selectedTaskId}`
+      : `http://13.233.111.56:8082/api/tasks/saveTask/${selectedProject}/${selectedModule}`;
 
     const method = selectedTaskId ? 'PUT' : 'POST';
 
@@ -180,32 +180,53 @@ const Task = () => {
     )
     : [];
 
-  const handleDeleteTask = (taskId) => {
-    axios.delete(`http://localhost:8082/api/tasks/deleteTaskById/${taskId}`)
-      .then(response => {
-        console.log('Task deleted successfully');
-        Swal.fire({
-          icon: 'success',
-          title: 'Task deleted successfully',
-          text: 'Task deleted successfully!',
-          customClass: {
-            popup: 'max-width-100',
-          },
-        });
-        fetchTasks();
-      })
-      .catch(error => {
-        console.error('Error deleting task:', error);
-        Swal.fire({
-          icon: 'error',
-          title: 'Error deleting task',
-          text: 'An error occurred during deletion. Please try again.',
-          customClass: {
-            popup: 'max-width-100',
-          },
-        });
+    const handleDeleteTask = (taskId) => {
+      Swal.fire({
+        title: 'Are you sure?',
+        text: 'Once deleted, you will not be able to recover this task!',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Yes, delete it!',
+        cancelButtonText: 'Cancel',
+        customClass: {
+          popup: 'max-width-100',
+        },
+      }).then((result) => {
+        if (result.isConfirmed) {
+          // Make a DELETE request to delete the task
+          axios.delete(`http://13.233.111.56:8082/api/tasks/deleteTaskById/${taskId}`)
+            .then(response => {
+              console.log('Task deleted successfully');
+              // Close the initial confirmation dialog
+              Swal.close();
+              // Inform the user about the successful deletion
+              Swal.fire({
+                icon: 'success',
+                title: 'Task Deleted',
+                text: 'The task has been deleted successfully!',
+                customClass: {
+                  popup: 'max-width-100',
+                },
+              });
+              // Fetch the updated list of tasks after deletion
+              fetchTasks();
+            })
+            .catch(error => {
+              console.error('Error deleting task:', error);
+              Swal.fire({
+                icon: 'error',
+                title: 'Error Deleting Task',
+                text: 'An error occurred during deletion. Please try again.',
+                customClass: {
+                  popup: 'max-width-100',
+                },
+              });
+            });
+        }
       });
-  };
+    };
   const [showAssignUserModal, setShowAssignUserModal] = useState(false);
   // ... other state variables
 
@@ -237,7 +258,7 @@ const Task = () => {
 
     // Make a PUT request to your backend API to assign users to the module
     axios
-      .put(`http://localhost:8082/api/modules/assign-user/${selectedTaskId}`, formData)
+      .put(`http://13.233.111.56:8082/api/modules/assign-user/${selectedTaskId}`, formData)
       .then((response) => {
         if (response.status === 200) {
           // Show success message if the request is successful
@@ -352,7 +373,7 @@ const Task = () => {
                   <i className="bi bi-pencil fs-4 " onClick={() => handleUpdateTask(task.id)}></i>
                   {' '}
                   <i className="bi bi-trash3 fs-4 m-2 text-danger" onClick={() => handleDeleteTask(task.id)}></i>
-                  <i class="bi bi-person-plus fs-4" onClick={() => handleAssignUser(task.id)}></i>
+                  {/* <i class="bi bi-person-plus fs-4" onClick={() => handleAssignUser(task.id)}></i> */}
                 </td>
               </tr>
             ))}
@@ -479,6 +500,7 @@ const Task = () => {
                 value={assignedTo}
                 onChange={(e) => setAssignedTo(Array.from(e.target.selectedOptions, (option) => option.value))}
               >
+               <option value="">Select User</option>
                 {users.map((user) => (
                   <option key={user.id} value={user.username}>
                     {user.username}

@@ -18,7 +18,8 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 
 @Entity
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+
+ 
 public class Modules {
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

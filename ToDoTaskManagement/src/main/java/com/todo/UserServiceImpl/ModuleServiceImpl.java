@@ -1,5 +1,8 @@
 package com.todo.UserServiceImpl;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
@@ -57,24 +60,39 @@ import com.todo.entity.Project;
 	        return moduleRepository.findByAssignedTo(username);
 	    }
 		
-		 public void assignUserToModules(Long moduleId, String assignedTo) {
-		        Optional<Modules> optionalModule = moduleRepository.findById(moduleId);
+		public void assignUserToModules(Long moduleId, String assignedTo) {
+		    Optional<Modules> optionalModule = moduleRepository.findById(moduleId);
 
-		        if (optionalModule.isPresent()) {
-		            Modules module = optionalModule.get();
-		            List<String> assignedToList = module.getAssignedTo();
+		    if (optionalModule.isPresent()) {
+		        Modules module = optionalModule.get();
+		        List<String> assignedToList = module.getAssignedTo();
 
-		            // Add the user to the list if not already present
-		            if (!assignedToList.contains(assignedTo)) {
-		                assignedToList.add(assignedTo);
-		                module.setAssignedTo(assignedToList);
-		                moduleRepository.save(module);
+		        // Split the assignedTo string into individual users
+		        List<String> newUsers = Arrays.asList(assignedTo.split(","));
+
+		        // Remove any duplicates from the new users
+		        newUsers = new ArrayList<>(new HashSet<>(newUsers));
+
+		        // Check if the user is already assigned
+		        for (String newUser : newUsers) {
+		            if (!assignedToList.contains(newUser)) {
+		                assignedToList.add(newUser);
+		            } else {
+		                // Handle the case where the user is already assigned
+		                // You can log an error or throw an exception based on your requirements
+		                // For example:
+		                // throw new IllegalArgumentException("User " + newUser + " is already assigned to the module.");
+		                throw new RuntimeException("User " + newUser + " is already assigned to the module.");
 		            }
-		        } else {
-		            throw new RuntimeException("Project not found with ID: " + moduleId);
 		        }
+
+		        module.setAssignedTo(assignedToList);
+		        moduleRepository.save(module);
+		    } else {
+		        throw new RuntimeException("Module not found with ID: " + moduleId);
 		    }
-		
+		}
+
 		
 	}
 

@@ -44,13 +44,23 @@ function Projects() {
     });
   };
   //project search function
-  const filteredProjects = projects.filter(
-    (project) =>
-      project.projectName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      project.assignedTo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      project.status.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
+  // const filteredProjects = projects.filter(
+  //   (project) =>
+  //     project.projectName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  //     project.assignedTo.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  //     project.status.toLowerCase().includes(searchTerm.toLowerCase())
+  // );
+  const filteredProjects = projects.filter((project) => {
+    const projectName = project.projectName && project.projectName.toLowerCase();
+    const assignedTo = project.assignedTo && project.assignedTo.map((user) => user.toLowerCase());
+    const status = project.status && project.status.toLowerCase();
+  
+    return (
+      (projectName && projectName.includes(searchTerm.toLowerCase())) ||
+      (assignedTo && assignedTo.some((user) => user.includes(searchTerm.toLowerCase()))) ||
+      (status && status.includes(searchTerm.toLowerCase()))
+    );
+  });
   useEffect(() => {
     // Fetch the projects for the specific user when the component mounts
     fetchUserProjects(username);
@@ -61,7 +71,7 @@ function Projects() {
 
     // Make a GET request to fetch user-specific projects
     fetch(
-      `http://localhost:8082/api/projects/getUserProjects?username=${username}`
+      `http://13.233.111.56:8082/api/projects/getUserProjects?username=${username}`
     )
       .then((response) => response.json())
       .then((data) => {
@@ -84,8 +94,8 @@ function Projects() {
     });
 
     const apiUrl = selectedProject.id
-      ? `http://localhost:8082/api/projects/update/${selectedProject.id}`
-      : "http://localhost:8082/api/projects/save";
+      ? `http://13.233.111.56:8082/api/projects/update/${selectedProject.id}`
+      : "http://13.233.111.56:8082/api/projects/save";
 
     const method = selectedProject.id ? "PUT" : "POST";
 
@@ -164,7 +174,7 @@ function Projects() {
     }).then((result) => {
       if (result.isConfirmed) {
         // Make a DELETE request to delete the project
-        fetch(`http://localhost:8082/api/projects/delete/${projectId}`, {
+        fetch(`http://13.233.111.56:8082/api/projects/delete/${projectId}`, {
           method: "DELETE",
         })
           .then((response) => {
@@ -257,7 +267,13 @@ function Projects() {
             {filteredProjects.map((project) => (
               <tr key={project.id}>
                 <td className="text-center">{project.projectName}</td>
-                <td className="text-center">{project.assignedTo}</td>
+                <td className="text-center">
+                  <ol>
+                    {project.assignedTo.map((user, index) => (
+                      <li key={index}>{user}</li>
+                    ))}
+                  </ol>
+                </td>
 
                 <td className="text-center">{project.status}</td>
                 <td className="text-center">

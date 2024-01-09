@@ -12,7 +12,7 @@ import {
 import Swal from "sweetalert2";
 import moment from "moment";
 import "bootstrap-icons/font/bootstrap-icons.css";
-
+import "./styles.css"
 function Projects() {
   const [showModal, setShowModal] = useState(false);
   const [projects, setProjects] = useState([]);
@@ -21,7 +21,7 @@ function Projects() {
 
   useEffect(() => {
     // Fetch the list of users when the component mounts
-    fetch("http://localhost:8082/api/users/userType/user")
+    fetch("http://13.233.111.56:8082/api/users/userType/user")
       .then((response) => response.json())
       .then((data) => {
         setUsers(data);
@@ -54,25 +54,25 @@ function Projects() {
     });
   };
 
-//   //filter Project
-//   const filteredProjects = projects.filter((project) =>
-//   project.assignedTo.some((user) =>
-//     user.toLowerCase().includes(searchTerm.toLowerCase())
-//   ) ||
-//   project.projectName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-//   project.status.toLowerCase().includes(searchTerm.toLowerCase())
-// );
-const filteredProjects = projects.filter((project) => {
-  const projectName = project.projectName && project.projectName.toLowerCase();
-  const assignedTo = project.assignedTo && project.assignedTo.map((user) => user.toLowerCase());
-  const status = project.status && project.status.toLowerCase();
+  //   //filter Project
+  //   const filteredProjects = projects.filter((project) =>
+  //   project.assignedTo.some((user) =>
+  //     user.toLowerCase().includes(searchTerm.toLowerCase())
+  //   ) ||
+  //   project.projectName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  //   project.status.toLowerCase().includes(searchTerm.toLowerCase())
+  // );
+  const filteredProjects = projects.filter((project) => {
+    const projectName = project.projectName && project.projectName.toLowerCase();
+    const assignedTo = project.assignedTo && project.assignedTo.map((user) => user.toLowerCase());
+    const status = project.status && project.status.toLowerCase();
 
-  return (
-    (projectName && projectName.includes(searchTerm.toLowerCase())) ||
-    (assignedTo && assignedTo.some((user) => user.includes(searchTerm.toLowerCase()))) ||
-    (status && status.includes(searchTerm.toLowerCase()))
-  );
-});
+    return (
+      (projectName && projectName.includes(searchTerm.toLowerCase())) ||
+      (assignedTo && assignedTo.some((user) => user.includes(searchTerm.toLowerCase()))) ||
+      (status && status.includes(searchTerm.toLowerCase()))
+    );
+  });
 
   useEffect(() => {
     // Fetch the projects when the component mounts
@@ -81,7 +81,7 @@ const filteredProjects = projects.filter((project) => {
 
   const fetchProjects = () => {
     // Make a GET request to fetch projects
-    fetch("http://localhost:8082/api/projects/getAllProjects")
+    fetch("http://13.233.111.56:8082/api/projects/getAllProjects")
       .then((response) => response.json())
       .then((data) => {
         // Set the fetched projects to the state
@@ -105,8 +105,8 @@ const filteredProjects = projects.filter((project) => {
     });
 
     const apiUrl = selectedProject.id
-      ? `http://localhost:8082/api/projects/update/${selectedProject.id}`
-      : "http://localhost:8082/api/projects/save";
+      ? `http://13.233.111.56:8082/api/projects/update/${selectedProject.id}`
+      : "http://13.233.111.56:8082/api/projects/save";
 
     const method = selectedProject.id ? "PUT" : "POST";
 
@@ -183,7 +183,7 @@ const filteredProjects = projects.filter((project) => {
     }).then((result) => {
       if (result.isConfirmed) {
         // Make a DELETE request to delete the project
-        fetch(`http://localhost:8082/api/projects/delete/${projectId}`, {
+        fetch(`http://13.233.111.56:8082/api/projects/delete/${projectId}`, {
           method: "DELETE",
         })
           .then((response) => {
@@ -258,7 +258,7 @@ const filteredProjects = projects.filter((project) => {
     formData.append('assignedTo', selectedProject.assignedTo.join(',')); // Convert the array to a comma-separated string
 
     // Make a PUT request to your backend API to assign users to the project
-    fetch(`http://localhost:8082/api/projects/assign-user/${selectedProject.id}`, {
+    fetch(`http://13.233.111.56:8082/api/projects/assign-user/${selectedProject.id}`, {
       method: 'PUT',
       body: formData,
     })
@@ -305,7 +305,6 @@ const filteredProjects = projects.filter((project) => {
         handleCloseAssignUserModal();
       });
   };
-
   return (
     <div>
       <h4 className="text-center ">Projects Component</h4>
@@ -319,7 +318,6 @@ const filteredProjects = projects.filter((project) => {
         style={{ border: "1px solid black" }}
         onChange={(e) => setSearchTerm(e.target.value)}
       />
-
       {filteredProjects.length === 0 && searchTerm !== "" ? (
         <Alert variant="danger text-center" className="mb-3">
           No results found for "{searchTerm}".
@@ -340,7 +338,6 @@ const filteredProjects = projects.filter((project) => {
               <th className=" border border-dark h6">Planned Closed Date</th>
               <th className=" border border-dark h6">Comments</th>
               <th className=" border border-dark h6">Actions</th>
-
             </tr>
           </thead>
           <tbody>
@@ -354,8 +351,6 @@ const filteredProjects = projects.filter((project) => {
                     ))}
                   </ol>
                 </td>
-
-
                 <td className="text-center">{project.status}</td>
                 <td className="text-center">
                   {moment(project.startDate).format("DD-MM-YYYY")}
@@ -367,28 +362,19 @@ const filteredProjects = projects.filter((project) => {
                   {project.remarks}
                 </td>
                 <td>
-                  {/* <Button variant="primary" className='mb-1' >
-                    Update
-                  </Button>  */}
-                  <i
-                    class="bi bi-pencil fs-4"
-                    onClick={() => handleUpdateProject(project.id)}
-                  ></i>{" "}
-                  {/* <Button variant="danger" >
-                    Delete
-                  </Button> */}
-                  <i
-                    class="bi bi-trash3 fs-4 m-2 text-danger"
-                    onClick={() => handleDeleteProject(project.id)}
-                  ></i>
-                  {/* <Button
-            variant="primary"
-            onClick={() => handleAssignUser(project.id)}
-          >
-            Assign User
-          </Button> */}
-                  <i class="bi bi-person-plus fs-4" onClick={() => handleAssignUser(project.id)}></i>
-                </td>
+                <i
+                  className="bi bi-pencil fs-4 table-icon"
+                  onClick={() => handleUpdateProject(project.id)}
+                ></i>{" "}
+                <i
+                  className="bi bi-trash3 fs-4 m-2 text-danger table-icon"
+                  onClick={() => handleDeleteProject(project.id)}
+                ></i>
+                <i
+                  className="bi bi-person-plus fs-4 table-icon"
+                  onClick={() => handleAssignUser(project.id)}
+                ></i>
+              </td>
               </tr>
             ))}
           </tbody>
@@ -576,15 +562,15 @@ const filteredProjects = projects.filter((project) => {
 
       <Modal show={showAssignUserModal} onHide={handleCloseAssignUserModal}>
         <Modal.Header closeButton>
-          <Modal.Title>Assign Users to Project</Modal.Title>
+          <Modal.Title className="text-center">Assign Users to Project</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form>
             <Form.Group controlId="formAssignUser">
-              <Form.Label>Select Users</Form.Label>
+
               <Form.Control
                 as="select"
-
+                className="border border-dark"
                 onChange={(e) =>
                   setSelectedProject({
                     ...selectedProject,
@@ -595,6 +581,8 @@ const filteredProjects = projects.filter((project) => {
                   })
                 }
               >
+                {/* Include a default option for selecting users */}
+                <option value="">Select User</option>
                 {users.map((user) => (
                   <option key={user.id} value={user.username}>
                     {user.username}
@@ -613,6 +601,7 @@ const filteredProjects = projects.filter((project) => {
           </Button>
         </Modal.Footer>
       </Modal>
+
     </div>
   );
 }

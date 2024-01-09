@@ -39,7 +39,7 @@ const Modules = () => {
 
     // Make a GET request to fetch user-specific projects
     fetch(
-      `http://localhost:8082/api/modules/getUserModules?username=${username}`
+      `http://13.233.111.56:8082/api/modules/getUserModules?username=${username}`
     )
       .then((response) => response.json())
       .then((data) => {
@@ -101,8 +101,8 @@ const Modules = () => {
 //   try {
 //     // Include projectId as a query parameter
 //     const apiUrl = projectId
-//       ? `http://localhost:8082/api/modules/getModuleByPId/${projectId}`
-//       : "http://localhost:8082/api/modules/getAllModules";
+//       ? `http://13.233.111.56:8082/api/modules/getModuleByPId/${projectId}`
+//       : "http://13.233.111.56:8082/api/modules/getAllModules";
 
 //     // Make a GET request to fetch modules
 //     const response = await axios.get(apiUrl);
@@ -198,8 +198,8 @@ const Modules = () => {
 
     // Determine whether to create or update based on selectedModuleId
     const requestUrl = selectedModuleId
-      ? `http://localhost:8082/api/modules/updateModule/${selectedModuleId}`
-      : `http://localhost:8082/api/modules/saveModule/${selectedProject}`;
+      ? `http://13.233.111.56:8082/api/modules/updateModule/${selectedModuleId}`
+      : `http://13.233.111.56:8082/api/modules/saveModule/${selectedProject}`;
 
     // Use 'PUT' for updating
     const method = selectedModuleId ? "PUT" : "POST";
@@ -262,7 +262,7 @@ const Modules = () => {
     }).then((result) => {
       if (result.isConfirmed) {
         // Make a DELETE request to delete the module
-        fetch(`http://localhost:8082/api/modules/deleteModule/${moduleId}`, {
+        fetch(`http://13.233.111.56:8082/api/modules/deleteModule/${moduleId}`, {
           method: 'DELETE',
         })
           .then((response) => {
@@ -362,6 +362,7 @@ const Modules = () => {
               <tr>
               <th className="h6">Project Name</th>
                 <th className="h6">Module Name</th>
+                <th className=" border border-dark h6">Assigned To</th>
                 <th className="h6">Status</th>
                 <th className="h6">Planned Start Date</th>
                 <th className="h6">Planned Closed Date</th>
@@ -374,6 +375,13 @@ const Modules = () => {
                 <tr key={index}>
                    <td>{module.project.projectName}</td>
                   <td>{module.moduleName}</td>
+                  <td className="text-center">
+                    <ol>
+                      {module.assignedTo.map((user, index) => (
+                        <li key={index}>{user}</li>
+                      ))}
+                    </ol>
+                  </td>
                   <td>{module.status}</td>
                   <td>{moment(module.startDate).format("YYYY-MM-DD")}</td>
                   <td>{moment(module.endDate).format("YYYY-MM-DD")}</td>
