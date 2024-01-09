@@ -35,9 +35,7 @@ public class Modules {
     @ManyToOne
     @JoinColumn(name = "project_id")
     private Project project;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "module")
-    private List<Task> tasks;
-
+   
 
 	public Modules() {
 		super();
@@ -46,7 +44,7 @@ public class Modules {
 
 
 	public Modules(Long id, String moduleName, Date startDate, Date endDate, String status, String remarks,
-			String priority, List<String> assignedTo, Project project, List<Task> tasks) {
+			String priority, List<String> assignedTo, Project project) {
 		super();
 		this.id = id;
 		this.moduleName = moduleName;
@@ -57,7 +55,6 @@ public class Modules {
 		this.priority = priority;
 		this.assignedTo = assignedTo;
 		this.project = project;
-		this.tasks = tasks;
 	}
 
 
@@ -151,17 +148,7 @@ public class Modules {
 	}
 
 
-	public List<Task> getTasks() {
-		return tasks;
-	}
-
-
-	public void setTasks(List<Task> tasks) {
-		this.tasks = tasks;
-	}
-
-
-
+	
 	
 
 	

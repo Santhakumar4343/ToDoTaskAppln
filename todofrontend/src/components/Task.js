@@ -25,7 +25,7 @@ const Task = () => {
 
   useEffect(() => {
     // Fetch the list of users when the component mounts
-    fetch("http://13.233.111.56:8082/api/users/userType/user")
+    fetch("http://localhost:8082/api/users/userType/user")
       .then((response) => response.json())
       .then((data) => {
         setUsers(data);
@@ -36,7 +36,7 @@ const Task = () => {
   }, []);
   useEffect(() => {
     // Fetch all projects on component mount
-    axios.get('http://13.233.111.56:8082/api/projects/getAllProjects')
+    axios.get('http://localhost:8082/api/projects/getAllProjects')
       .then(response => {
         setProjects(response.data);
       })
@@ -48,7 +48,7 @@ const Task = () => {
   useEffect(() => {
     // Fetch modules when the selected project changes
     if (selectedProject) {
-      axios.get(`http://13.233.111.56:8082/api/modules/getModuleByPId/${selectedProject}`)
+      axios.get(`http://localhost:8082/api/modules/getModuleByPId/${selectedProject}`)
         .then(response => {
           setModules(response.data);
         })
@@ -65,8 +65,8 @@ const Task = () => {
 
   const fetchTasks = () => {
     const apiUrl = selectedModule
-      ? `http://13.233.111.56:8082/api/tasks/getTaskByModule/${selectedModule}`
-      : 'http://13.233.111.56:8082/api/tasks/getAllTasks';
+      ? `http://localhost:8082/api/tasks/getTaskByModule/${selectedModule}`
+      : 'http://localhost:8082/api/tasks/getAllTasks';
 
     axios.get(apiUrl)
       .then(response => {
@@ -132,8 +132,8 @@ const Task = () => {
     formData.append('remarks', remarks);
     formData.append('assignedTo', assignedTo.join(','));
     const requestUrl = selectedTaskId
-      ? `http://13.233.111.56:8082/api/tasks/updateTask/${selectedTaskId}`
-      : `http://13.233.111.56:8082/api/tasks/saveTask/${selectedProject}/${selectedModule}`;
+      ? `http://localhost:8082/api/tasks/updateTask/${selectedTaskId}`
+      : `http://localhost:8082/api/tasks/saveTask/${selectedProject}/${selectedModule}`;
 
     const method = selectedTaskId ? 'PUT' : 'POST';
 
@@ -181,7 +181,7 @@ const Task = () => {
     : [];
 
   const handleDeleteTask = (taskId) => {
-    axios.delete(`http://13.233.111.56:8082/api/tasks/deleteTaskById/${taskId}`)
+    axios.delete(`http://localhost:8082/api/tasks/deleteTaskById/${taskId}`)
       .then(response => {
         console.log('Task deleted successfully');
         Swal.fire({
@@ -237,7 +237,7 @@ const Task = () => {
 
     // Make a PUT request to your backend API to assign users to the module
     axios
-      .put(`http://13.233.111.56:8082/api/modules/assign-user/${selectedTaskId}`, formData)
+      .put(`http://localhost:8082/api/modules/assign-user/${selectedTaskId}`, formData)
       .then((response) => {
         if (response.status === 200) {
           // Show success message if the request is successful

@@ -61,7 +61,7 @@ function Projects() {
 
     // Make a GET request to fetch user-specific projects
     fetch(
-      `http://13.233.111.56:8082/api/projects/getUserProjects?username=${username}`
+      `http://localhost:8082/api/projects/getUserProjects?username=${username}`
     )
       .then((response) => response.json())
       .then((data) => {
@@ -84,8 +84,8 @@ function Projects() {
     });
 
     const apiUrl = selectedProject.id
-      ? `http://13.233.111.56:8082/api/projects/update/${selectedProject.id}`
-      : "http://13.233.111.56:8082/api/projects/save";
+      ? `http://localhost:8082/api/projects/update/${selectedProject.id}`
+      : "http://localhost:8082/api/projects/save";
 
     const method = selectedProject.id ? "PUT" : "POST";
 
@@ -164,7 +164,7 @@ function Projects() {
     }).then((result) => {
       if (result.isConfirmed) {
         // Make a DELETE request to delete the project
-        fetch(`http://13.233.111.56:8082/api/projects/delete/${projectId}`, {
+        fetch(`http://localhost:8082/api/projects/delete/${projectId}`, {
           method: "DELETE",
         })
           .then((response) => {

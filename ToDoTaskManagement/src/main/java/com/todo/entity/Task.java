@@ -29,6 +29,9 @@ public class Task {
     @ManyToOne
     @JoinColumn(name = "module_id")
     private Modules module;
+    @ManyToOne
+    @JoinColumn(name = "project_id")
+    private Project project;
 
 	public Task() {
 		super();
@@ -36,7 +39,7 @@ public class Task {
 	}
 
 	public Task(Long id, String taskName, Date startDate, Date endDate, String status, String priority, String remarks,
-			List<String> assignedTo, Modules module) {
+			List<String> assignedTo, Modules module, Project project) {
 		super();
 		this.id = id;
 		this.taskName = taskName;
@@ -47,6 +50,7 @@ public class Task {
 		this.remarks = remarks;
 		this.assignedTo = assignedTo;
 		this.module = module;
+		this.project = project;
 	}
 
 	public Long getId() {
@@ -119,6 +123,14 @@ public class Task {
 
 	public void setModule(Modules module) {
 		this.module = module;
+	}
+
+	public Project getProject() {
+		return project;
+	}
+
+	public void setProject(Project project) {
+		this.project = project;
 	}
 
 	
