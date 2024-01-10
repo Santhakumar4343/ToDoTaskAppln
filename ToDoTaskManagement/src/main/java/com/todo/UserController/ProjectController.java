@@ -27,101 +27,98 @@ import jakarta.persistence.EntityNotFoundException;
 @RequestMapping("/api/projects")
 public class ProjectController {
 
-    @Autowired
-    private ProjectServiceImpl projectService;
-    @Autowired
-    private ProjectRepository projectRepository;
+	@Autowired
+	private ProjectServiceImpl projectService;
+	@Autowired
+	private ProjectRepository projectRepository;
 
-    
-    @PostMapping("/save")
-    public Project saveProject(
-            @RequestParam String projectName,
-            @RequestParam  List<String> assignedTo,
-            
-            @RequestParam String status,
-            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date startDate,
-            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date closedDate,
-	
-            @RequestParam String remarks) {
+	@PostMapping("/save")
+	public Project saveProject(@RequestParam String projectName, @RequestParam List<String> assignedTo,
 
-        Project project = new Project();
-        project.setProjectName(projectName);
-        project.setAssignedTo(assignedTo);
-       
-        project.setStatus(status);
-        project.setStartDate(startDate);
-        project.setClosedDate(closedDate);
-        project.setRemarks(remarks);
+			@RequestParam String status, @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date startDate,
+			@RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date closedDate,
 
-        return projectService.saveProject(project);
-    }
+			@RequestParam String remarks, @RequestParam String priority) {
 
-    @PutMapping("/update/{projectId}")
-    public Project updateProject(
-    		@PathVariable Long projectId,
-            @RequestParam(required = false) String projectName,
-            @RequestParam(required = false)  List<String> assignedTo,
-           
-            @RequestParam(required = false) String status,
-            @RequestParam (required = false)@DateTimeFormat(pattern = "yyyy-MM-dd") Date startDate,
-            @RequestParam (required = false)@DateTimeFormat(pattern = "yyyy-MM-dd") Date closedDate,
-            @RequestParam(required = false) String remarks) {
+		Project project = new Project();
+		project.setProjectName(projectName);
+		project.setAssignedTo(assignedTo);
 
-        Project updatedProject = new Project();
-        updatedProject.setId(projectId);
-        updatedProject.setProjectName(projectName);
-       // updatedProject.setAssignedTo(assignedTo);
-     // Retrieve the current project
-        Project existingProject = projectRepository.getProjectById(projectId);
+		project.setStatus(status);
+		project.setStartDate(startDate);
+		project.setClosedDate(closedDate);
+		project.setRemarks(remarks);
+		project.setPriority(priority);
+		return projectService.saveProject(project);
+	}
 
-        // If the existing project is not found, you may want to handle this scenario accordingly
+	@PutMapping("/update/{projectId}")
+	public Project updateProject(@PathVariable Long projectId, @RequestParam(required = false) String projectName,
+			@RequestParam(required = false) List<String> assignedTo,
 
-        // Create a new list to preserve the existing assignedTo values
-        List<String> updatedAssignedTo = new ArrayList<>(existingProject.getAssignedTo());
+			@RequestParam(required = false) String status,
+			@RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date startDate,
+			@RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date closedDate,
+			@RequestParam(required = false) String remarks, @RequestParam String priority) {
 
-        // Append new users if provided
-        if (assignedTo != null) {
-            updatedAssignedTo.addAll(assignedTo);
-        }
+		Project updatedProject = new Project();
+		updatedProject.setId(projectId);
+		updatedProject.setProjectName(projectName);
+		// updatedProject.setAssignedTo(assignedTo);
+		// Retrieve the current project
+		Project existingProject = projectRepository.getProjectById(projectId);
 
-        // Set the updated assignedTo list
-        updatedProject.setAssignedTo(updatedAssignedTo);
-       
-        updatedProject.setStatus(status);
-        updatedProject.setStartDate(startDate);
-        updatedProject.setClosedDate(closedDate);
-        updatedProject.setRemarks(remarks);
+		// If the existing project is not found, you may want to handle this scenario
+		// accordingly
 
-        return projectService.updateProject(projectId, updatedProject);
-    }
-    @DeleteMapping("/delete/{projectId}")
-    public void deleteProject(@PathVariable Long projectId) {
-        projectService.deleteProject(projectId);
-    }
+		// Create a new list to preserve the existing assignedTo values
+		List<String> updatedAssignedTo = new ArrayList<>(existingProject.getAssignedTo());
 
-    @GetMapping("/get/{projectId}")
-    public Project getProject(@PathVariable Long projectId) {
-        return projectService.getProject(projectId);
-    }
-    @GetMapping("/getAllProjects")
-    public List<Project> getAllProjects() {
-        return projectService.getAllProjects();
-    }
-    @GetMapping("/getUserProjects")
-    public List<Project> getUserProjects(@RequestParam String username) {
-        return projectService.getUserProjects(username);
-    }
-    @PutMapping("/assign-user/{projectId}")
-    public ResponseEntity<String> assignUserToProject(
-            @PathVariable Long projectId,
-            @RequestParam String assignedTo) {
+		// Append new users if provided
+		if (assignedTo != null) {
+			updatedAssignedTo.addAll(assignedTo);
+		}
 
-        try {
-            projectService.assignUserToProject(projectId, assignedTo);
-            return new ResponseEntity<>("User assigned successfully", HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>("Error assigning user: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
+		// Set the updated assignedTo list
+		updatedProject.setAssignedTo(updatedAssignedTo);
+
+		updatedProject.setStatus(status);
+		updatedProject.setStartDate(startDate);
+		updatedProject.setPriority(priority);
+		updatedProject.setClosedDate(closedDate);
+		updatedProject.setRemarks(remarks);
+		
+		return projectService.updateProject(projectId, updatedProject);
+	}
+
+	@DeleteMapping("/delete/{projectId}")
+	public void deleteProject(@PathVariable Long projectId) {
+		projectService.deleteProject(projectId);
+	}
+
+	@GetMapping("/get/{projectId}")
+	public Project getProject(@PathVariable Long projectId) {
+		return projectService.getProject(projectId);
+	}
+
+	@GetMapping("/getAllProjects")
+	public List<Project> getAllProjects() {
+		return projectService.getAllProjects();
+	}
+
+	@GetMapping("/getUserProjects")
+	public List<Project> getUserProjects(@RequestParam String username) {
+		return projectService.getUserProjects(username);
+	}
+
+	@PutMapping("/assign-user/{projectId}")
+	public ResponseEntity<String> assignUserToProject(@PathVariable Long projectId, @RequestParam String assignedTo) {
+
+		try {
+			projectService.assignUserToProject(projectId, assignedTo);
+			return new ResponseEntity<>("User assigned successfully", HttpStatus.OK);
+		} catch (Exception e) {
+			return new ResponseEntity<>("Error assigning user: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
 }
-

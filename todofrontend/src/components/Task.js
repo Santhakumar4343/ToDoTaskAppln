@@ -25,7 +25,7 @@ const Task = () => {
 
   useEffect(() => {
     // Fetch the list of users when the component mounts
-    fetch("http://localhost:8082/api/users/userType/user")
+    fetch("http://13.233.111.56:8082/api/users/userType/user")
       .then((response) => response.json())
       .then((data) => {
         setUsers(data);
@@ -36,7 +36,7 @@ const Task = () => {
   }, []);
   useEffect(() => {
     // Fetch all projects on component mount
-    axios.get('http://localhost:8082/api/projects/getAllProjects')
+    axios.get('http://13.233.111.56:8082/api/projects/getAllProjects')
       .then(response => {
         setProjects(response.data);
       })
@@ -48,7 +48,7 @@ const Task = () => {
   useEffect(() => {
     // Fetch modules when the selected project changes
     if (selectedProject) {
-      axios.get(`http://localhost:8082/api/modules/getModuleByPId/${selectedProject}`)
+      axios.get(`http://13.233.111.56:8082/api/modules/getModuleByPId/${selectedProject}`)
         .then(response => {
           setModules(response.data);
         })
@@ -65,8 +65,8 @@ const Task = () => {
 
   const fetchTasks = () => {
     const apiUrl = selectedModule
-      ? `http://localhost:8082/api/tasks/getTaskByModule/${selectedModule}`
-      : 'http://localhost:8082/api/tasks/getAllTasks';
+      ? `http://13.233.111.56:8082/api/tasks/getTaskByModule/${selectedModule}`
+      : 'http://13.233.111.56:8082/api/tasks/getAllTasks';
 
     axios.get(apiUrl)
       .then(response => {
@@ -114,11 +114,11 @@ const Task = () => {
     setStartDate(moment(selectedTask.startDate).format('YYYY-MM-DD'));
     setEndDate(moment(selectedTask.endDate).format('YYYY-MM-DD'));
     setStatus(selectedTask.status);
-    setPriority(selectedTask.priority);
+    setPriority(selectedTask.priority); 
     setRemarks(selectedTask.remarks);
     setSelectedTaskId(taskId);
     // Fetch modules for the selected project
-    axios.get(`http://localhost:8082/api/modules/getModuleByPId/${selectedTask.module.project.id}`)
+    axios.get(`http://13.233.111.56:8082/api/modules/getModuleByPId/${selectedTask.module.project.id}`)
       .then(response => {
         setModules(response.data);
 
@@ -146,8 +146,8 @@ const Task = () => {
     formData.append('remarks', remarks);
     formData.append('assignedTo', assignedTo.join(','));
     const requestUrl = selectedTaskId
-      ? `http://localhost:8082/api/tasks/updateTask/${selectedTaskId}`
-      : `http://localhost:8082/api/tasks/saveTask/${selectedProject}/${selectedModule}`;
+      ? `http://13.233.111.56:8082/api/tasks/updateTask/${selectedTaskId}`
+      : `http://13.233.111.56:8082/api/tasks/saveTask/${selectedProject}/${selectedModule}`;
 
     const method = selectedTaskId ? 'PUT' : 'POST';
 
@@ -210,7 +210,7 @@ const Task = () => {
     }).then((result) => {
       if (result.isConfirmed) {
         // Make a DELETE request to delete the task
-        axios.delete(`http://localhost:8082/api/tasks/deleteTaskById/${taskId}`)
+        axios.delete(`http://13.233.111.56:8082/api/tasks/deleteTaskById/${taskId}`)
           .then(response => {
             console.log('Task deleted successfully');
             // Close the initial confirmation dialog
@@ -272,7 +272,7 @@ const Task = () => {
 
     // Make a PUT request to your backend API to assign users to the module
     axios
-      .put(`http://localhost:8082/api/modules/assign-user/${selectedTaskId}`, formData)
+      .put(`http://13.233.111.56:8082/api/modules/assign-user/${selectedTaskId}`, formData)
       .then((response) => {
         if (response.status === 200) {
           // Show success message if the request is successful
@@ -322,6 +322,37 @@ const Task = () => {
   const filteredUsers = users.filter(user => {
     return modules.find(module => module.id === parseInt(selectedModule, 10))?.assignedTo.includes(user.username);
   });
+
+
+  //validation for creating task
+  const [taskNameError, setTaskNameError] = useState("");
+  const [assignedToError, setAssignedToError] = useState("");
+
+  const validateForm = () => {
+    let isValid = true;
+
+    if (!taskName) {
+      setTaskNameError("Task Name is required");
+      isValid = false;
+    } else {
+      setTaskNameError("");
+    }
+
+    if (assignedTo.length === 0) {
+      setAssignedToError("Assigned To is required");
+      isValid = false;
+    } else {
+      setAssignedToError("");
+    }
+
+    return isValid;
+  };
+
+  const handleSave = () => {
+    if (validateForm()) {
+      handleSaveTask();
+    }
+  };
   return (
     <div>
       <h4 className='text-center '>Tasks Component </h4>
@@ -361,9 +392,10 @@ const Task = () => {
               <th className='h6'>Task Name</th>
               <th className=" border border-dark h6">Assigned To</th>
               <th className='h6'>Status</th>
+              <th className='h6'>Priority</th>
               <th className='h6'>Planned Start Date</th>
               <th className='h6'>Planned Closed Date</th>
-              <th className='h6'>Priority</th>
+             
               <th className='h6'>Comments</th>
               <th className='h6'>Actions</th>
             </tr>
@@ -383,9 +415,9 @@ const Task = () => {
                 </td>
 
                 <td>{task.status}</td>
+                <td>{task.priority}</td>
                 <td>{moment(task.startDate).format('YYYY-MM-DD')}</td>
                 <td>{moment(task.endDate).format('YYYY-MM-DD')}</td>
-                <td>{task.priority}</td>
                 <td>{task.remarks}</td>
                 <td>
                   <i className="bi bi-pencil fs-4 " onClick={() => handleUpdateTask(task.id)}></i>
@@ -413,6 +445,7 @@ const Task = () => {
                   value={taskName}
                   onChange={(e) => setTaskName(e.target.value)}
                 />
+                  <Form.Text className="text-danger">{taskNameError}</Form.Text>
               </Form.Group></Col>
             </Row>
             <Row>
@@ -424,9 +457,7 @@ const Task = () => {
                     value={assignedTo}
                     className="border border-dark mb-3"
                     onChange={(e) => setAssignedTo(Array.from(e.target.selectedOptions, (option) => option.value))}
-
                   >
-
                     <option value="">Select Assigned To</option>
                     {filteredUsers.map((user) => (
                       <option key={user.id} value={user.username}>
@@ -434,8 +465,8 @@ const Task = () => {
                       </option>
                     ))}
                   </Form.Control>
+                  <Form.Text className="text-danger">{assignedToError}</Form.Text>
                 </Form.Group>
-
               </Col>
             </Row>
             <Row>
@@ -461,26 +492,45 @@ const Task = () => {
               </Form.Group></Col>
             </Row>
             <Row>
-              <Col md={4}> <Form.Label>Status</Form.Label></Col>
-              <Col md={8}><Form.Group controlId="formStatus">
-                <Form.Control
-                  type="text"
-                  className='border border-black mb-3'
-                  value={status}
-                  onChange={(e) => setStatus(e.target.value)}
-                />
-              </Form.Group></Col>
+              <Col md={4}>
+                <Form.Label>Status</Form.Label>
+              </Col>
+              <Col md={8}>
+                <Form.Group controlId="formStatus">
+                  <Form.Select
+                    className="mb-3 border border-dark"
+                    value={status}
+                    onChange={(e) => setStatus(e.target.value)}
+                  >
+                    <option value="">Select Status</option>
+                    <option value="Open">Open</option>
+                    <option value="In Progress">In Progress</option>
+                    <option value="Fix/Fixed">Fix/Fixed</option>
+                    <option value="Reopened">Reopened</option>
+                    <option value="Closed">Closed</option>
+                  </Form.Select>
+                </Form.Group>
+              </Col>
             </Row>
             <Row>
-              <Col md={4}><Form.Label>Priority</Form.Label></Col>
-              <Col md={8}><Form.Group controlId="formPriority">
-                <Form.Control
-                  type="text"
-                  className='border border-black mb-3'
-                  value={priority}
-                  onChange={(e) => setPriority(e.target.value)}
-                />
-              </Form.Group></Col>
+              <Col md={4}>
+                <Form.Label>Priority</Form.Label>
+              </Col>
+              <Col md={8}>
+                <Form.Group controlId="formPriority">
+                  <Form.Select
+                    className="border border-black mb-3"
+                    value={priority}
+                    onChange={(e) => setPriority(e.target.value)}
+                  >
+                    <option value="">Select Priority</option>
+                    <option value="Critical">Critical</option>
+                    <option value="High">High</option>
+                    <option value="Medium">Medium</option>
+                    <option value="Low">Low</option>
+                  </Form.Select>
+                </Form.Group>
+              </Col>
             </Row>
             <Row>
               <Col md={4}><Form.Label>Remarks</Form.Label></Col>

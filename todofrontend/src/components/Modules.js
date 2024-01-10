@@ -17,12 +17,12 @@ const Modules = () => {
   const [selectedModuleId, setSelectedModuleId] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [assignedTo, setAssignedTo] = useState([]);
-
+  const [priority, setPriority] = useState('');
   const [users, setUsers] = useState([]);
 
   useEffect(() => {
     // Fetch the list of users when the component mounts
-    fetch("http://localhost:8082/api/users/userType/user")
+    fetch("http://13.233.111.56:8082/api/users/userType/user")
       .then((response) => response.json())
       .then((data) => {
         setUsers(data);
@@ -33,7 +33,7 @@ const Modules = () => {
   }, []);
   useEffect(() => {
     // Fetch all projects on component mount
-    axios.get('http://localhost:8082/api/projects/getAllProjects')
+    axios.get('http://13.233.111.56:8082/api/projects/getAllProjects')
       .then(response => {
         setProjects(response.data);
       })
@@ -49,7 +49,7 @@ const Modules = () => {
 
   // const fetchModules = () => {
   //   // Make a GET request to fetch modules
-  //   axios.get('http://localhost:8082/api/modules/getAllModules')
+  //   axios.get('http://13.233.111.56:8082/api/modules/getAllModules')
   //     .then((response) => {
   //       // Set the fetched modules to the state
   //       setModules(response.data);
@@ -68,8 +68,8 @@ const Modules = () => {
   const fetchModules = () => {
     // Include selectedProject as a query parameter
     const apiUrl = selectedProject
-      ? `http://localhost:8082/api/modules/getModuleByPId/${selectedProject}`
-      : 'http://localhost:8082/api/modules/getAllModules';
+      ? `http://13.233.111.56:8082/api/modules/getModuleByPId/${selectedProject}`
+      : 'http://13.233.111.56:8082/api/modules/getAllModules';
 
     // Make a GET request to fetch modules
     axios.get(apiUrl)
@@ -101,6 +101,7 @@ const Modules = () => {
     setEndDate('');
     setStatus('');
     setRemarks('');
+    setPriority('')
     setSelectedModuleId(null);
     // Make sure a project is selected before creating a module
     if (!selectedProject) {
@@ -123,7 +124,7 @@ const Modules = () => {
     setRemarks(selectedModule.remarks);
     setSelectedModuleId(moduleId);
     setAssignedTo(selectedModule.assignedTo);
-
+    setPriority(selectedModule.priority);
     // Set the selected project based on the module's project
     setSelectedProject(selectedModule.project.id);
 
@@ -141,11 +142,12 @@ const Modules = () => {
     formData.append('endDate', endDate);
     formData.append('status', status);
     formData.append('remarks', remarks);
+    formData.append('priority', priority);
     formData.append('assignedTo', assignedTo.join(','));
     // Determine whether to create or update based on selectedModuleId
     const requestUrl = selectedModuleId
-      ? `http://localhost:8082/api/modules/updateModule/${selectedModuleId}`
-      : `http://localhost:8082/api/modules/saveModule/${selectedProject}`;
+      ? `http://13.233.111.56:8082/api/modules/updateModule/${selectedModuleId}`
+      : `http://13.233.111.56:8082/api/modules/saveModule/${selectedProject}`;
 
     // Use 'PUT' for updating
     const method = selectedModuleId ? 'PUT' : 'POST';
@@ -202,7 +204,7 @@ const Modules = () => {
     }).then((result) => {
       if (result.isConfirmed) {
         // Make a DELETE request to delete the module
-        fetch(`http://localhost:8082/api/modules/deleteModule/${moduleId}`, {
+        fetch(`http://13.233.111.56:8082/api/modules/deleteModule/${moduleId}`, {
           method: 'DELETE',
         })
           .then((response) => {
@@ -281,7 +283,7 @@ const Modules = () => {
 
     // Make a PUT request to your backend API to assign users to the module
     axios
-      .put(`http://localhost:8082/api/modules/assign-user/${selectedModuleId}`, formData)
+      .put(`http://13.233.111.56:8082/api/modules/assign-user/${selectedModuleId}`, formData)
       .then((response) => {
         if (response.status === 200) {
           // Show success message if the request is successful
@@ -332,6 +334,36 @@ const Modules = () => {
     return projects.find(project => project.id === parseInt(selectedProject, 10))?.assignedTo.includes(user.username);
   });
 
+  //validations for module creation 
+  const [moduleNameError, setModuleNameError] = useState("");
+  const [assignedToError, setAssignedToError] = useState("");
+
+  const validateForm = () => {
+    let isValid = true;
+
+    if (!moduleName) {
+      setModuleNameError("Module Name is required");
+      isValid = false;
+    } else {
+      setModuleNameError("");
+    }
+
+    if (assignedTo.length === 0) {
+      setAssignedToError("Assigned To is required");
+      isValid = false;
+    } else {
+      setAssignedToError("");
+    }
+
+    return isValid;
+  };
+
+  const handleSave = () => {
+    if (validateForm()) {
+      handleSaveModule();
+    }
+  };
+
   return (
     <div>
       <h4 className='text-center '>Modules Component </h4>
@@ -361,6 +393,7 @@ const Modules = () => {
                 <th className='h6'>Module Name</th>
                 <th className=" border border-dark h6">Assigned To</th>
                 <th className='h6'>Status</th>
+                <th className='h6'>Priority</th>
                 <th className='h6'>Planned Start Date</th>
                 <th className='h6'>Planned Closed Date</th>
                 <th className='h6'>Comments</th>
@@ -381,6 +414,7 @@ const Modules = () => {
                   </td>
 
                   <td>{module.status}</td>
+                  <td>{module.priority}</td>
                   <td>{moment(module.startDate).format('YYYY-MM-DD')}</td>
                   <td>{moment(module.endDate).format('YYYY-MM-DD')}</td>
 
@@ -441,6 +475,7 @@ const Modules = () => {
                     value={moduleName}
                     onChange={(e) => setModuleName(e.target.value)}
                   />
+                   <Form.Text className="text-danger">{moduleNameError}</Form.Text>
                 </Form.Group>
               </Col>
             </Row>
@@ -462,6 +497,7 @@ const Modules = () => {
 
                     ))}
                   </Form.Control>
+                  <Form.Text className="text-danger">{assignedToError}</Form.Text>
                 </Form.Group>
 
               </Col>
@@ -493,18 +529,47 @@ const Modules = () => {
             </Row>
 
             <Row>
-              <Col md={4}><Form.Label>Status</Form.Label></Col>
-              <Col md={8}><Form.Group controlId="formStatus">
-
-                <Form.Control
-                  type="text"
-                  className=" mb-3 border border-dark"
-                  value={status}
-                  onChange={(e) => setStatus(e.target.value)}
-                />
-              </Form.Group></Col>
+              <Col md={4}>
+                <Form.Label>Status</Form.Label>
+              </Col>
+              <Col md={8}>
+                <Form.Group controlId="formStatus">
+                  <Form.Select
+                    className="mb-3 border border-dark"
+                    value={status}
+                    onChange={(e) => setStatus(e.target.value)}
+                  >
+                    <option value="">Select Status</option>
+                    <option value="Open">Open</option>
+                    <option value="In Progress">In Progress</option>
+                    <option value="Fix/Fixed">Fix/Fixed</option>
+                    <option value="Reopened">Reopened</option>
+                    <option value="Closed">Closed</option>
+                  </Form.Select>
+                </Form.Group>
+              </Col>
             </Row>
 
+            <Row>
+              <Col md={4}>
+                <Form.Label>Priority</Form.Label>
+              </Col>
+              <Col md={8}>
+                <Form.Group controlId="formPriority">
+                  <Form.Select
+                    className="border border-black mb-3"
+                    value={priority}
+                    onChange={(e) => setPriority(e.target.value)}
+                  >
+                    <option value="">Select Priority</option>
+                    <option value="Critical">Critical</option>
+                    <option value="High">High</option>
+                    <option value="Medium">Medium</option>
+                    <option value="Low">Low</option>
+                  </Form.Select>
+                </Form.Group>
+              </Col>
+            </Row>
             <Row>
               <Col md={4}><Form.Label>Remarks</Form.Label></Col>
               <Col md={8}><Form.Group controlId="formRemarks">
@@ -524,7 +589,7 @@ const Modules = () => {
           <Button variant="secondary" onClick={() => setShowModal(false)}>
             Close
           </Button>
-          <Button variant="primary" onClick={handleSaveModule}>
+          <Button variant="primary" onClick={handleSave}>
             Save Module
           </Button>
         </Modal.Footer>

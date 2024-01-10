@@ -70,22 +70,22 @@ public class TaskController {
 		task.setTaskName(taskName);
 		task.setStartDate(startDate);
 
-//        Task existingTask =taskRepository.getTaskById(taskId);
-//
-//        // If the existing project is not found, you may want to handle this scenario accordingly
-//
-//        // Create a new list to preserve the existing assignedTo values
-//        List<String> updatedAssignedTo = new ArrayList<>(existingTask.getAssignedTo());
-//
-//        // Append new users if provided
-//        if (assignedTo != null) {
-//            updatedAssignedTo.addAll(assignedTo);
-//        }
-//
-//        // Set the updated assignedTo list
-//        task.setAssignedTo(updatedAssignedTo);
+        Task existingTask =taskRepository.getTaskById(taskId);
 
-		task.setAssignedTo(assignedTo);
+        // If the existing project is not found, you may want to handle this scenario accordingly
+
+        // Create a new list to preserve the existing assignedTo values
+        List<String> updatedAssignedTo = new ArrayList<>(existingTask.getAssignedTo());
+
+        // Append new users if provided
+        if (assignedTo != null) {
+            updatedAssignedTo.addAll(assignedTo);
+        }
+
+        // Set the updated assignedTo list
+        task.setAssignedTo(updatedAssignedTo);
+
+		//task.setAssignedTo(assignedTo);
 
 		task.setEndDate(endDate);
 		task.setStatus(status);

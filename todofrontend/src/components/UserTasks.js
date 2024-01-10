@@ -39,7 +39,7 @@ const Task = () => {
 
   useEffect(() => {
     // Fetch the list of users when the component mounts
-    fetch("http://localhost:8082/api/users/userType/user")
+    fetch("http://13.233.111.56:8082/api/users/userType/user")
       .then((response) => response.json())
       .then((data) => {
         setUsers(data);
@@ -58,7 +58,7 @@ const Task = () => {
 
   //   // Make a GET request to fetch user-specific projects
   //   fetch(
-  //     `http://localhost:8082/api/projects/getUserProjects?username=${username}`
+  //     `http://13.233.111.56:8082/api/projects/getUserProjects?username=${username}`
   //   )
   //     .then((response) => response.json())
   //     .then((data) => {
@@ -90,7 +90,7 @@ const Task = () => {
 
     // Make a GET request to fetch user-specific projects
     fetch(
-      `http://localhost:8082/api/tasks/getUserTasks?username=${username}`
+      `http://13.233.111.56:8082/api/tasks/getUserTasks?username=${username}`
     )
       .then((response) => response.json())
       .then((data) => {
@@ -148,8 +148,8 @@ const Task = () => {
   //   try {
   //     // Include projectId as a query parameter
   //     const apiUrl = projectId
-  //       ? `http://localhost:8082/api/modules/getModuleByPId/${projectId}`
-  //       : "http://localhost:8082/api/modules/getAllModules";
+  //       ? `http://13.233.111.56:8082/api/modules/getModuleByPId/${projectId}`
+  //       : "http://13.233.111.56:8082/api/modules/getAllModules";
 
   //     // Make a GET request to fetch modules
   //     const response = await axios.get(apiUrl);
@@ -196,8 +196,8 @@ const Task = () => {
 
   // const fetchTasks = (moduleId) => {
   //   const apiUrl = moduleId
-  //     ? `http://localhost:8082/api/tasks/getTaskByModule/${moduleId}`
-  //     : "http://localhost:8082/api/tasks/getAllTasks";
+  //     ? `http://13.233.111.56:8082/api/tasks/getTaskByModule/${moduleId}`
+  //     : "http://13.233.111.56:8082/api/tasks/getAllTasks";
 
   //   axios
   //     .get(apiUrl)
@@ -263,9 +263,10 @@ const Task = () => {
     formData.append("priority", priority);
     formData.append("remarks", remarks);
     formData.append('assignedTo', assignedTo.join(','));
+   
     const requestUrl = selectedTaskId
-      ? `http://localhost:8082/api/tasks/updateTask/${selectedTaskId}`
-      : `http://localhost:8082/api/tasks/saveTask/${selectedProject}/${selectedModule}`;
+      ? `http://13.233.111.56:8082/api/tasks/updateTask/${selectedTaskId}`
+      : `http://13.233.111.56:8082/api/tasks/saveTask/${selectedProject}/${selectedModule}`;
 
     const method = selectedTaskId ? "PUT" : "POST";
 
@@ -291,8 +292,9 @@ const Task = () => {
             popup: "max-width-100",
           },
         });
+        fetchUserTasks(username);
         setShowModal(false);
-        fetchUserTasks();
+       
       })
       .catch((error) => {
         console.error("Error saving task:", error);
@@ -334,7 +336,7 @@ const Task = () => {
     }).then((result) => {
       if (result.isConfirmed) {
         // Make a DELETE request to delete the task
-        axios.delete(`http://localhost:8082/api/tasks/deleteTaskById/${taskId}`)
+        axios.delete(`http://13.233.111.56:8082/api/tasks/deleteTaskById/${taskId}`)
           .then(response => {
             console.log('Task deleted successfully');
             // Close the initial confirmation dialog
@@ -349,7 +351,7 @@ const Task = () => {
               },
             });
             // Fetch the updated list of tasks after deletion
-            fetchUserTasks();
+            fetchUserTasks(username);
           })
           .catch(error => {
             console.error('Error deleting task:', error);
@@ -541,32 +543,43 @@ const Task = () => {
             </Row>
             <Row>
               <Col md={4}>
-                {" "}
                 <Form.Label>Status</Form.Label>
               </Col>
               <Col md={8}>
                 <Form.Group controlId="formStatus">
-                  <Form.Control
-                    type="text"
-                    className="border border-black mb-3"
+                  <Form.Select
+                    className="mb-3 border border-dark"
                     value={status}
                     onChange={(e) => setStatus(e.target.value)}
-                  />
+                  >
+                    <option value="">Select Status</option>
+                    <option value="Open">Open</option>
+                    <option value="In Progress">In Progress</option>
+                    <option value="Fix/Fixed">Fix/Fixed</option>
+                    <option value="Reopened">Reopened</option>
+                    <option value="Closed">Closed</option>
+                  </Form.Select>
                 </Form.Group>
               </Col>
             </Row>
+
             <Row>
               <Col md={4}>
                 <Form.Label>Priority</Form.Label>
               </Col>
               <Col md={8}>
                 <Form.Group controlId="formPriority">
-                  <Form.Control
-                    type="text"
+                  <Form.Select
                     className="border border-black mb-3"
                     value={priority}
                     onChange={(e) => setPriority(e.target.value)}
-                  />
+                  >
+                    <option value="">Select Priority</option>
+                    <option value="Critical">Critical</option>
+                    <option value="High">High</option>
+                    <option value="Medium">Medium</option>
+                    <option value="Low">Low</option>
+                  </Form.Select>
                 </Form.Group>
               </Col>
             </Row>

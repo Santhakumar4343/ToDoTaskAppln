@@ -43,7 +43,7 @@ public class ProjectServiceImpl implements ProjectService {
         existingProject.setStartDate(updatedProject.getStartDate());
         existingProject.setClosedDate(updatedProject.getClosedDate());
         existingProject.setRemarks(updatedProject.getRemarks());
-
+        existingProject.setPriority(updatedProject.getPriority());
         return projectRepository.save(existingProject);
     }
 

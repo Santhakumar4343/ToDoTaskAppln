@@ -39,7 +39,7 @@ public class ModuleController {
 	public Modules createModuleForProject(@PathVariable Long projectId, @RequestParam String moduleName,
 			@RequestParam List<String> assignedTo, @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date startDate,
 			@RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date endDate, @RequestParam String status,
-			@RequestParam String remarks) {
+			@RequestParam String remarks, @RequestParam String priority) {
 		Project project = projectService.getProject(projectId);
 		Modules module = new Modules();
 		module.setProject(project);
@@ -49,7 +49,7 @@ public class ModuleController {
 		module.setEndDate(endDate);
 		module.setStatus(status);
 		module.setRemarks(remarks);
-
+		module.setPriority(priority);
 		return moduleService.saveModule(module);
 	}
 
@@ -58,29 +58,31 @@ public class ModuleController {
 			@RequestParam(required = false) List<String> assignedTo,
 			@RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date startDate,
 			@RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date endDate, @RequestParam String status,
-			@RequestParam String remarks) {
+			@RequestParam String remarks, @RequestParam String priority) {
 		// Retrieve the module from the service
 		Modules module = moduleService.getModuleById(moduleId);
 		Modules existingModule = moduleRepository.getModuleById(moduleId);
 
-		// If the existing module is not found, you may want to handle this scenario accordingly
+		// If the existing module is not found, you may want to handle this scenario
+		// accordingly
 
 		// Create a new list to preserve the existing assignedTo values
 		List<String> updatedAssignedTo = new ArrayList<>(existingModule.getAssignedTo());
 
 		// Append new users if provided and not already assigned
 		if (assignedTo != null) {
-		    for (String user : assignedTo) {
-		        if (!updatedAssignedTo.contains(user)) {
-		            updatedAssignedTo.add(user);
-		        } else {
-		            // Handle the case where the user is already assigned
-		            // You can log an error or throw an exception based on your requirements
-		            // For example:
-		            // throw new IllegalArgumentException("User " + user + " is already assigned to the module.");
-		            System.err.println("User " + user + " is already assigned to the module.");
-		        }
-		    }
+			for (String user : assignedTo) {
+				if (!updatedAssignedTo.contains(user)) {
+					updatedAssignedTo.add(user);
+				} else {
+					// Handle the case where the user is already assigned
+					// You can log an error or throw an exception based on your requirements
+					// For example:
+					// throw new IllegalArgumentException("User " + user + " is already assigned to
+					// the module.");
+					System.err.println("User " + user + " is already assigned to the module.");
+				}
+			}
 		}
 
 		// Set the updated assignedTo list
@@ -94,6 +96,7 @@ public class ModuleController {
 		module.setRemarks(remarks);
 		module.setStartDate(startDate);
 		module.setEndDate(endDate);
+		module.setPriority(priority);
 		// Save the updated module
 		return moduleService.updateModule(module);
 	}

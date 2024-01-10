@@ -21,7 +21,7 @@ function Projects() {
 
   useEffect(() => {
     // Fetch the list of users when the component mounts
-    fetch("http://localhost:8082/api/users/userType/user")
+    fetch("http://13.233.111.56:8082/api/users/userType/user")
       .then((response) => response.json())
       .then((data) => {
         setUsers(data);
@@ -36,6 +36,7 @@ function Projects() {
     actionItem: "",
     status: "",
     startDate: "",
+    priority: "",
     closedDate: "",
     remarks: "",
   });
@@ -45,14 +46,16 @@ function Projects() {
     setShowModal(false);
     setSelectedProject({
       projectName: "",
-      assignedTo: "",
+      assignedTo: [],
       actionItem: "",
       status: "",
       startDate: "",
+      priority: "",
       closedDate: "",
       remarks: "",
     });
   };
+
 
   //   //filter Project
   //   const filteredProjects = projects.filter((project) =>
@@ -81,7 +84,7 @@ function Projects() {
 
   const fetchProjects = () => {
     // Make a GET request to fetch projects
-    fetch("http://localhost:8082/api/projects/getAllProjects")
+    fetch("http://13.233.111.56:8082/api/projects/getAllProjects")
       .then((response) => response.json())
       .then((data) => {
         // Set the fetched projects to the state
@@ -105,8 +108,8 @@ function Projects() {
     });
 
     const apiUrl = selectedProject.id
-      ? `http://localhost:8082/api/projects/update/${selectedProject.id}`
-      : "http://localhost:8082/api/projects/save";
+      ? `http://13.233.111.56:8082/api/projects/update/${selectedProject.id}`
+      : "http://13.233.111.56:8082/api/projects/save";
 
     const method = selectedProject.id ? "PUT" : "POST";
 
@@ -163,6 +166,7 @@ function Projects() {
     // Set the selected project to update
     setSelectedProject(selectedProject);
 
+
     // Show the modal for updating the project
     handleShowModal();
   };
@@ -183,7 +187,7 @@ function Projects() {
     }).then((result) => {
       if (result.isConfirmed) {
         // Make a DELETE request to delete the project
-        fetch(`http://localhost:8082/api/projects/delete/${projectId}`, {
+        fetch(`http://13.233.111.56:8082/api/projects/delete/${projectId}`, {
           method: "DELETE",
         })
           .then((response) => {
@@ -258,7 +262,7 @@ function Projects() {
     formData.append('assignedTo', selectedProject.assignedTo.join(',')); // Convert the array to a comma-separated string
 
     // Make a PUT request to your backend API to assign users to the project
-    fetch(`http://localhost:8082/api/projects/assign-user/${selectedProject.id}`, {
+    fetch(`http://13.233.111.56:8082/api/projects/assign-user/${selectedProject.id}`, {
       method: 'PUT',
       body: formData,
     })
@@ -268,7 +272,7 @@ function Projects() {
           Swal.fire({
             icon: "success",
             title: "Users Assigned",
-            text:  `Users have been assigned to the "${selectedProject.projectName}" successfully!`,
+            text: `Users have been assigned to the "${selectedProject.projectName}" successfully!`,
             customClass: {
               popup: "max-width-100",
             },
@@ -305,6 +309,43 @@ function Projects() {
         handleCloseAssignUserModal();
       });
   };
+  const [projectNameError, setProjectNameError] = useState("");
+  const [assignedToError, setAssignedToError] = useState("");
+
+  const validateForm = () => {
+    let isValid = true;
+
+    if (!selectedProject.projectName) {
+      setProjectNameError("Project Name is required");
+      isValid = false;
+    } else {
+      setProjectNameError("");
+    }
+
+    if (selectedProject.assignedTo.length === 0) {
+      setAssignedToError("Assigned Person is required");
+      isValid = false;
+    } else {
+      setAssignedToError("");
+    }
+
+    return isValid;
+  };
+
+  const handleSave = () => {
+    if (validateForm()) {
+      handleSaveProject();
+    } else {
+      Swal.fire({
+        icon: "error",
+        title: "Validation Error",
+        text: "Please fill in the required fields.",
+        customClass: {
+          popup: "max-width-100",
+        },
+      });
+    }
+  };
   return (
     <div>
       <h4 className="text-center ">Projects Component</h4>
@@ -334,6 +375,7 @@ function Projects() {
               <th className=" border border-dark h6 ">Project Name</th>
               <th className=" border border-dark h6">Assigned To</th>
               <th className=" border border-dark h6">Status</th>
+              <th className=" border border-dark h6">Priority</th>
               <th className=" border border-dark h6">Planned Start Date</th>
               <th className=" border border-dark h6">Planned Closed Date</th>
               <th className=" border border-dark h6">Comments</th>
@@ -352,6 +394,7 @@ function Projects() {
                   </ol>
                 </td>
                 <td className="text-center">{project.status}</td>
+                <td className="text-center">{project.priority}</td>
                 <td className="text-center">
                   {moment(project.startDate).format("DD-MM-YYYY")}
                 </td>
@@ -362,19 +405,19 @@ function Projects() {
                   {project.remarks}
                 </td>
                 <td>
-                <i
-                  className="bi bi-pencil fs-4 table-icon"
-                  onClick={() => handleUpdateProject(project.id)}
-                ></i>{" "}
-                <i
-                  className="bi bi-trash3 fs-4 m-2 text-danger table-icon"
-                  onClick={() => handleDeleteProject(project.id)}
-                ></i>
-                <i
-                  className="bi bi-person-plus fs-4 table-icon"
-                  onClick={() => handleAssignUser(project.id)}
-                ></i>
-              </td>
+                  <i
+                    className="bi bi-pencil fs-4 table-icon"
+                    onClick={() => handleUpdateProject(project.id)}
+                  ></i>{" "}
+                  <i
+                    className="bi bi-trash3 fs-4 m-2 text-danger table-icon"
+                    onClick={() => handleDeleteProject(project.id)}
+                  ></i>
+                  <i
+                    className="bi bi-person-plus fs-4 table-icon"
+                    onClick={() => handleAssignUser(project.id)}
+                  ></i>
+                </td>
               </tr>
             ))}
           </tbody>
@@ -397,6 +440,7 @@ function Projects() {
               <Col md={8}>
                 <Form.Group controlId="formProjectName">
                   <Form.Control
+
                     type="text"
                     value={selectedProject.projectName}
                     className="border border-dark mb-3"
@@ -407,6 +451,7 @@ function Projects() {
                       })
                     }
                   />
+                  <Form.Text className="text-danger">{projectNameError}</Form.Text>
                 </Form.Group>
               </Col>
             </Row>
@@ -416,24 +461,7 @@ function Projects() {
               </Col>
               <Col md={8}>
                 <Form.Group controlId="formAssignedTo">
-                  {/* <Form.Control
-                    as="select"
-                    value={selectedProject.assignedTo}
-                    className="border border-dark mb-3"
-                    onChange={(e) =>
-                      setSelectedProject({
-                        ...selectedProject,
-                        assignedTo: Array.from(e.target.selectedOptions, (option) => option.value),
-                      })
-                    }
-                    multiple // Enable multiple selection
-                  >
-                    {users.map((user) => (
-                      <option key={user.id} value={user.username}>
-                        {user.username}
-                      </option>
-                    ))}
-                  </Form.Control> */}
+
                   <Form.Control
                     as="select"
                     value={selectedProject.assignedTo}
@@ -445,14 +473,16 @@ function Projects() {
                       })
                     }
                   >
+                    
                     <option value="">Select Assigned To</option>
                     {users.map((user) => (
                       <option key={user.id} value={user.username}>
                         {user.username}
                       </option>
                     ))}
+                   
                   </Form.Control>
-
+                  <Form.Text className="text-danger">{assignedToError}</Form.Text>
                 </Form.Group>
               </Col>
             </Row>
@@ -464,21 +494,52 @@ function Projects() {
               </Col>
               <Col md={8}>
                 <Form.Group controlId="formStatus">
-                  <Form.Control
-                    type="text"
-                    value={selectedProject.status}
+                  <Form.Select
                     className="border border-dark mb-3"
+                    value={selectedProject.status}
                     onChange={(e) =>
                       setSelectedProject({
                         ...selectedProject,
                         status: e.target.value,
                       })
                     }
-                  />
+                  >
+                    <option value="">Select Status</option>
+                    <option value="Open">Open</option>
+                    <option value="In Progress">In Progress</option>
+                    <option value="Fix/Fixed">Fix/Fixed</option>
+                    <option value="Reopened">Reopened</option>
+                    <option value="Closed">Closed</option>
+                  </Form.Select>
                 </Form.Group>
               </Col>
             </Row>
 
+            <Row>
+              <Col md={4}>
+                <Form.Label>Priority</Form.Label>
+              </Col>
+              <Col md={8}>
+                <Form.Group controlId="formPriority">
+                  <Form.Select
+                    className="border border-black mb-3"
+                    value={selectedProject.priority}
+                    onChange={(e) =>
+                      setSelectedProject({
+                        ...selectedProject,
+                        priority: e.target.value,
+                      })
+                    }
+                  >
+                    <option value="">Select Priority</option>
+                    <option value="Critical">Critical</option>
+                    <option value="High">High</option>
+                    <option value="Medium">Medium</option>
+                    <option value="Low">Low</option>
+                  </Form.Select>
+                </Form.Group>
+              </Col>
+            </Row>
             <Row>
               <Col md={4}>
                 {" "}
@@ -553,7 +614,7 @@ function Projects() {
           <Button variant="secondary" onClick={handleCloseModal}>
             Close
           </Button>
-          <Button variant="primary" onClick={handleSaveProject}>
+          <Button variant="primary" onClick={handleSave}>
             {selectedProject.id ? "Update Project" : "Save Project"}
           </Button>
         </Modal.Footer>
