@@ -25,7 +25,7 @@ const Task = () => {
 
   useEffect(() => {
     // Fetch the list of users when the component mounts
-    fetch("http://13.233.111.56:8082/api/users/userType/user")
+    fetch("http://localhost:8082/api/users/userType/user")
       .then((response) => response.json())
       .then((data) => {
         setUsers(data);
@@ -36,7 +36,7 @@ const Task = () => {
   }, []);
   useEffect(() => {
     // Fetch all projects on component mount
-    axios.get('http://13.233.111.56:8082/api/projects/getAllProjects')
+    axios.get('http://localhost:8082/api/projects/getAllProjects')
       .then(response => {
         setProjects(response.data);
       })
@@ -48,7 +48,7 @@ const Task = () => {
   useEffect(() => {
     // Fetch modules when the selected project changes
     if (selectedProject) {
-      axios.get(`http://13.233.111.56:8082/api/modules/getModuleByPId/${selectedProject}`)
+      axios.get(`http://localhost:8082/api/modules/getModuleByPId/${selectedProject}`)
         .then(response => {
           setModules(response.data);
         })
@@ -65,8 +65,8 @@ const Task = () => {
 
   const fetchTasks = () => {
     const apiUrl = selectedModule
-      ? `http://13.233.111.56:8082/api/tasks/getTaskByModule/${selectedModule}`
-      : 'http://13.233.111.56:8082/api/tasks/getAllTasks';
+      ? `http://localhost:8082/api/tasks/getTaskByModule/${selectedModule}`
+      : 'http://localhost:8082/api/tasks/getAllTasks';
 
     axios.get(apiUrl)
       .then(response => {
@@ -117,7 +117,21 @@ const Task = () => {
     setPriority(selectedTask.priority);
     setRemarks(selectedTask.remarks);
     setSelectedTaskId(taskId);
+    // Fetch modules for the selected project
+    axios.get(`http://localhost:8082/api/modules/getModuleByPId/${selectedTask.module.project.id}`)
+      .then(response => {
+        setModules(response.data);
 
+        // Set the selected project and module based on the task's data
+        setSelectedProject(selectedTask.module.project.id);
+        setSelectedModule(selectedTask.module.id);
+
+        // Display the modal for updating the task
+        setShowModal(true);
+      })
+      .catch(error => {
+        console.error('Error fetching modules:', error);
+      });
     // Display the modal for updating the task
     setShowModal(true);
   };
@@ -132,8 +146,8 @@ const Task = () => {
     formData.append('remarks', remarks);
     formData.append('assignedTo', assignedTo.join(','));
     const requestUrl = selectedTaskId
-      ? `http://13.233.111.56:8082/api/tasks/updateTask/${selectedTaskId}`
-      : `http://13.233.111.56:8082/api/tasks/saveTask/${selectedProject}/${selectedModule}`;
+      ? `http://localhost:8082/api/tasks/updateTask/${selectedTaskId}`
+      : `http://localhost:8082/api/tasks/saveTask/${selectedProject}/${selectedModule}`;
 
     const method = selectedTaskId ? 'PUT' : 'POST';
 
@@ -180,53 +194,53 @@ const Task = () => {
     )
     : [];
 
-    const handleDeleteTask = (taskId) => {
-      Swal.fire({
-        title: 'Are you sure?',
-        text: 'Once deleted, you will not be able to recover this task!',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#3085d6',
-        confirmButtonText: 'Yes, delete it!',
-        cancelButtonText: 'Cancel',
-        customClass: {
-          popup: 'max-width-100',
-        },
-      }).then((result) => {
-        if (result.isConfirmed) {
-          // Make a DELETE request to delete the task
-          axios.delete(`http://13.233.111.56:8082/api/tasks/deleteTaskById/${taskId}`)
-            .then(response => {
-              console.log('Task deleted successfully');
-              // Close the initial confirmation dialog
-              Swal.close();
-              // Inform the user about the successful deletion
-              Swal.fire({
-                icon: 'success',
-                title: 'Task Deleted',
-                text: 'The task has been deleted successfully!',
-                customClass: {
-                  popup: 'max-width-100',
-                },
-              });
-              // Fetch the updated list of tasks after deletion
-              fetchTasks();
-            })
-            .catch(error => {
-              console.error('Error deleting task:', error);
-              Swal.fire({
-                icon: 'error',
-                title: 'Error Deleting Task',
-                text: 'An error occurred during deletion. Please try again.',
-                customClass: {
-                  popup: 'max-width-100',
-                },
-              });
+  const handleDeleteTask = (taskId) => {
+    Swal.fire({
+      title: 'Are you sure?',
+      text: 'Once deleted, you will not be able to recover this task!',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Yes, delete it!',
+      cancelButtonText: 'Cancel',
+      customClass: {
+        popup: 'max-width-100',
+      },
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // Make a DELETE request to delete the task
+        axios.delete(`http://localhost:8082/api/tasks/deleteTaskById/${taskId}`)
+          .then(response => {
+            console.log('Task deleted successfully');
+            // Close the initial confirmation dialog
+            Swal.close();
+            // Inform the user about the successful deletion
+            Swal.fire({
+              icon: 'success',
+              title: 'Task Deleted',
+              text: 'The task has been deleted successfully!',
+              customClass: {
+                popup: 'max-width-100',
+              },
             });
-        }
-      });
-    };
+            // Fetch the updated list of tasks after deletion
+            fetchTasks();
+          })
+          .catch(error => {
+            console.error('Error deleting task:', error);
+            Swal.fire({
+              icon: 'error',
+              title: 'Error Deleting Task',
+              text: 'An error occurred during deletion. Please try again.',
+              customClass: {
+                popup: 'max-width-100',
+              },
+            });
+          });
+      }
+    });
+  };
   const [showAssignUserModal, setShowAssignUserModal] = useState(false);
   // ... other state variables
 
@@ -258,7 +272,7 @@ const Task = () => {
 
     // Make a PUT request to your backend API to assign users to the module
     axios
-      .put(`http://13.233.111.56:8082/api/modules/assign-user/${selectedTaskId}`, formData)
+      .put(`http://localhost:8082/api/modules/assign-user/${selectedTaskId}`, formData)
       .then((response) => {
         if (response.status === 200) {
           // Show success message if the request is successful
@@ -304,6 +318,10 @@ const Task = () => {
         handleCloseAssignUserModal();
       });
   };
+  // Filter users based on the selected module's assigned users
+  const filteredUsers = users.filter(user => {
+    return modules.find(module => module.id === parseInt(selectedModule, 10))?.assignedTo.includes(user.username);
+  });
   return (
     <div>
       <h4 className='text-center '>Tasks Component </h4>
@@ -410,7 +428,7 @@ const Task = () => {
                   >
 
                     <option value="">Select Assigned To</option>
-                    {users.map((user) => (
+                    {filteredUsers.map((user) => (
                       <option key={user.id} value={user.username}>
                         {user.username}
                       </option>
@@ -500,7 +518,7 @@ const Task = () => {
                 value={assignedTo}
                 onChange={(e) => setAssignedTo(Array.from(e.target.selectedOptions, (option) => option.value))}
               >
-               <option value="">Select User</option>
+                <option value="">Select User</option>
                 {users.map((user) => (
                   <option key={user.id} value={user.username}>
                     {user.username}

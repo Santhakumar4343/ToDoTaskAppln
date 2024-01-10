@@ -21,7 +21,7 @@ function Projects() {
 
   useEffect(() => {
     // Fetch the list of users when the component mounts
-    fetch("http://13.233.111.56:8082/api/users/userType/user")
+    fetch("http://localhost:8082/api/users/userType/user")
       .then((response) => response.json())
       .then((data) => {
         setUsers(data);
@@ -81,7 +81,7 @@ function Projects() {
 
   const fetchProjects = () => {
     // Make a GET request to fetch projects
-    fetch("http://13.233.111.56:8082/api/projects/getAllProjects")
+    fetch("http://localhost:8082/api/projects/getAllProjects")
       .then((response) => response.json())
       .then((data) => {
         // Set the fetched projects to the state
@@ -105,8 +105,8 @@ function Projects() {
     });
 
     const apiUrl = selectedProject.id
-      ? `http://13.233.111.56:8082/api/projects/update/${selectedProject.id}`
-      : "http://13.233.111.56:8082/api/projects/save";
+      ? `http://localhost:8082/api/projects/update/${selectedProject.id}`
+      : "http://localhost:8082/api/projects/save";
 
     const method = selectedProject.id ? "PUT" : "POST";
 
@@ -183,7 +183,7 @@ function Projects() {
     }).then((result) => {
       if (result.isConfirmed) {
         // Make a DELETE request to delete the project
-        fetch(`http://13.233.111.56:8082/api/projects/delete/${projectId}`, {
+        fetch(`http://localhost:8082/api/projects/delete/${projectId}`, {
           method: "DELETE",
         })
           .then((response) => {
@@ -258,7 +258,7 @@ function Projects() {
     formData.append('assignedTo', selectedProject.assignedTo.join(',')); // Convert the array to a comma-separated string
 
     // Make a PUT request to your backend API to assign users to the project
-    fetch(`http://13.233.111.56:8082/api/projects/assign-user/${selectedProject.id}`, {
+    fetch(`http://localhost:8082/api/projects/assign-user/${selectedProject.id}`, {
       method: 'PUT',
       body: formData,
     })
@@ -268,7 +268,7 @@ function Projects() {
           Swal.fire({
             icon: "success",
             title: "Users Assigned",
-            text: "Users have been assigned to the project successfully!",
+            text:  `Users have been assigned to the "${selectedProject.projectName}" successfully!`,
             customClass: {
               popup: "max-width-100",
             },
@@ -281,7 +281,7 @@ function Projects() {
           Swal.fire({
             icon: "error",
             title: "Assignment Failed",
-            text: "An error occurred during the assignment. Please try again.",
+            text: `Selected user already assigned to the ${selectedProject.projectName}.`,
             customClass: {
               popup: "max-width-100",
             },
@@ -294,7 +294,7 @@ function Projects() {
         Swal.fire({
           icon: "error",
           title: "Assignment Failed",
-          text: "An error occurred during the assignment. Please try again.",
+          text: `An error occurred during the assignmentto the "${selectedProject.projectName}"Please try again.`,
           customClass: {
             popup: "max-width-100",
           },

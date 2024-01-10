@@ -39,7 +39,7 @@ const Task = () => {
 
   useEffect(() => {
     // Fetch the list of users when the component mounts
-    fetch("http://13.233.111.56:8082/api/users/userType/user")
+    fetch("http://localhost:8082/api/users/userType/user")
       .then((response) => response.json())
       .then((data) => {
         setUsers(data);
@@ -58,7 +58,7 @@ const Task = () => {
 
   //   // Make a GET request to fetch user-specific projects
   //   fetch(
-  //     `http://13.233.111.56:8082/api/projects/getUserProjects?username=${username}`
+  //     `http://localhost:8082/api/projects/getUserProjects?username=${username}`
   //   )
   //     .then((response) => response.json())
   //     .then((data) => {
@@ -90,7 +90,7 @@ const Task = () => {
 
     // Make a GET request to fetch user-specific projects
     fetch(
-      `http://13.233.111.56:8082/api/tasks/getUserTasks?username=${username}`
+      `http://localhost:8082/api/tasks/getUserTasks?username=${username}`
     )
       .then((response) => response.json())
       .then((data) => {
@@ -148,8 +148,8 @@ const Task = () => {
   //   try {
   //     // Include projectId as a query parameter
   //     const apiUrl = projectId
-  //       ? `http://13.233.111.56:8082/api/modules/getModuleByPId/${projectId}`
-  //       : "http://13.233.111.56:8082/api/modules/getAllModules";
+  //       ? `http://localhost:8082/api/modules/getModuleByPId/${projectId}`
+  //       : "http://localhost:8082/api/modules/getAllModules";
 
   //     // Make a GET request to fetch modules
   //     const response = await axios.get(apiUrl);
@@ -196,8 +196,8 @@ const Task = () => {
 
   // const fetchTasks = (moduleId) => {
   //   const apiUrl = moduleId
-  //     ? `http://13.233.111.56:8082/api/tasks/getTaskByModule/${moduleId}`
-  //     : "http://13.233.111.56:8082/api/tasks/getAllTasks";
+  //     ? `http://localhost:8082/api/tasks/getTaskByModule/${moduleId}`
+  //     : "http://localhost:8082/api/tasks/getAllTasks";
 
   //   axios
   //     .get(apiUrl)
@@ -264,8 +264,8 @@ const Task = () => {
     formData.append("remarks", remarks);
     formData.append('assignedTo', assignedTo.join(','));
     const requestUrl = selectedTaskId
-      ? `http://13.233.111.56:8082/api/tasks/updateTask/${selectedTaskId}`
-      : `http://13.233.111.56:8082/api/tasks/saveTask/${selectedProject}/${selectedModule}`;
+      ? `http://localhost:8082/api/tasks/updateTask/${selectedTaskId}`
+      : `http://localhost:8082/api/tasks/saveTask/${selectedProject}/${selectedModule}`;
 
     const method = selectedTaskId ? "PUT" : "POST";
 
@@ -334,7 +334,7 @@ const Task = () => {
     }).then((result) => {
       if (result.isConfirmed) {
         // Make a DELETE request to delete the task
-        axios.delete(`http://13.233.111.56:8082/api/tasks/deleteTaskById/${taskId}`)
+        axios.delete(`http://localhost:8082/api/tasks/deleteTaskById/${taskId}`)
           .then(response => {
             console.log('Task deleted successfully');
             // Close the initial confirmation dialog

@@ -22,7 +22,7 @@ const Modules = () => {
 
   useEffect(() => {
     // Fetch the list of users when the component mounts
-    fetch("http://13.233.111.56:8082/api/users/userType/user")
+    fetch("http://localhost:8082/api/users/userType/user")
       .then((response) => response.json())
       .then((data) => {
         setUsers(data);
@@ -33,7 +33,7 @@ const Modules = () => {
   }, []);
   useEffect(() => {
     // Fetch all projects on component mount
-    axios.get('http://13.233.111.56:8082/api/projects/getAllProjects')
+    axios.get('http://localhost:8082/api/projects/getAllProjects')
       .then(response => {
         setProjects(response.data);
       })
@@ -49,7 +49,7 @@ const Modules = () => {
 
   // const fetchModules = () => {
   //   // Make a GET request to fetch modules
-  //   axios.get('http://13.233.111.56:8082/api/modules/getAllModules')
+  //   axios.get('http://localhost:8082/api/modules/getAllModules')
   //     .then((response) => {
   //       // Set the fetched modules to the state
   //       setModules(response.data);
@@ -68,8 +68,8 @@ const Modules = () => {
   const fetchModules = () => {
     // Include selectedProject as a query parameter
     const apiUrl = selectedProject
-      ? `http://13.233.111.56:8082/api/modules/getModuleByPId/${selectedProject}`
-      : 'http://13.233.111.56:8082/api/modules/getAllModules';
+      ? `http://localhost:8082/api/modules/getModuleByPId/${selectedProject}`
+      : 'http://localhost:8082/api/modules/getAllModules';
 
     // Make a GET request to fetch modules
     axios.get(apiUrl)
@@ -111,7 +111,6 @@ const Modules = () => {
     // Display the modal for creating a module
     setShowModal(true);
   };
-
   const handleUpdateModule = (moduleId) => {
     // Find the selected module by ID
     const selectedModule = modules.find((module) => module.id === moduleId);
@@ -123,10 +122,15 @@ const Modules = () => {
     setStatus(selectedModule.status);
     setRemarks(selectedModule.remarks);
     setSelectedModuleId(moduleId);
+    setAssignedTo(selectedModule.assignedTo);
+
+    // Set the selected project based on the module's project
+    setSelectedProject(selectedModule.project.id);
 
     // Display the modal for updating the module
     setShowModal(true);
   };
+
 
   const handleSaveModule = () => {
     // Prepare module data using FormData
@@ -140,8 +144,8 @@ const Modules = () => {
     formData.append('assignedTo', assignedTo.join(','));
     // Determine whether to create or update based on selectedModuleId
     const requestUrl = selectedModuleId
-      ? `http://13.233.111.56:8082/api/modules/updateModule/${selectedModuleId}`
-      : `http://13.233.111.56:8082/api/modules/saveModule/${selectedProject}`;
+      ? `http://localhost:8082/api/modules/updateModule/${selectedModuleId}`
+      : `http://localhost:8082/api/modules/saveModule/${selectedProject}`;
 
     // Use 'PUT' for updating
     const method = selectedModuleId ? 'PUT' : 'POST';
@@ -198,7 +202,7 @@ const Modules = () => {
     }).then((result) => {
       if (result.isConfirmed) {
         // Make a DELETE request to delete the module
-        fetch(`http://13.233.111.56:8082/api/modules/deleteModule/${moduleId}`, {
+        fetch(`http://localhost:8082/api/modules/deleteModule/${moduleId}`, {
           method: 'DELETE',
         })
           .then((response) => {
@@ -254,6 +258,7 @@ const Modules = () => {
     setSelectedModuleId(moduleId);
     setAssignedTo(selectedModule.assignedTo);
     setShowAssignUserModal(true);
+    setSelectedProject(selectedModule.project.id);
   };
 
 
@@ -263,6 +268,7 @@ const Modules = () => {
   // Function to handle assigning a user to the module
   const handleAssignUserToModule = () => {
     // Make sure there are assigned users to save
+    const selectedModule = modules.find((module) => module.id === selectedModuleId);
     if (assignedTo.length === 0) {
       // Handle the case where no users are selected
       console.error('No users selected for assignment.');
@@ -275,14 +281,14 @@ const Modules = () => {
 
     // Make a PUT request to your backend API to assign users to the module
     axios
-      .put(`http://13.233.111.56:8082/api/modules/assign-user/${selectedModuleId}`, formData)
+      .put(`http://localhost:8082/api/modules/assign-user/${selectedModuleId}`, formData)
       .then((response) => {
         if (response.status === 200) {
           // Show success message if the request is successful
           Swal.fire({
             icon: 'success',
             title: 'Users Assigned',
-            text: 'Users have been assigned to the module successfully!',
+            text: `Users have been assigned to the "${selectedModule?.moduleName}"  successfully!`,
             customClass: {
               popup: 'max-width-100',
             },
@@ -297,7 +303,7 @@ const Modules = () => {
           Swal.fire({
             icon: 'error',
             title: 'Assignment Failed',
-            text: 'An error occurred during the assignment. Please try again.',
+            text: `An error occurred during the assignment to module "${selectedModule?.moduleName}". Please try again.`,
             customClass: {
               popup: 'max-width-100',
             },
@@ -310,7 +316,7 @@ const Modules = () => {
         Swal.fire({
           icon: 'error',
           title: 'Assignment Failed',
-          text: 'An error occurred during the assignment. Please try again.',
+          text: `An error occurred during the assignment to module "${selectedModule?.moduleName}". Please try again.`,
           customClass: {
             popup: 'max-width-100',
           },
@@ -321,7 +327,10 @@ const Modules = () => {
         handleCloseAssignUserModal();
       });
   };
-
+  // Filter users based on the selected project's assigned users
+  const filteredUsers = users.filter(user => {
+    return projects.find(project => project.id === parseInt(selectedProject, 10))?.assignedTo.includes(user.username);
+  });
 
   return (
     <div>
@@ -436,7 +445,7 @@ const Modules = () => {
               </Col>
             </Row>
             <Row>
-              <Col md={4}><Form.Label>Module Name</Form.Label></Col>
+              <Col md={4}><Form.Label>Assigned To </Form.Label></Col>
               <Col md={8} >
                 <Form.Group controlId="formAssignedTo">
                   <Form.Control
@@ -444,14 +453,9 @@ const Modules = () => {
                     value={assignedTo}
                     className="border border-dark mb-3"
                     onChange={(e) => setAssignedTo(Array.from(e.target.selectedOptions, (option) => option.value))}
-
                   >
-
-
-                    {users.map((user) => (
-
-
-
+                    <option value="">Select Assigned To</option>
+                    {filteredUsers.map((user) => (
                       <option key={user.id} value={user.username}>
                         {user.username}
                       </option>
@@ -532,15 +536,15 @@ const Modules = () => {
         <Modal.Body>
           <Form>
             <Form.Group controlId="formAssignUser">
-              <Form.Label>Select Users</Form.Label>
+
               <Form.Control
                 as="select"
-
+                className='border border-dark'
                 value={assignedTo}
                 onChange={(e) => setAssignedTo(Array.from(e.target.selectedOptions, (option) => option.value))}
               >
                 <option value="">Select User</option>
-                {users.map((user) => (
+                {filteredUsers.map((user) => (
                   <option key={user.id} value={user.username}>
                     {user.username}
                   </option>
