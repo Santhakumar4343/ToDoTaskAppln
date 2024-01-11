@@ -112,6 +112,23 @@ public class ProjectServiceImpl implements ProjectService {
             throw new RuntimeException("Project not found with ID: " + projectId);
         }
     }
+    public void removeUserFromProject(Long projectId, String userToRemove) {
+        Optional<Project> optionalProject = projectRepository.findById(projectId);
+
+        if (optionalProject.isPresent()) {
+            Project project = optionalProject.get();
+            List<String> assignedToList = project.getAssignedTo();
+
+            // Remove the specified user from the list
+            assignedToList.remove(userToRemove);
+
+            project.setAssignedTo(assignedToList);
+            projectRepository.save(project);
+        } else {
+            throw new RuntimeException("Project not found with ID: " + projectId);
+        }
+    }
+
 
 }
 

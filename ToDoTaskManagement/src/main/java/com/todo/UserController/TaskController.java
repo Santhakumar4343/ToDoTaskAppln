@@ -74,16 +74,20 @@ public class TaskController {
 
         // If the existing project is not found, you may want to handle this scenario accordingly
 
-        // Create a new list to preserve the existing assignedTo values
+        
         List<String> updatedAssignedTo = new ArrayList<>(existingTask.getAssignedTo());
 
-        // Append new users if provided
+        // Append new users if provided and not already present
         if (assignedTo != null) {
-            updatedAssignedTo.addAll(assignedTo);
+            for (String user : assignedTo) {
+                if (!updatedAssignedTo.contains(user)) {
+                    updatedAssignedTo.add(user);
+                }
+            }
         }
 
         // Set the updated assignedTo list
-        task.setAssignedTo(updatedAssignedTo);
+        existingTask.setAssignedTo(updatedAssignedTo);
 
 		//task.setAssignedTo(assignedTo);
 

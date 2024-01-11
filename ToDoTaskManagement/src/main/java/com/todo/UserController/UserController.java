@@ -34,6 +34,11 @@ public class UserController {
 	 @Autowired
 	    private UserRepository userRepository;
 	 private final Map<String, String> otpCache = new ConcurrentHashMap<>();
+	 
+	 
+	 
+	 
+	 
 	    @GetMapping("/userType/{type}")
 	    public ResponseEntity<List<User>> getUsersByUserType(@PathVariable String type) {
 	        List<User> users = userRepository.findByUserType(type);

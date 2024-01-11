@@ -92,6 +92,23 @@ import com.todo.entity.Project;
 		        throw new RuntimeException("Module not found with ID: " + moduleId);
 		    }
 		}
+		 public void removeUserFromModule(Long moduleId, String userToRemove) {
+		        Optional<Modules> optionalModule = moduleRepository.findById(moduleId);
+
+		        if (optionalModule.isPresent()) {
+		            Modules module = optionalModule.get();
+		            List<String> assignedToList = module.getAssignedTo();
+
+		            // Remove the specified user from the list
+		            assignedToList.remove(userToRemove);
+
+		            module.setAssignedTo(assignedToList);
+		            moduleRepository.save(module);
+		        } else {
+		            throw new RuntimeException("Project not found with ID: " + moduleId);
+		        }
+		    }
+
 
 		
 	}

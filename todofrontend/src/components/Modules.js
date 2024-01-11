@@ -19,8 +19,11 @@ const Modules = () => {
   const [assignedTo, setAssignedTo] = useState([]);
   const [priority, setPriority] = useState('');
   const [users, setUsers] = useState([]);
+  const [userToRemove, setUserToRemove] = useState("");
+  const [selectedModule, setSelectedModule] = useState(null);
 
   useEffect(() => {
+
     // Fetch the list of users when the component mounts
     fetch("http://13.233.111.56:8082/api/users/userType/user")
       .then((response) => response.json())
@@ -127,7 +130,7 @@ const Modules = () => {
     setPriority(selectedModule.priority);
     // Set the selected project based on the module's project
     setSelectedProject(selectedModule.project.id);
-
+    setSelectedModule(selectedModule);
     // Display the modal for updating the module
     setShowModal(true);
   };
@@ -258,6 +261,7 @@ const Modules = () => {
     // Set the selected module for assigning users
     const selectedModule = modules.find((module) => module.id === moduleId);
     setSelectedModuleId(moduleId);
+    setSelectedModule(selectedModule);
     setAssignedTo(selectedModule.assignedTo);
     setShowAssignUserModal(true);
     setSelectedProject(selectedModule.project.id);
@@ -276,7 +280,7 @@ const Modules = () => {
       console.error('No users selected for assignment.');
       return;
     }
-
+    
     // Prepare the form data
     const formData = new FormData();
     formData.append('assignedTo', assignedTo.join(',')); // Convert the array to a comma-separated string
@@ -290,7 +294,7 @@ const Modules = () => {
           Swal.fire({
             icon: 'success',
             title: 'Users Assigned',
-            text: `Users have been assigned to the "${selectedModule?.moduleName}"  successfully!`,
+            text: `User have been assigned to the "${selectedModule?.moduleName}"  successfully!`,
             customClass: {
               popup: 'max-width-100',
             },
@@ -328,6 +332,57 @@ const Modules = () => {
         // Close the modal after handling the assignment
         handleCloseAssignUserModal();
       });
+  };
+  const handleRemoveUser = () => {
+    if (userToRemove) {
+      // Make a DELETE request to your backend API to remove the user from the module
+      axios
+        .delete(`http://13.233.111.56:8082/api/modules/remove-user/${selectedModuleId}?userToRemove=${userToRemove}`)
+        .then(response => {
+          if (response.status === 200) {
+            // Show success message if the request is successful
+            Swal.fire({
+              icon: "success",
+              title: "User Removed",
+              text: `User "${userToRemove}" has been removed from the ${selectedModule.moduleName} successfully!`,
+              customClass: {
+                popup: "max-width-100",
+              },
+            });
+            fetchModules(); // Fetch the updated list of modules or update the state accordingly
+          } else {
+            // Show error message if the request is not successful
+            console.error(`Error removing user from ${selectedModule.moduleName}:`, response.status);
+            Swal.fire({
+              icon: "error",
+              title: "Removal Failed",
+              text: `Error removing user "${userToRemove}" from the ${selectedModule.moduleName}.`,
+              customClass: {
+                popup: "max-width-100",
+              },
+            });
+          }
+        })
+        .catch(error => {
+          console.error('Error removing user from module:', error);
+          // Handle the error
+          Swal.fire({
+            icon: "error",
+            title: "Removal Failed",
+            text: `An error occurred while removing user "${userToRemove}" from the ${selectedModule.moduleName}. Please try again.`,
+            customClass: {
+              popup: "max-width-100",
+            },
+          });
+        })
+        .finally(() => {
+          // Close the modal after handling the removal
+          handleCloseAssignUserModal();
+        });
+    } else {
+      // Handle the case where no user is selected for removal
+      console.error('No user selected for removal.');
+    }
   };
   // Filter users based on the selected project's assigned users
   const filteredUsers = users.filter(user => {
@@ -475,7 +530,7 @@ const Modules = () => {
                     value={moduleName}
                     onChange={(e) => setModuleName(e.target.value)}
                   />
-                   <Form.Text className="text-danger">{moduleNameError}</Form.Text>
+                  <Form.Text className="text-danger">{moduleNameError}</Form.Text>
                 </Form.Group>
               </Col>
             </Row>
@@ -601,17 +656,35 @@ const Modules = () => {
         <Modal.Body>
           <Form>
             <Form.Group controlId="formAssignUser">
-
+              <Form.Label>Assign Users</Form.Label>
               <Form.Control
                 as="select"
-                className='border border-dark'
+                className="border border-dark"
                 value={assignedTo}
-                onChange={(e) => setAssignedTo(Array.from(e.target.selectedOptions, (option) => option.value))}
+                onChange={(e) =>
+                  setAssignedTo(Array.from(e.target.selectedOptions, (option) => option.value))
+                }
               >
                 <option value="">Select User</option>
                 {filteredUsers.map((user) => (
                   <option key={user.id} value={user.username}>
                     {user.username}
+                  </option>
+                ))}
+              </Form.Control>
+            </Form.Group>
+            <Form.Group controlId="formRemoveUser">
+              <Form.Label className="mt-4">Remove Users</Form.Label>
+              <Form.Control
+                as="select"
+                className="border border-dark mt-3"
+                value={userToRemove}
+                onChange={(e) => setUserToRemove(e.target.value)}
+              >
+                <option value="">Select User to Remove</option>
+                {selectedModule?.assignedTo.map((assignedUser) => (
+                  <option key={assignedUser} value={assignedUser}>
+                    {assignedUser}
                   </option>
                 ))}
               </Form.Control>
@@ -625,8 +698,12 @@ const Modules = () => {
           <Button variant="primary" onClick={handleAssignUserToModule}>
             Assign User
           </Button>
+          <Button variant="danger" onClick={handleRemoveUser}>
+            Remove User
+          </Button>
         </Modal.Footer>
       </Modal>
+
     </div>
   );
 };

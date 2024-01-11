@@ -151,4 +151,14 @@ public class ModuleController {
 	public List<Modules> getUserModules(@RequestParam String username) {
 		return moduleService.getUserModules(username);
 	}
+	
+	@DeleteMapping("/remove-user/{moduleId}")
+	public ResponseEntity<String> removeUserFromProject(@PathVariable Long moduleId, @RequestParam String userToRemove) {
+	    try {
+	        moduleService.removeUserFromModule(moduleId, userToRemove);
+	        return new ResponseEntity<>("User removed successfully", HttpStatus.OK);
+	    } catch (Exception e) {
+	        return new ResponseEntity<>("Error removing user: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+	    }
+	}
 }

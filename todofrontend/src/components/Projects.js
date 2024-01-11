@@ -18,6 +18,7 @@ function Projects() {
   const [projects, setProjects] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [users, setUsers] = useState([]);
+  const [userToRemove, setUserToRemove] = useState("");
 
   useEffect(() => {
     // Fetch the list of users when the component mounts
@@ -256,7 +257,19 @@ function Projects() {
       console.error('No users selected for assignment.');
       return;
     }
+    // Check if there's a user to remove
+    if (userToRemove) {
+      // Remove the selected user from the assignedTo array
+      const updatedAssignedTo = selectedProject.assignedTo.filter(
+        (user) => user !== userToRemove
+      );
 
+      // Update the assignedTo array in the selected project
+      setSelectedProject({
+        ...selectedProject,
+        assignedTo: updatedAssignedTo,
+      });
+    }
     // Prepare the form data
     const formData = new FormData();
     formData.append('assignedTo', selectedProject.assignedTo.join(',')); // Convert the array to a comma-separated string
@@ -272,12 +285,12 @@ function Projects() {
           Swal.fire({
             icon: "success",
             title: "Users Assigned",
-            text: `Users have been assigned to the "${selectedProject.projectName}" successfully!`,
+            text: `"${selectedProject.assignedTo}" have been assigned to the "${selectedProject.projectName}" successfully!`,
             customClass: {
               popup: "max-width-100",
             },
           });
-
+          fetchProjects();
           // Optionally, you may want to update the frontend with the latest data
           // Fetch the updated list of projects or update the state accordingly
         } else {
@@ -309,6 +322,62 @@ function Projects() {
         handleCloseAssignUserModal();
       });
   };
+
+  const handleRemoveUser = () => {
+    // Check if there's a user to remove
+    if (userToRemove) {
+      // Make a DELETE request to your backend API to remove the user from the project
+      fetch(`http://13.233.111.56:8082/api/projects/remove-user/${selectedProject.id}?userToRemove=${userToRemove}`, {
+        method: 'DELETE',
+      })
+        .then(response => {
+          if (response.ok) {
+            // Show success message if the request is successful
+            Swal.fire({
+              icon: "success",
+              title: "User Removed",
+              text: `User "${userToRemove}" has been removed from the "${selectedProject.projectName}" successfully!`,
+              customClass: {
+                popup: "max-width-100",
+              },
+            });
+            fetchProjects();
+            // Optionally, you may want to update the frontend with the latest data
+            // Fetch the updated list of projects or update the state accordingly
+          } else {
+            // Show error message if the request is not successful
+            Swal.fire({
+              icon: "error",
+              title: "Removal Failed",
+              text: `Error removing user "${userToRemove}" from the project.`,
+              customClass: {
+                popup: "max-width-100",
+              },
+            });
+          }
+        })
+        .catch(error => {
+          console.error('Error removing user:', error);
+          // Handle the error
+          Swal.fire({
+            icon: "error",
+            title: "Removal Failed",
+            text: `An error occurred while removing user "${userToRemove}". Please try again.`,
+            customClass: {
+              popup: "max-width-100",
+            },
+          });
+        })
+        .finally(() => {
+          // Close the modal after handling the removal
+          handleCloseAssignUserModal();
+        });
+    } else {
+      // Handle the case where no user is selected for removal
+      console.error('No user selected for removal.');
+    }
+  };
+  
   const [projectNameError, setProjectNameError] = useState("");
   const [assignedToError, setAssignedToError] = useState("");
 
@@ -473,14 +542,14 @@ function Projects() {
                       })
                     }
                   >
-                    
+
                     <option value="">Select Assigned To</option>
                     {users.map((user) => (
                       <option key={user.id} value={user.username}>
                         {user.username}
                       </option>
                     ))}
-                   
+
                   </Form.Control>
                   <Form.Text className="text-danger">{assignedToError}</Form.Text>
                 </Form.Group>
@@ -620,15 +689,13 @@ function Projects() {
         </Modal.Footer>
       </Modal>
 
-
       <Modal show={showAssignUserModal} onHide={handleCloseAssignUserModal}>
         <Modal.Header closeButton>
           <Modal.Title className="text-center">Assign Users to Project</Modal.Title>
         </Modal.Header>
-        <Modal.Body>
+        <Modal.Body className>
           <Form>
             <Form.Group controlId="formAssignUser">
-
               <Form.Control
                 as="select"
                 className="border border-dark"
@@ -639,11 +706,12 @@ function Projects() {
                       e.target.selectedOptions,
                       (option) => option.value
                     ),
+                    selectedUser: e.target.value, // Add this line to store the selected user
                   })
                 }
               >
                 {/* Include a default option for selecting users */}
-                <option value="">Select User</option>
+                <option value="">Select User to Assign</option>
                 {users.map((user) => (
                   <option key={user.id} value={user.username}>
                     {user.username}
@@ -651,18 +719,40 @@ function Projects() {
                 ))}
               </Form.Control>
             </Form.Group>
+            <Button variant="primary" className="mt-4 "  style={{marginLeft:"160px"}}onClick={handleSaveAssignUser}>
+            Assign User
+          </Button>
+            <Form.Group controlId="formRemoveUser">
+            <Modal.Title className="mt-4">Remove Users From Project</Modal.Title>
+              <Form.Control
+                as="select"
+                className="border border-dark mt-3"
+                value={userToRemove}
+                onChange={(e) => setUserToRemove(e.target.value)}
+              >
+                <option value="">Select User to Remove</option>
+                {selectedProject.assignedTo.map((assignedUser) => (
+                  <option key={assignedUser} value={assignedUser}>
+                    {assignedUser}
+                  </option>
+                ))}
+              </Form.Control>
+            </Form.Group>
           </Form>
         </Modal.Body>
-        <Modal.Footer>
+        <Modal.Footer className="d-flex align-item-center justify-content-center">
           <Button variant="secondary" onClick={handleCloseAssignUserModal}>
             Close
           </Button>
-          <Button variant="primary" onClick={handleSaveAssignUser}>
-            Assign User
+         
+          <Button
+            variant="danger"
+            onClick={() => handleRemoveUser(selectedProject.id, selectedProject.selectedUser)}
+          >
+            Remove User
           </Button>
         </Modal.Footer>
       </Modal>
-
     </div>
   );
 }
