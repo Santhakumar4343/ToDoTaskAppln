@@ -353,6 +353,12 @@ const Task = () => {
       handleSaveTask();
     }
   };
+  const handleModalClose = () => {
+    // Fetch all modules when the modal is closed
+    console.log('Closing modal...');
+    setSelectedModule(null);
+    fetchTasks();
+  };
   return (
     <div>
       <h4 className='text-center '>Tasks Component </h4>
@@ -430,7 +436,7 @@ const Task = () => {
           </tbody>
         </Table>
       )}
-      <Modal show={showModal} onHide={() => setShowModal(false)}>
+      <Modal show={showModal} onHide={() => { setShowModal(false); handleModalClose(); }} backdrop="static" keyboard={false}>
         <Modal.Header closeButton>
           <Modal.Title>Create/Update Task</Modal.Title>
         </Modal.Header>

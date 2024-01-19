@@ -15,7 +15,7 @@ import axios from "axios";
 import { useLocation } from "react-router";
 const Task = () => {
   const [showModal, setShowModal] = useState(false);
-  const [modules, setModules] = useState([]);
+ 
   const [selectedModule, setSelectedModule] = useState("");
   const [taskName, setTaskName] = useState("");
   const [startDate, setStartDate] = useState("");
@@ -26,11 +26,9 @@ const Task = () => {
   const [remarks, setRemarks] = useState("");
   const [selectedTaskId, setSelectedTaskId] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [projects, setProjects] = useState([]);
+
   const [selectedProject, setSelectedProject] = useState("");
-  const [modulesForSelectedProject, setModulesForSelectedProject] = useState(
-    []
-  );
+  
   const location = useLocation();
   const { state: { username } = {} } = location;
   const [assignedTo, setAssignedTo] = useState([]);
@@ -48,38 +46,7 @@ const Task = () => {
         console.error("Error fetching users:", error);
       });
   }, []);
-  // useEffect(() => {
-  //   // Fetch the projects for the specific user when the component mounts
-  //   fetchUserProjects(username);
-  // }, [username]);
-
-  // const fetchUserProjects = (username) => {
-  //   console.log("Fetching projects for user:", username);
-
-  //   // Make a GET request to fetch user-specific projects
-  //   fetch(
-  //     `http://13.233.111.56:8082/api/projects/getUserProjects?username=${username}`
-  //   )
-  //     .then((response) => response.json())
-  //     .then((data) => {
-  //       console.log("Fetched projects:", data);
-
-  //       // Set the fetched projects to the state
-  //       setProjects(data);
-
-  //       // Set the first project as the selected project
-  //       if (data.length > 0) {
-  //         setSelectedProject(data[0]);
-
-  //         // Fetch modules and tasks for all projects
-  //         fetchModulesForAllProjects(data);
-  //       }
-  //     })
-  //     .catch((error) => {
-  //       console.error("Error fetching user projects:", error);
-  //       // Handle the error
-  //     });
-  // };
+ 
   useEffect(() => {
     // Fetch the projects for the specific user when the component mounts
     fetchUserTasks(username);
@@ -113,108 +80,7 @@ const Task = () => {
       });
   };
 
-  // const fetchModulesForAllProjects = async (projects) => {
-  //   // Create a Set to keep track of unique module IDs
-  //   const uniqueModuleIds = new Set();
-
-  //   // Create an array to store promises for each project
-  //   const fetchPromises = projects.map(async (project) => {
-  //     const newModules = await fetchModules(project.id);
-
-  //     // Filter out modules that are already present in the Set
-  //     const filteredModules = newModules.filter(
-  //       (newModule) => !uniqueModuleIds.has(newModule.id)
-  //     );
-
-  //     // Add new module IDs to the Set
-  //     filteredModules.forEach((newModule) => {
-  //       uniqueModuleIds.add(newModule.id);
-  //     });
-
-  //     return filteredModules;
-  //   });
-
-  //   // Wait for all promises to resolve
-  //   const modulesArrays = await Promise.all(fetchPromises);
-
-  //   // Flatten the array of arrays into a single array
-  //   const allModules = modulesArrays.flat();
-
-  //   // Set the fetched modules to the state
-  //   setModules(allModules);
-  // };
-
-  // const fetchModules = async (projectId) => {
-  //   try {
-  //     // Include projectId as a query parameter
-  //     const apiUrl = projectId
-  //       ? `http://13.233.111.56:8082/api/modules/getModuleByPId/${projectId}`
-  //       : "http://13.233.111.56:8082/api/modules/getAllModules";
-
-  //     // Make a GET request to fetch modules
-  //     const response = await axios.get(apiUrl);
-
-  //     // Use functional update to ensure the latest state is used
-  //     setModules((prevModules) => {
-  //       // Filter out modules that are already present in the state
-  //       const newModules = response.data.filter(
-  //         (newModule) =>
-  //           !prevModules.some(
-  //             (existingModule) => existingModule.id === newModule.id
-  //           )
-  //       );
-
-  //       // Return the new state
-  //       return [...prevModules, ...newModules];
-  //     });
-  //     setModulesForSelectedProject(response.data);
-
-  //     return response.data; // Return the new modules for further processing if needed
-  //   } catch (error) {
-  //     console.error("Error fetching modules:", error);
-  //     // Handle the error
-  //   }
-  // };
-
-  // useEffect(() => {
-  //   console.log("Selected Project Changed:", selectedProject);
-  //   // Fetch modules for the selected project when it changes
-  //   if (selectedProject) {
-  //     // Clear the selected module when the project changes
-  //     setSelectedModule("");
-  //     // Fetch modules for the selected project
-  //     fetchModules(selectedProject.id);
-  //   }
-  // }, [selectedProject]);
-  // useEffect(() => {
-  //   console.log("Selected Module Changed:", selectedModule);
-  //   // Fetch tasks for the selected module
-  //   if (selectedModule) {
-  //     fetchTasks(selectedModule);
-  //   }
-  // }, [selectedModule]);
-
-  // const fetchTasks = (moduleId) => {
-  //   const apiUrl = moduleId
-  //     ? `http://13.233.111.56:8082/api/tasks/getTaskByModule/${moduleId}`
-  //     : "http://13.233.111.56:8082/api/tasks/getAllTasks";
-
-  //   axios
-  //     .get(apiUrl)
-  //     .then((response) => {
-  //       // Ensure that the response data is an array before setting it to state
-  //       if (Array.isArray(response.data)) {
-  //         setTasks(response.data);
-  //       } else {
-  //         console.error("Error: Response data is not an array", response.data);
-  //         setTasks([]);
-  //       }
-  //     })
-  //     .catch((error) => {
-  //       console.error("Error fetching tasks:", error);
-  //     });
-  // };
-
+  
   const handleCreateTask = () => {
     setTaskName("");
     setStartDate("");
@@ -249,9 +115,10 @@ const Task = () => {
     setPriority(selectedTask.priority);
     setRemarks(selectedTask.remarks);
     setSelectedTaskId(taskId);
-
+    setAssignedTo(selectedTask.assignedTo);
     // Display the modal for updating the task
     setShowModal(true);
+    fetchUserTasks(username);
   };
 
   const handleSaveTask = () => {
@@ -300,6 +167,9 @@ const Task = () => {
         console.error("Error saving task:", error);
         setShowModal(false);
         Swal.fire({
+
+
+
           icon: "error",
           title: "Operation Failed",
           text: `An error occurred during the ${selectedTaskId ? "update" : "creation"
@@ -454,10 +324,10 @@ const Task = () => {
                     className="bi bi-pencil fs-4"
                     onClick={() => handleUpdateTask(task.id)}
                   ></i>{" "}
-                  <i
+                  {/* <i
                     className="bi bi-trash3 fs-4 m-2 text-danger"
                     onClick={() => handleDeleteTask(task.id)}
-                  ></i>
+                  ></i> */}
                 </td>
               </tr>
             ))}
@@ -483,6 +353,7 @@ const Task = () => {
                     className="border border-black mb-3"
                     value={taskName}
                     onChange={(e) => setTaskName(e.target.value)}
+                    disabled
                   />
                 </Form.Group>
               </Col>
@@ -496,14 +367,15 @@ const Task = () => {
                     value={assignedTo}
                     className="border border-dark mb-3"
                     onChange={(e) => setAssignedTo(Array.from(e.target.selectedOptions, (option) => option.value))}
-
+                   disabled
                   >
 
-                    <option value="">Select Assigned To</option>
+                   
                     {users.map((user) => (
                       <option key={user.id} value={user.username}>
                         {user.username}
                       </option>
+                      
                     ))}
                   </Form.Control>
                 </Form.Group>
@@ -522,6 +394,7 @@ const Task = () => {
                     className="border border-black mb-3"
                     value={startDate}
                     onChange={(e) => setStartDate(e.target.value)}
+                    disabled
                   />
                 </Form.Group>
               </Col>
@@ -537,6 +410,7 @@ const Task = () => {
                     className="border border-black mb-3"
                     value={endDate}
                     onChange={(e) => setEndDate(e.target.value)}
+                    disabled
                   />
                 </Form.Group>
               </Col>
@@ -573,6 +447,7 @@ const Task = () => {
                     className="border border-black mb-3"
                     value={priority}
                     onChange={(e) => setPriority(e.target.value)}
+                    disabled
                   >
                     <option value="">Select Priority</option>
                     <option value="Critical">Critical</option>

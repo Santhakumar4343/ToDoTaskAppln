@@ -99,7 +99,9 @@ function Projects() {
 
   const handleSaveProject = () => {
     const formData = new FormData();
-
+    selectedProject.startDate = moment(selectedProject.startDate).format("YYYY-MM-DD");
+    selectedProject.closedDate = moment(selectedProject.closedDate).format("YYYY-MM-DD");
+  
     Object.entries(selectedProject).forEach(([key, value]) => {
       // Convert assignedTo array to a comma-separated string
       if (key === "assignedTo" && Array.isArray(value)) {
@@ -163,14 +165,26 @@ function Projects() {
     const selectedProject = projects.find(
       (project) => project.id === projectId
     );
-
-    // Set the selected project to update
-    setSelectedProject(selectedProject);
-
-
+  
+    // Format start and end dates before setting them in the state
+    const formattedStartDate = selectedProject.startDate
+      ? moment(selectedProject.startDate).format("YYYY-MM-DD")
+      : "";
+    const formattedClosedDate = selectedProject.closedDate
+      ? moment(selectedProject.closedDate).format("YYYY-MM-DD")
+      : "";
+  
+    // Set the selected project with formatted dates to update
+    setSelectedProject({
+      ...selectedProject,
+      startDate: formattedStartDate,
+      closedDate: formattedClosedDate,
+    });
+  
     // Show the modal for updating the project
     handleShowModal();
   };
+  
 
   const handleDeleteProject = (projectId) => {
     Swal.fire({
@@ -326,52 +340,67 @@ function Projects() {
   const handleRemoveUser = () => {
     // Check if there's a user to remove
     if (userToRemove) {
-      // Make a DELETE request to your backend API to remove the user from the project
-      fetch(`http://13.233.111.56:8082/api/projects/remove-user/${selectedProject.id}?userToRemove=${userToRemove}`, {
-        method: 'DELETE',
-      })
-        .then(response => {
-          if (response.ok) {
-            // Show success message if the request is successful
-            Swal.fire({
-              icon: "success",
-              title: "User Removed",
-              text: `User "${userToRemove}" has been removed from the "${selectedProject.projectName}" successfully!`,
-              customClass: {
-                popup: "max-width-100",
-              },
+      // Show a confirmation dialog before proceeding with the removal
+      Swal.fire({
+        title: 'Are you sure?',
+        text: `Do you really want to remove user "${userToRemove}" from the project "${selectedProject.projectName}"?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Yes, remove it!',
+        cancelButtonText: 'Cancel',
+        customClass: {
+          popup: 'max-width-100',
+        },
+      }).then((result) => {
+        if (result.isConfirmed) {
+          // If the user confirms, proceed with the removal
+          fetch(`http://13.233.111.56:8082/api/projects/remove-user/${selectedProject.id}?userToRemove=${userToRemove}`, {
+            method: 'DELETE',
+          })
+            .then((response) => {
+              if (response.ok) {
+                // Show success message if the request is successful
+                Swal.fire({
+                  icon: 'success',
+                  title: 'User Removed',
+                  text: `User "${userToRemove}" has been removed from the "${selectedProject.projectName}" successfully!`,
+                  customClass: {
+                    popup: 'max-width-100',
+                  },
+                });
+                fetchProjects();
+              } else {
+                // Show error message if the request is not successful
+                Swal.fire({
+                  icon: 'error',
+                  title: 'Removal Failed',
+                  text: `Error removing user "${userToRemove}" from the project.`,
+                  customClass: {
+                    popup: 'max-width-100',
+                  },
+                });
+              }
+            })
+            .catch((error) => {
+              console.error('Error removing user:', error);
+              // Handle the error
+              Swal.fire({
+                icon: 'error',
+                title: 'Removal Failed',
+                text: `An error occurred while removing user "${userToRemove}". Please try again.`,
+                customClass: {
+                  popup: 'max-width-100',
+                },
+              });
+            })
+            .finally(() => {
+              // Close the modal after handling the removal
+              handleCloseAssignUserModal();
             });
-            fetchProjects();
-            // Optionally, you may want to update the frontend with the latest data
-            // Fetch the updated list of projects or update the state accordingly
-          } else {
-            // Show error message if the request is not successful
-            Swal.fire({
-              icon: "error",
-              title: "Removal Failed",
-              text: `Error removing user "${userToRemove}" from the project.`,
-              customClass: {
-                popup: "max-width-100",
-              },
-            });
-          }
-        })
-        .catch(error => {
-          console.error('Error removing user:', error);
-          // Handle the error
-          Swal.fire({
-            icon: "error",
-            title: "Removal Failed",
-            text: `An error occurred while removing user "${userToRemove}". Please try again.`,
-            customClass: {
-              popup: "max-width-100",
-            },
-          });
-        })
-        .finally(() => {
-          // Close the modal after handling the removal
-          handleCloseAssignUserModal();
-        });
+        }
+      });
     } else {
       // Handle the case where no user is selected for removal
       console.error('No user selected for removal.');
@@ -492,8 +521,8 @@ function Projects() {
           </tbody>
         </Table>
       )}
-      {/* Modal for creating or updating a project */}
-      <Modal show={showModal} onHide={handleCloseModal}>
+      
+      <Modal show={showModal} onHide={handleCloseModal} backdrop="static" keyboard={false}>
         <Modal.Header closeButton>
           <Modal.Title>
             {selectedProject.id ? "Update Project" : "Create Project"}
@@ -556,6 +585,50 @@ function Projects() {
               </Col>
             </Row>
 
+           <Row>
+              <Col md={4}>
+                {" "}
+                <Form.Label>Planned Start Date</Form.Label>
+              </Col>
+              <Col md={8}>
+                <Form.Group controlId="formStartDate">
+                  <Form.Control
+                    type="date"
+                    className="border border-dark mb-3"
+                    placeholder="Planned Start Date"
+                    value={selectedProject.startDate}
+                    onChange={(e) =>
+                      setSelectedProject({
+                        ...selectedProject,
+                        startDate: e.target.value,
+                      })
+                    }
+                  />
+                </Form.Group>
+              </Col>
+            </Row>
+            <Row>
+              <Col md={4}>
+                {" "}
+                <Form.Label>Planned End date</Form.Label>
+              </Col>
+              <Col md={8}>
+                <Form.Group controlId="formClosedDate">
+                  <Form.Control
+                    type="date"
+                    placeholder="Planned Closed Date"
+                    className="border border-dark mb-3"
+                    value={selectedProject.closedDate}
+                    onChange={(e) =>
+                      setSelectedProject({
+                        ...selectedProject,
+                        closedDate: e.target.value,
+                      })
+                    }
+                  />
+                </Form.Group>
+              </Col>
+            </Row>
             <Row>
               <Col md={4}>
                 {" "}
@@ -609,51 +682,7 @@ function Projects() {
                 </Form.Group>
               </Col>
             </Row>
-            <Row>
-              <Col md={4}>
-                {" "}
-                <Form.Label>Planned Start Date</Form.Label>
-              </Col>
-              <Col md={8}>
-                <Form.Group controlId="formStartDate">
-                  <Form.Control
-                    type="date"
-                    className="border border-dark mb-3"
-                    placeholder="Planned Start Date"
-                    value={selectedProject.startDate}
-                    onChange={(e) =>
-                      setSelectedProject({
-                        ...selectedProject,
-                        startDate: e.target.value,
-                      })
-                    }
-                  />
-                </Form.Group>
-              </Col>
-            </Row>
-            <Row>
-              <Col md={4}>
-                {" "}
-                <Form.Label>Planned End date</Form.Label>
-              </Col>
-              <Col md={8}>
-                <Form.Group controlId="formClosedDate">
-                  <Form.Control
-                    type="date"
-                    placeholder="Planned Closed Date"
-                    className="border border-dark mb-3"
-                    value={selectedProject.closedDate}
-                    onChange={(e) =>
-                      setSelectedProject({
-                        ...selectedProject,
-                        closedDate: e.target.value,
-                      })
-                    }
-                  />
-                </Form.Group>
-              </Col>
-            </Row>
-
+            
             <Row>
               <Col md={4} className="sans-serif-bold">
                 {" "}
@@ -689,7 +718,7 @@ function Projects() {
         </Modal.Footer>
       </Modal>
 
-      <Modal show={showAssignUserModal} onHide={handleCloseAssignUserModal}>
+      <Modal show={showAssignUserModal} onHide={handleCloseAssignUserModal} backdrop="static" keyboard={false}>
         <Modal.Header closeButton>
           <Modal.Title className="text-center">Assign Users to Project</Modal.Title>
         </Modal.Header>

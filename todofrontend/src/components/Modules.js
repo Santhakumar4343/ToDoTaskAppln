@@ -121,18 +121,26 @@ const Modules = () => {
 
     // Set the form fields with the selected module data
     setModuleName(selectedModule.moduleName);
-    setStartDate(selectedModule.startDate);
-    setEndDate(selectedModule.endDate);
+    setStartDate(moment(selectedModule.startDate).format("YYYY-MM-DD"));
+    setEndDate(moment(selectedModule.endDate).format("YYYY-MM-DD"));
     setStatus(selectedModule.status);
     setRemarks(selectedModule.remarks);
-    setSelectedModuleId(moduleId);
     setAssignedTo(selectedModule.assignedTo);
+    setSelectedModuleId(moduleId);
+
     setPriority(selectedModule.priority);
     // Set the selected project based on the module's project
     setSelectedProject(selectedModule.project.id);
     setSelectedModule(selectedModule);
     // Display the modal for updating the module
     setShowModal(true);
+  };
+  const handleModalClose = () => {
+    // Fetch all modules when the modal is closed
+    console.log('Closing modal...');
+    fetchModules();
+    // Set selectedProject to null
+    setSelectedProject(null);
   };
 
 
@@ -175,8 +183,9 @@ const Modules = () => {
           },
         });
         setShowModal(false);
-        fetchModules(); // Fetch modules again to update the table
 
+        // Fetch all modules after updating the module
+        fetchModules();
       })
       .catch(error => {
         console.error('Error saving module:', error);
@@ -280,7 +289,7 @@ const Modules = () => {
       console.error('No users selected for assignment.');
       return;
     }
-    
+
     // Prepare the form data
     const formData = new FormData();
     formData.append('assignedTo', assignedTo.join(',')); // Convert the array to a comma-separated string
@@ -335,55 +344,73 @@ const Modules = () => {
   };
   const handleRemoveUser = () => {
     if (userToRemove) {
-      // Make a DELETE request to your backend API to remove the user from the module
-      axios
-        .delete(`http://13.233.111.56:8082/api/modules/remove-user/${selectedModuleId}?userToRemove=${userToRemove}`)
-        .then(response => {
-          if (response.status === 200) {
-            // Show success message if the request is successful
-            Swal.fire({
-              icon: "success",
-              title: "User Removed",
-              text: `User "${userToRemove}" has been removed from the ${selectedModule.moduleName} successfully!`,
-              customClass: {
-                popup: "max-width-100",
-              },
+      // Show a confirmation dialog before proceeding with the removal
+      Swal.fire({
+        title: 'Are you sure?',
+        text: `Do you really want to remove user "${userToRemove}" from the module "${selectedModule.moduleName}"?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Yes, remove it!',
+        cancelButtonText: 'Cancel',
+        customClass: {
+          popup: 'max-width-100',
+        },
+      }).then((result) => {
+        if (result.isConfirmed) {
+          // If the user confirms, proceed with the removal
+          axios
+            .delete(`http://13.233.111.56:8082/api/modules/remove-user/${selectedModuleId}?userToRemove=${userToRemove}`)
+            .then((response) => {
+              if (response.status === 200) {
+                // Show success message if the request is successful
+                Swal.fire({
+                  icon: 'success',
+                  title: 'User Removed',
+                  text: `User "${userToRemove}" has been removed from the ${selectedModule.moduleName} successfully!`,
+                  customClass: {
+                    popup: 'max-width-100',
+                  },
+                });
+                fetchModules(); // Fetch the updated list of modules or update the state accordingly
+              } else {
+                // Show error message if the request is not successful
+                console.error(`Error removing user from ${selectedModule.moduleName}:`, response.status);
+                Swal.fire({
+                  icon: 'error',
+                  title: 'Removal Failed',
+                  text: `Error removing user "${userToRemove}" from the ${selectedModule.moduleName}.`,
+                  customClass: {
+                    popup: 'max-width-100',
+                  },
+                });
+              }
+            })
+            .catch((error) => {
+              console.error('Error removing user from module:', error);
+              // Handle the error
+              Swal.fire({
+                icon: 'error',
+                title: 'Removal Failed',
+                text: `An error occurred while removing user "${userToRemove}" from the ${selectedModule.moduleName}. Please try again.`,
+                customClass: {
+                  popup: 'max-width-100',
+                },
+              });
+            })
+            .finally(() => {
+              // Close the modal after handling the removal
+              handleCloseAssignUserModal();
             });
-            fetchModules(); // Fetch the updated list of modules or update the state accordingly
-          } else {
-            // Show error message if the request is not successful
-            console.error(`Error removing user from ${selectedModule.moduleName}:`, response.status);
-            Swal.fire({
-              icon: "error",
-              title: "Removal Failed",
-              text: `Error removing user "${userToRemove}" from the ${selectedModule.moduleName}.`,
-              customClass: {
-                popup: "max-width-100",
-              },
-            });
-          }
-        })
-        .catch(error => {
-          console.error('Error removing user from module:', error);
-          // Handle the error
-          Swal.fire({
-            icon: "error",
-            title: "Removal Failed",
-            text: `An error occurred while removing user "${userToRemove}" from the ${selectedModule.moduleName}. Please try again.`,
-            customClass: {
-              popup: "max-width-100",
-            },
-          });
-        })
-        .finally(() => {
-          // Close the modal after handling the removal
-          handleCloseAssignUserModal();
-        });
+        }
+      });
     } else {
       // Handle the case where no user is selected for removal
       console.error('No user selected for removal.');
     }
   };
+
   // Filter users based on the selected project's assigned users
   const filteredUsers = users.filter(user => {
     return projects.find(project => project.id === parseInt(selectedProject, 10))?.assignedTo.includes(user.username);
@@ -475,28 +502,11 @@ const Modules = () => {
 
                   <td style={{ maxWidth: '200px', overflowX: 'auto' }}>{module.remarks}</td>
                   <td>
-                    {/* <Button
-                      variant="primary"
-                      className='mb-1'
-                      onClick={() => handleUpdateModule(module.id)}
-                    >
-                      Update
-                    </Button>{' '}
-                    <Button
-                      variant="danger"
-                      onClick={() => handleDeleteModule(module.id)}
-                    >
-                      Delete
-                    </Button> */}
+                   
                     <i className="bi bi-pencil fs-4" onClick={() => handleUpdateModule(module.id)}></i>
                     {' '}
                     <i class="bi bi-trash3 fs-4 m-2 text-danger" onClick={() => handleDeleteModule(module.id)}></i>
-                    {/* <Button
-                      variant="primary"
-                      onClick={() => handleAssignUser(module.id)}
-                    >
-                      Assign User
-                    </Button> */}
+                   
                     <i class="bi bi-person-plus fs-4" onClick={() => handleAssignUser(module.id)}></i>
 
                   </td>
@@ -514,7 +524,7 @@ const Modules = () => {
 
 
 
-      <Modal show={showModal} onHide={() => setShowModal(false)}>
+      <Modal show={showModal} onHide={() => { setShowModal(false); handleModalClose(); }} backdrop="static" keyboard={false}>
         <Modal.Header closeButton>
           <Modal.Title>Create/Update Module</Modal.Title>
         </Modal.Header>
@@ -649,14 +659,14 @@ const Modules = () => {
           </Button>
         </Modal.Footer>
       </Modal>
-      <Modal show={showAssignUserModal} onHide={handleCloseAssignUserModal}>
+      <Modal show={showAssignUserModal} onHide={handleCloseAssignUserModal} backdrop="static" keyboard={false}>
         <Modal.Header closeButton>
           <Modal.Title>Assign Users to Module</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form>
             <Form.Group controlId="formAssignUser">
-              <Form.Label>Assign Users</Form.Label>
+
               <Form.Control
                 as="select"
                 className="border border-dark"
@@ -665,7 +675,7 @@ const Modules = () => {
                   setAssignedTo(Array.from(e.target.selectedOptions, (option) => option.value))
                 }
               >
-                <option value="">Select User</option>
+                <option value="">Select User to Assign</option>
                 {filteredUsers.map((user) => (
                   <option key={user.id} value={user.username}>
                     {user.username}
@@ -673,8 +683,11 @@ const Modules = () => {
                 ))}
               </Form.Control>
             </Form.Group>
+            <Button variant="primary" className="mt-4 " style={{ marginLeft: "160px" }} onClick={handleAssignUserToModule}>
+              Assign User
+            </Button>
             <Form.Group controlId="formRemoveUser">
-              <Form.Label className="mt-4">Remove Users</Form.Label>
+              <Modal.Title className="mt-4">Remove Users From Module </Modal.Title>
               <Form.Control
                 as="select"
                 className="border border-dark mt-3"
@@ -691,12 +704,9 @@ const Modules = () => {
             </Form.Group>
           </Form>
         </Modal.Body>
-        <Modal.Footer>
+        <Modal.Footer className=' d-flex align-item-center justify-content-center'>
           <Button variant="secondary" onClick={handleCloseAssignUserModal}>
             Close
-          </Button>
-          <Button variant="primary" onClick={handleAssignUserToModule}>
-            Assign User
           </Button>
           <Button variant="danger" onClick={handleRemoveUser}>
             Remove User
