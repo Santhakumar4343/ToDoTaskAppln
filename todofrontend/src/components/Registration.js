@@ -37,7 +37,7 @@ const RegistrationForm = () => {
     try {
       setOtpError("");
       const response = await axios.post(
-        "http://13.233.111.56:8082/api/users/verify-otp",
+        "http://localhost:8082/api/users/verify-otp",
         { username: formData.username, otp: otp }
       );
 
@@ -87,11 +87,15 @@ const RegistrationForm = () => {
     }
   };
 
-  // Function to save the user in the database
   const saveUser = async () => {
     try {
+      const saveEndpoint =
+        formData.userType === "admin"
+          ? "http://localhost:8082/api/admins"
+          : "http://localhost:8082/api/users";
+  
       // Assuming you have an endpoint to save the user after OTP verification
-      await axios.post("http://13.233.111.56:8082/api/users/save", formDataForSave);
+      await axios.post(saveEndpoint + "/save", formDataForSave);
       console.log("User saved successfully!");
     } catch (error) {
       console.error("Error saving user:", error);
@@ -118,7 +122,7 @@ const RegistrationForm = () => {
         // Check if the username already exists
         try {
           const response = await axios.get(
-            "http://13.233.111.56:8082/api/users/allUsernames"
+            "http://localhost:8082/api/users/allUsernames"
           );
   
           if (response.data.includes(value)) {
@@ -136,7 +140,7 @@ const RegistrationForm = () => {
           // Check if the employee ID already exists
           try {
             const response = await axios.get(
-              "http://13.233.111.56:8082/api/users/allEmployeeIds"
+              "http://localhost:8082/api/users/allEmployeeIds"
             );
     
             if (response.data.includes(value)) {
@@ -202,7 +206,7 @@ const RegistrationForm = () => {
           // Check if the email already exists
           try {
             const response = await axios.get(
-              "http://13.233.111.56:8082/api/users/allEmails"
+              "http://localhost:8082/api/users/allEmails"
             );
     
             if (response.data.includes(value)) {
@@ -254,7 +258,7 @@ const RegistrationForm = () => {
   };
   const sendOtpToSuperUser = async () => {
     try {
-      await axios.post("http://13.233.111.56:8082/api/users/send-otp", formData);
+      await axios.post("http://localhost:8082/api/users/send-otp", formData);
       // Assuming your server sends the OTP to the SuperUser's email
       console.log("OTP sent to SuperUser's email");
     } catch (error) {

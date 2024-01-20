@@ -5,20 +5,87 @@ import { useNavigate } from "react-router-dom";
 const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [userType, setUserType] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null); // State for error message
+  const [formData, setFormData] = useState(new FormData());
   const navigate = useNavigate();
-  const [showPassword, setShowPassword] = useState(false); 
+  const [showPassword, setShowPassword] = useState(false);
+  const handleUserTypeChange = (e) => {
+    setUserType(e.target.value);
+    formData.set("userType", e.target.value);
+  };
+  // const handleLogin = async () => {
+  //   try {
+  //     setLoading(true);
+  //     setError(null); // Clear previous error messages
+
+      
+  //     formData.append("username", username);
+  //     formData.append("password", password);
+      
+
+  //     const response = await fetch("http://localhost:8082/api/users/login", {
+  //       method: "POST",
+  //       body: formData,
+  //     });
+
+  //     if (response.ok) {
+  //       const userData = await response.json();
+  //       const userTypeLowerCase = userData.userType.toLowerCase();
+  //       const userUsername = userData.username;
+
+  //       if (userTypeLowerCase === "user") {
+  //         // Navigate to the user dashboard with state (username)
+  //         navigate("/user-dashboard", { state: { username: userUsername } });
+  //       } else if (userTypeLowerCase === "admin") {
+  //         // Navigate to the admin dashboard if needed
+  //         navigate("/admin-dashboard");
+  //       } else {
+  //         console.error("Unknown userType:", userData.userType);
+  //       }
+  //     } else {
+  //       // Set error message for invalid credentials
+  //       setError("Invalid credentials");
+  //       console.error("Login failed:", response.statusText);
+  //       setTimeout(() => {
+  //         setError(null);
+  //       }, 2000);
+  //     }
+  //   } catch (error) {
+  //     // Set error message for any other errors
+  //     setError("Login failed. Please try again later.");
+  //     console.error("Login failed:", error);
+  //     setTimeout(() => {
+  //       setError(null);
+  //     }, 2000);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+  
   const handleLogin = async () => {
     try {
       setLoading(true);
-      setError(null); // Clear previous error messages
+      setError(null);
 
       const formData = new FormData();
       formData.append("username", username);
       formData.append("password", password);
+      formData.append("userType", userType);
 
-      const response = await fetch("http://13.233.111.56:8082/api/users/login", {
+      let endpoint;
+
+      if (userType === "user") {
+        endpoint = "http://localhost:8082/api/users/login";
+      } else if (userType === "admin") {
+        endpoint = "http://localhost:8082/api/admins/login";
+      } else {
+        console.error("Unknown userType:", userType);
+        return;
+      }
+
+      const response = await fetch(endpoint, {
         method: "POST",
         body: formData,
       });
@@ -29,16 +96,13 @@ const Login = () => {
         const userUsername = userData.username;
 
         if (userTypeLowerCase === "user") {
-          // Navigate to the user dashboard with state (username)
           navigate("/user-dashboard", { state: { username: userUsername } });
         } else if (userTypeLowerCase === "admin") {
-          // Navigate to the admin dashboard if needed
           navigate("/admin-dashboard");
         } else {
           console.error("Unknown userType:", userData.userType);
         }
       } else {
-        // Set error message for invalid credentials
         setError("Invalid credentials");
         console.error("Login failed:", response.statusText);
         setTimeout(() => {
@@ -46,7 +110,6 @@ const Login = () => {
         }, 2000);
       }
     } catch (error) {
-      // Set error message for any other errors
       setError("Login failed. Please try again later.");
       console.error("Login failed:", error);
       setTimeout(() => {
@@ -108,8 +171,36 @@ const Login = () => {
             </div>
           </div>
         </Form.Group>
-
-
+        <div className=" mt-3   d-flex justify-content-center align-items-center">
+          <div className="form-check">
+            <input
+              type="radio"
+              className="form-check-input border border-dark"
+              id="user"
+              name="userType"
+              value="user"
+              checked={userType === "user"}
+              onChange={handleUserTypeChange}
+            />
+            <label className="form-check-label" htmlFor="user">
+              User
+            </label>
+          </div>
+          <div className="form-check">
+            <input
+              type="radio"
+              className="form-check-input m-1 border border-dark"
+              id="admin"
+              name="userType"
+              value="admin"
+              checked={userType === "admin"}
+              onChange={handleUserTypeChange}
+            />
+            <label className="form-check-label" htmlFor="admin">
+              Admin
+            </label>
+          </div>
+        </div>
         {error && <Alert variant="danger">{error}</Alert>}
 
         <div className="mt-2">
