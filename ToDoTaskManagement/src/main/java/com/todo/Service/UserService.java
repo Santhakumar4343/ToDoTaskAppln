@@ -18,7 +18,7 @@ public interface UserService {
  User createUser(User user);
 
  User updateUser(Long userId, User user);
-
+ User updateUserSuper(Long userId, User user);
  void deleteUser(Long userId);
  User login(String username, String password) throws AuthException;
 

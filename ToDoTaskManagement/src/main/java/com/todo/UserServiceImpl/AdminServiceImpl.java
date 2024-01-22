@@ -72,6 +72,20 @@ public class AdminServiceImpl implements AdminService {
      }
      return null; // User not found
  }
+ @Override
+ public Admin updateAdmin(Long userId, Admin updatedUser) {
+     Optional<Admin> optionalUser = adminRepository.findById(userId);
+     if (optionalUser.isPresent()) {
+         Admin existingUser = optionalUser.get();
+         // Update fields as needed
+         existingUser.setUsername(updatedUser.getUsername());
+         existingUser.setPassword(updatedUser.getPassword());
+         existingUser.setEmail(updatedUser.getEmail());
+         existingUser.setMobileNumber(updatedUser.getMobileNumber());
+         return adminRepository.save(existingUser);
+     }
+     return null; // User not found
+ }
 
  @Override
  public void deleteUser(Long userId) {

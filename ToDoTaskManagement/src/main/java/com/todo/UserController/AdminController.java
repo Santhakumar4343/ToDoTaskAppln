@@ -50,7 +50,7 @@ public class AdminController {
 
 	        return new ResponseEntity<>(users, HttpStatus.OK);
 	    }
-	@GetMapping
+	@GetMapping("/getAll")
 	public List<Admin> getAllUsers() {
 		return adminService.getAllUsers();
 	}
@@ -79,9 +79,14 @@ public class AdminController {
 	}
 
 	@PutMapping("/update/{userId}")
-	public ResponseEntity<Admin> updateUser(@PathVariable Long userId, @RequestParam String username,
-			@RequestParam String password, @RequestParam String confirmPassword, @RequestParam String employeeId,
-			@RequestParam String email, @RequestParam String mobileNumber, @RequestParam String userType) {
+	public ResponseEntity<Admin> updateUser(@PathVariable Long userId,
+			@RequestParam String username,
+			@RequestParam String password,
+			@RequestParam (required = false)String confirmPassword,
+			@RequestParam (required = false) String employeeId,
+			@RequestParam String email,
+			@RequestParam String mobileNumber,
+			@RequestParam (required = false)String userType) {
 		Admin updatedUser = new Admin();
 		updatedUser.setId(userId);
 		updatedUser.setUsername(username);
@@ -93,6 +98,23 @@ public class AdminController {
 		updatedUser.setUserType(userType);
 
 		Admin user = adminService.updateUser(userId, updatedUser);
+		return user != null ? new ResponseEntity<>(user, HttpStatus.OK) : new ResponseEntity<>(HttpStatus.NOT_FOUND);
+	}
+	@PutMapping("/update-admin/{userId}")
+	public ResponseEntity<Admin> updateUserBySuperUser(@PathVariable Long userId,
+			@RequestParam String username,
+			@RequestParam String password,
+			
+			@RequestParam String email,
+			@RequestParam String mobileNumber
+			) {
+		Admin updatedUser = new Admin();
+		updatedUser.setId(userId);
+		updatedUser.setUsername(username);
+		updatedUser.setPassword(password);
+		updatedUser.setEmail(email);
+		updatedUser.setMobileNumber(mobileNumber);
+		Admin user = adminService.updateAdmin(userId, updatedUser);
 		return user != null ? new ResponseEntity<>(user, HttpStatus.OK) : new ResponseEntity<>(HttpStatus.NOT_FOUND);
 	}
 

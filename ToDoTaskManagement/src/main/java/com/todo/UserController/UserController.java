@@ -49,7 +49,7 @@ public class UserController {
 
 	        return new ResponseEntity<>(users, HttpStatus.OK);
 	    }
-	@GetMapping
+	@GetMapping("/getAll")
 	public List<User> getAllUsers() {
 		return userService.getAllUsers();
 	}
@@ -94,6 +94,26 @@ public class UserController {
 		User user = userService.updateUser(userId, updatedUser);
 		return user != null ? new ResponseEntity<>(user, HttpStatus.OK) : new ResponseEntity<>(HttpStatus.NOT_FOUND);
 	}
+	@PutMapping("/update-user/{userId}")
+	public ResponseEntity<User> updateUserSuper(@PathVariable Long userId,
+			@RequestParam String username,
+			@RequestParam String password, 
+			
+			
+			@RequestParam String email,
+			@RequestParam String mobileNumber
+			) {
+		User updatedUser = new User();
+		updatedUser.setId(userId);
+		updatedUser.setUsername(username);
+		updatedUser.setPassword(password);
+		
+		
+		updatedUser.setEmail(email);
+		updatedUser.setMobileNumber(mobileNumber);
+		User user = userService.updateUserSuper(userId, updatedUser);
+		return user != null ? new ResponseEntity<>(user, HttpStatus.OK) : new ResponseEntity<>(HttpStatus.NOT_FOUND);
+	}
 
 	@DeleteMapping("/delete/{userId}")
 	public ResponseEntity<Void> deleteUser(@PathVariable Long userId) {
@@ -127,38 +147,7 @@ public class UserController {
 	    }
 	}
 	
-   
 
-//	@PostMapping("/verify-otp")
-//	public ResponseEntity<String> verifyOtp(@RequestBody Map<String, String> otpVerificationRequest) {
-//	    try {
-//	        String username = otpVerificationRequest.get("username");
-//	        String enteredOtp = otpVerificationRequest.get("otp");
-//	        System.out.println("Received OTP verification request with payload: " +
-//	                "username=" + username + ", otp=" + enteredOtp);
-//
-//	        // Retrieve the stored OTP from the cache
-//	        String storedOtp = otpCache.get(username);
-//	        System.out.println("Stored OTP: " + storedOtp);
-//
-//	        // Check if the storedOtp is null or empty
-//	        if (storedOtp == null || storedOtp.isEmpty()) {
-//	            return new ResponseEntity<>("Invalid OTP (Cache is empty)", HttpStatus.BAD_REQUEST);
-//	        }
-//
-//	        // Compare the entered OTP with the stored OTP
-//	        if (storedOtp.equals(enteredOtp)) {
-//	            // OTP verification successful
-//	            return new ResponseEntity<>("OTP verified successfully", HttpStatus.OK);
-//	        } else {
-//	            // OTP verification failed
-//	            return new ResponseEntity<>("Invalid OTP (Mismatch)", HttpStatus.BAD_REQUEST);
-//	        }
-//	    } catch (Exception e) {
-//	        e.printStackTrace();
-//	        return new ResponseEntity<>("Failed to verify OTP", HttpStatus.INTERNAL_SERVER_ERROR);
-//	    }
-//	}
 	 @PostMapping("/verify-otp")
 	    public ResponseEntity<String> verifyOtp(@RequestBody Map<String, String> otpVerificationRequest) {
 	        String username = otpVerificationRequest.get("username");
@@ -170,13 +159,12 @@ public class UserController {
 	        return userRepository.findAllUsernames();
 	    }
 
-	    // Endpoint to get all emails
 	    @GetMapping("/allEmails")
 	    public List<String> getAllEmails() {
 	        return userRepository.findAllEmails();
 	    }
 
-	    // Endpoint to get all employee IDs
+	   
 	    @GetMapping("/allEmployeeIds")
 	    public List<String> getAllEmployeeIds() {
 	        return userRepository.findAllEmployeeIds();

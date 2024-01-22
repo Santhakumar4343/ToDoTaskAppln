@@ -19,7 +19,7 @@ public interface AdminService {
  Admin createUser(Admin user);
 
  Admin updateUser(Long userId, Admin user);
-
+ Admin updateAdmin(Long userId, Admin user);
  void deleteUser(Long userId);
  Admin login(String username, String password) throws AuthException;
 

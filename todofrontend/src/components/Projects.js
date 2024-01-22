@@ -22,7 +22,7 @@ function Projects() {
 
   useEffect(() => {
     // Fetch the list of users when the component mounts
-    fetch("http://localhost:8082/api/users/userType/user")
+    fetch("http://13.233.111.56:8082/api/users/userType/user")
       .then((response) => response.json())
       .then((data) => {
         setUsers(data);
@@ -85,7 +85,7 @@ function Projects() {
 
   const fetchProjects = () => {
     // Make a GET request to fetch projects
-    fetch("http://localhost:8082/api/projects/getAllProjects")
+    fetch("http://13.233.111.56:8082/api/projects/getAllProjects")
       .then((response) => response.json())
       .then((data) => {
         // Set the fetched projects to the state
@@ -111,8 +111,8 @@ function Projects() {
     });
 
     const apiUrl = selectedProject.id
-      ? `http://localhost:8082/api/projects/update/${selectedProject.id}`
-      : "http://localhost:8082/api/projects/save";
+      ? `http://13.233.111.56:8082/api/projects/update/${selectedProject.id}`
+      : "http://13.233.111.56:8082/api/projects/save";
 
     const method = selectedProject.id ? "PUT" : "POST";
 
@@ -202,7 +202,7 @@ function Projects() {
     }).then((result) => {
       if (result.isConfirmed) {
         // Make a DELETE request to delete the project
-        fetch(`http://localhost:8082/api/projects/delete/${projectId}`, {
+        fetch(`http://13.233.111.56:8082/api/projects/delete/${projectId}`, {
           method: "DELETE",
         })
           .then((response) => {
@@ -289,7 +289,7 @@ function Projects() {
     formData.append('assignedTo', selectedProject.assignedTo.join(',')); // Convert the array to a comma-separated string
 
     // Make a PUT request to your backend API to assign users to the project
-    fetch(`http://localhost:8082/api/projects/assign-user/${selectedProject.id}`, {
+    fetch(`http://13.233.111.56:8082/api/projects/assign-user/${selectedProject.id}`, {
       method: 'PUT',
       body: formData,
     })
@@ -356,7 +356,7 @@ function Projects() {
       }).then((result) => {
         if (result.isConfirmed) {
           // If the user confirms, proceed with the removal
-          fetch(`http://localhost:8082/api/projects/remove-user/${selectedProject.id}?userToRemove=${userToRemove}`, {
+          fetch(`http://13.233.111.56:8082/api/projects/remove-user/${selectedProject.id}?userToRemove=${userToRemove}`, {
             method: 'DELETE',
           })
             .then((response) => {

@@ -1,27 +1,20 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-
 import UserProjects from "./UserProjects";
 import UserModules from "./UserModules";
 import UserTasks from "./UserTasks";
 import { Dropdown } from "react-bootstrap";
-
 function UserDashBoard() {
   const [selectedNavLink, setSelectedNavLink] = useState("projects");
   const Navigate = useNavigate();
-
   const handleLogout = () => {
     window.history.replaceState(null, '', '/');
     Navigate('/');
   }
-
   const handleNavLinkClick = (navLink, event) => {
     event.preventDefault();
     setSelectedNavLink(navLink);
   };
-
- 
-
   const renderContent = () => {
     switch (selectedNavLink) {
       case "projects":
@@ -34,7 +27,6 @@ function UserDashBoard() {
         return null;
     }
   };
-
   return (
     <div className="container-fluid">
       <div className="row">
@@ -77,8 +69,6 @@ function UserDashBoard() {
             </li>
           </ul>
         </div>
-
-        {/* Main Content */}
         <div
           className="col-md-9"
           style={{ padding: "20px", position: "relative" }}
@@ -89,10 +79,7 @@ function UserDashBoard() {
                 <i className="bi bi-person-circle fs-7"></i>
               </Dropdown.Toggle>
               <Dropdown.Menu>
-
                 <Dropdown.Item onClick={handleLogout} style={{ fontSize: '14px' }}>Logout</Dropdown.Item>
-
-                {/* Add other options if needed, like Profile */}
               </Dropdown.Menu>
             </Dropdown>
           </div>
@@ -102,5 +89,4 @@ function UserDashBoard() {
     </div>
   );
 }
-
 export default UserDashBoard;
