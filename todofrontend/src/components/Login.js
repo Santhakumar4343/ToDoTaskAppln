@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { Form, Button, Spinner, Alert } from "react-bootstrap";
-import { useNavigate } from "react-router-dom";
+import { Form, Button, Spinner,Modal, Alert } from "react-bootstrap";
+import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const Login = () => {
   const [username, setUsername] = useState("");
@@ -9,21 +10,72 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null); // State for error message
   const [formData, setFormData] = useState(new FormData());
+  const [showForgotPasswordModal, setShowForgotPasswordModal] = useState(false);
+  const [forgotPasswordUsername, setForgotPasswordUsername] = useState('');
+  const [forgotPasswordNewPassword, setForgotPasswordNewPassword] = useState('');
+  const [forgotPasswordConfirmNewPassword, setForgotPasswordConfirmNewPassword] = useState('');
+
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const handleUserTypeChange = (e) => {
     setUserType(e.target.value);
     formData.set("userType", e.target.value);
   };
+  const handleForgotPasswordClick = () => {
+    setShowForgotPasswordModal(true);
+  };
+
+  const handleCloseForgotPasswordModal = () => {
+    setShowForgotPasswordModal(false);
+  };
+
+  const handleForgotPasswordSubmit = async () => {
+    try {
+        // Make a backend request to get the user ID based on the entered username
+        const response = await axios.get(`http://localhost:8082/api/admins/get-user-id/${forgotPasswordUsername}`);
+        const userId = response.data;
+
+        if (!userId) {
+            // Handle the case where the user is not found
+            console.error('User not found.');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('newPassword', forgotPasswordNewPassword);
+        formData.append('confirmNewPassword', forgotPasswordConfirmNewPassword);
+
+        // Make a backend request to update the password
+        const updatePasswordResponse = await axios.put(`http://localhost:8082/api/admins/update-password/${userId}`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+
+        // Handle success
+        console.log('Password updated successfully:', updatePasswordResponse.data);
+
+        // Additional logic...
+
+        // Close the modal after the request is completed
+        setShowForgotPasswordModal(false);
+    } catch (error) {
+        // Handle errors
+        console.error('Failed to update password:', error.response.data);
+        // Additional error handling...
+    }
+};
+
+
   // const handleLogin = async () => {
   //   try {
   //     setLoading(true);
   //     setError(null); // Clear previous error messages
 
-      
+
   //     formData.append("username", username);
   //     formData.append("password", password);
-      
+
 
   //     const response = await fetch("http://localhost:8082/api/users/login", {
   //       method: "POST",
@@ -63,7 +115,7 @@ const Login = () => {
   //     setLoading(false);
   //   }
   // };
-  
+
   const handleLogin = async () => {
     try {
       setLoading(true);
@@ -200,7 +252,9 @@ const Login = () => {
               Admin
             </label>
           </div>
+
         </div>
+
         {error && <Alert variant="danger">{error}</Alert>}
 
         <div className="mt-2">
@@ -227,7 +281,54 @@ const Login = () => {
           </Button>
           <Button className=" btn btn-secondary w-50" onClick={handleCancel}>Cancel</Button>
         </div>
+        <div className="mt-3 d-flex justify-content-center align-items-center">
+          <Link to="#" onClick={handleForgotPasswordClick}>
+            Forgot Password?
+          </Link>
+      
+        <Modal show={showForgotPasswordModal} onHide={handleCloseForgotPasswordModal}  backdrop="static" keyboard={false}>
+          <Modal.Header closeButton>
+            <Modal.Title >Forgot Password</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <Form.Group controlId="formForgotPasswordUsername">
+              <Form.Control
+                type="text"
+                className="border border-dark mb-3"
+                placeholder="Username"
+                value={forgotPasswordUsername}
+                onChange={(e) => setForgotPasswordUsername(e.target.value)}
+              />
+            </Form.Group>
+
+            <Form.Group controlId="formForgotPasswordNewPassword">
+              <Form.Control
+                type="password"
+                className="border border-dark mb-3"
+                placeholder="New Password"
+                value={forgotPasswordNewPassword}
+                onChange={(e) => setForgotPasswordNewPassword(e.target.value)}
+              />
+            </Form.Group>
+
+            <Form.Group controlId="formForgotPasswordConfirmNewPassword">
+              <Form.Control
+                type="password"
+                className="border border-dark mb-3"
+                placeholder="Confirm New Password"
+                value={forgotPasswordConfirmNewPassword}
+                onChange={(e) => setForgotPasswordConfirmNewPassword(e.target.value)}
+              />
+            </Form.Group>
+
+            <Button variant="primary" className='text-center' onClick={handleForgotPasswordSubmit}>
+              Submit
+            </Button>
+          </Modal.Body>
+        </Modal>
+        </div>
       </Form>
+
     </div>
   );
 };

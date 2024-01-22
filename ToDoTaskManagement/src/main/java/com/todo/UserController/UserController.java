@@ -181,6 +181,26 @@ public class UserController {
 	    public List<String> getAllEmployeeIds() {
 	        return userRepository.findAllEmployeeIds();
 	    }
+	    @PutMapping("/update-password/{userId}")
+	    public ResponseEntity<User> updatePassword(@PathVariable Long userId, @RequestParam String newPassword,@RequestParam String confirmNewPassword) {
+	        User updatedUser = new User();
+	        updatedUser.setId(userId);
+	        updatedUser.setPassword(newPassword);
+	        updatedUser.setConfirmPassword(confirmNewPassword);
+
+	        User user = userService.updatePassword(userId, updatedUser);
+	        return user != null ? new ResponseEntity<>(user, HttpStatus.OK) : new ResponseEntity<>(HttpStatus.NOT_FOUND);
+	    }
+	    @GetMapping("/get-user-id/{username}")
+	    public ResponseEntity<Long> getUserIdByUsername(@PathVariable String username) {
+	        User user = userRepository.findByUsername(username);
+
+	        if (user != null) {
+	            return new ResponseEntity<>(user.getId(), HttpStatus.OK);
+	        } else {
+	            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+	        }
+	    }
 
 
 

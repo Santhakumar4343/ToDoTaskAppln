@@ -467,7 +467,7 @@ const RegistrationForm = () => {
             >
               Cancel
             </button>
-            <Modal show={showOtpModal} onHide={() => setShowOtpModal(false)}>
+            <Modal show={showOtpModal} onHide={() => setShowOtpModal(false)} backdrop="static" keyboard={false}>
               <Modal.Header closeButton>
                 <Modal.Title>Enter OTP</Modal.Title>
               </Modal.Header>

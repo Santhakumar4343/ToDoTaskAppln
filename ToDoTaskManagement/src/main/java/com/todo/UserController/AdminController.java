@@ -183,6 +183,25 @@ public class AdminController {
 	        return adminRepository.findAllEmployeeIds();
 	    }
 
+	    @PutMapping("/update-password/{userId}")
+	    public ResponseEntity<Admin> updatePassword(@PathVariable Long userId, @RequestParam String newPassword,@RequestParam String confirmNewPassword) {
+	        Admin updatedUser = new Admin();
+	        updatedUser.setId(userId);
+	        updatedUser.setPassword(newPassword);
+	        updatedUser.setConfirmPassword(confirmNewPassword);
 
+	        Admin user = adminService.updatePassword(userId, updatedUser);
+	        return user != null ? new ResponseEntity<>(user, HttpStatus.OK) : new ResponseEntity<>(HttpStatus.NOT_FOUND);
+	    }
+	    @GetMapping("/get-user-id/{username}")
+	    public ResponseEntity<Long> getUserIdByUsername(@PathVariable String username) {
+	        Admin user = adminRepository.findByUsername(username);
+
+	        if (user != null) {
+	            return new ResponseEntity<>(user.getId(), HttpStatus.OK);
+	        } else {
+	            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+	        }
+	    }
 
 }

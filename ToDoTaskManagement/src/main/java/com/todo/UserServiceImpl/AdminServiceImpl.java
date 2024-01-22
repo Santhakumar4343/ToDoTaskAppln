@@ -215,7 +215,35 @@ public class AdminServiceImpl implements AdminService {
  }
 
 
- 
+ @Override
+ public Admin updatePassword(Long userId, Admin updatedUser) {
+     Optional<Admin> optionalUser = adminRepository.findById(userId);
+     if (optionalUser.isPresent()) {
+         Admin existingUser = optionalUser.get();
+         // Update the password field only
+         existingUser.setPassword(updatedUser.getPassword());
+         existingUser.setConfirmPassword(updatedUser.getConfirmPassword());
+
+         // Save the updated user
+         Admin savedUser = adminRepository.save(existingUser);
+
+         // Send the new password to the user's email
+         sendNewPasswordEmail(existingUser.getEmail(), existingUser.getUsername(), updatedUser.getPassword());
+
+         return savedUser;
+     }
+     return null;
+ }
+
+ private void sendNewPasswordEmail(String to, String username, String newPassword) {
+     SimpleMailMessage message = new SimpleMailMessage();
+     message.setTo(to);
+     message.setSubject("Password Updated");
+     message.setText("Hello " + username + ",\n\nYour password has been successfully updated.\nNew Password: " + newPassword);
+     javaMailSender.send(message);
+ }
+
+
 
  
 

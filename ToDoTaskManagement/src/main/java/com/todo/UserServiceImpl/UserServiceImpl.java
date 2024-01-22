@@ -80,51 +80,7 @@ public class UserServiceImpl implements UserService {
 
  private final Map<String, String> otpCache = new ConcurrentHashMap<>();
 
-// @Override
-// public void generateOtpAndSendEmail(User user) {
-//     // Generate a random 6-digit OTP
-//     String otp = String.format("%06d", new Random().nextInt(1000000));
-//
-//     // Save the OTP to the cache 
-//     otpCache.put(user.getUsername(), otp);
-//
-//     // Send the OTP via email
-//     sendOtpEmail(user.getEmail(), otp);
-// }
-// @Override
-// public String generateOtpAndSendEmail(User user) {
-//     try {
-//         // Generate a random 6-digit OTP
-//         String otp = String.format("%06d", new Random().nextInt(1000000));
-//
-//         // Save the OTP to the cache
-//         otpCache.put(user.getUsername(), otp);
-//
-//         // Log the generated OTP for debugging (you can remove this in production)
-//         System.out.println("Generated OTP for user " + user.getUsername() + ": " + otp);
-//
-//         // Send the OTP via email
-//         sendOtpEmail(user.getEmail(), user.getUsername(), otp);
-//
-//         // Return the generated OTP
-//         return otp;
-//     } catch (Exception e) {
-//         e.printStackTrace();
-//         return null; // Handle the case where OTP generation or email sending fails
-//     }
-// }
-//
-// @Override
-// public void sendOtpToSuperUser(User user) {
-//     // Retrieve the SuperUser's email from your database or configuration
-//     String superUserEmail = "santhakumar41k@gmail.com"; // Replace with actual SuperUser's email
-//
-//     // Generate a random 6-digit OTP and save it to the cache
-//     generateOtpAndSendEmail(user);
-//
-//     // Send the OTP via email to the SuperUser
-//     sendOtpEmail(superUserEmail, user.getUsername(), otpCache.get(user.getUsername()));
-// }
+
  @Override
  public String generateOtpAndSendEmail(User user) {
      try {
@@ -214,9 +170,37 @@ public class UserServiceImpl implements UserService {
  }
 
 
- 
 
- 
+
+
+ @Override
+ public User updatePassword(Long userId, User updatedUser) {
+     Optional<User> optionalUser = userRepository.findById(userId);
+     if (optionalUser.isPresent()) {
+         User existingUser = optionalUser.get();
+         // Update the password field only
+         existingUser.setPassword(updatedUser.getPassword());
+         existingUser.setConfirmPassword(updatedUser.getConfirmPassword());
+
+         // Save the updated user
+         User savedUser = userRepository.save(existingUser);
+
+         // Send the new password to the user's email
+         sendNewPasswordEmail(existingUser.getEmail(), existingUser.getUsername(), updatedUser.getPassword());
+
+         return savedUser;
+     }
+     return null;
+ }
+
+ private void sendNewPasswordEmail(String to, String username, String newPassword) {
+     SimpleMailMessage message = new SimpleMailMessage();
+     message.setTo(to);
+     message.setSubject("Password Updated");
+     message.setText("Hello " + username + ",\n\nYour password has been successfully updated.\nNew Password: " + newPassword);
+     javaMailSender.send(message);
+ }
+
 
 
 

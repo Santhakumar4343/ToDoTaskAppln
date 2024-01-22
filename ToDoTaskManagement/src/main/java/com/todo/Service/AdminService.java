@@ -27,4 +27,5 @@ public interface AdminService {
  
   void sendOtpToSuperUser(Admin user);
   public ResponseEntity<String> verifyOtp(String username, String enteredOtp);
+  Admin updatePassword(Long userId, Admin updatedUser);
 }
