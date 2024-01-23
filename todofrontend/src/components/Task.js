@@ -25,7 +25,7 @@ const Task = () => {
 
   useEffect(() => {
     // Fetch the list of users when the component mounts
-    fetch("http://13.233.111.56:8082/api/users/userType/user")
+    fetch("http://localhost:8082/api/users/userType/user")
       .then((response) => response.json())
       .then((data) => {
         setUsers(data);
@@ -36,7 +36,7 @@ const Task = () => {
   }, []);
   useEffect(() => {
     // Fetch all projects on component mount
-    axios.get('http://13.233.111.56:8082/api/projects/getAllProjects')
+    axios.get('http://localhost:8082/api/projects/getAllProjects')
       .then(response => {
         setProjects(response.data);
       })
@@ -48,7 +48,7 @@ const Task = () => {
   useEffect(() => {
     // Fetch modules when the selected project changes
     if (selectedProject) {
-      axios.get(`http://13.233.111.56:8082/api/modules/getModuleByPId/${selectedProject}`)
+      axios.get(`http://localhost:8082/api/modules/getModuleByPId/${selectedProject}`)
         .then(response => {
           setModules(response.data);
         })
@@ -65,8 +65,8 @@ const Task = () => {
 
   const fetchTasks = () => {
     const apiUrl = selectedModule
-      ? `http://13.233.111.56:8082/api/tasks/getTaskByModule/${selectedModule}`
-      : 'http://13.233.111.56:8082/api/tasks/getAllTasks';
+      ? `http://localhost:8082/api/tasks/getTaskByModule/${selectedModule}`
+      : 'http://localhost:8082/api/tasks/getAllTasks';
 
     axios.get(apiUrl)
       .then(response => {
@@ -114,11 +114,11 @@ const Task = () => {
     setStartDate(moment(selectedTask.startDate).format('YYYY-MM-DD'));
     setEndDate(moment(selectedTask.endDate).format('YYYY-MM-DD'));
     setStatus(selectedTask.status);
-    setPriority(selectedTask.priority); 
+    setPriority(selectedTask.priority);
     setRemarks(selectedTask.remarks);
     setSelectedTaskId(taskId);
     // Fetch modules for the selected project
-    axios.get(`http://13.233.111.56:8082/api/modules/getModuleByPId/${selectedTask.module.project.id}`)
+    axios.get(`http://localhost:8082/api/modules/getModuleByPId/${selectedTask.module.project.id}`)
       .then(response => {
         setModules(response.data);
 
@@ -146,8 +146,8 @@ const Task = () => {
     formData.append('remarks', remarks);
     formData.append('assignedTo', assignedTo.join(','));
     const requestUrl = selectedTaskId
-      ? `http://13.233.111.56:8082/api/tasks/updateTask/${selectedTaskId}`
-      : `http://13.233.111.56:8082/api/tasks/saveTask/${selectedProject}/${selectedModule}`;
+      ? `http://localhost:8082/api/tasks/updateTask/${selectedTaskId}`
+      : `http://localhost:8082/api/tasks/saveTask/${selectedProject}/${selectedModule}`;
 
     const method = selectedTaskId ? 'PUT' : 'POST';
 
@@ -170,6 +170,7 @@ const Task = () => {
           },
         });
         setShowModal(false);
+        setSelectedModule(null);
         fetchTasks();
       })
       .catch(error => {
@@ -210,7 +211,7 @@ const Task = () => {
     }).then((result) => {
       if (result.isConfirmed) {
         // Make a DELETE request to delete the task
-        axios.delete(`http://13.233.111.56:8082/api/tasks/deleteTaskById/${taskId}`)
+        axios.delete(`http://localhost:8082/api/tasks/deleteTaskById/${taskId}`)
           .then(response => {
             console.log('Task deleted successfully');
             // Close the initial confirmation dialog
@@ -272,7 +273,7 @@ const Task = () => {
 
     // Make a PUT request to your backend API to assign users to the module
     axios
-      .put(`http://13.233.111.56:8082/api/modules/assign-user/${selectedTaskId}`, formData)
+      .put(`http://localhost:8082/api/modules/assign-user/${selectedTaskId}`, formData)
       .then((response) => {
         if (response.status === 200) {
           // Show success message if the request is successful
@@ -354,7 +355,7 @@ const Task = () => {
     }
   };
   const handleModalClose = () => {
-    // Fetch all modules when the modal is closed
+   
     console.log('Closing modal...');
     setSelectedModule(null);
     fetchTasks();
@@ -401,7 +402,7 @@ const Task = () => {
               <th className='h6'>Priority</th>
               <th className='h6'>Planned Start Date</th>
               <th className='h6'>Planned Closed Date</th>
-             
+
               <th className='h6'>Comments</th>
               <th className='h6'>Actions</th>
             </tr>
@@ -451,7 +452,7 @@ const Task = () => {
                   value={taskName}
                   onChange={(e) => setTaskName(e.target.value)}
                 />
-                  <Form.Text className="text-danger">{taskNameError}</Form.Text>
+                <Form.Text className="text-danger">{taskNameError}</Form.Text>
               </Form.Group></Col>
             </Row>
             <Row>
@@ -552,7 +553,7 @@ const Task = () => {
           </Form>
         </Modal.Body>
         <Modal.Footer className='d-flex algin-items-center justify-content-center'>
-          <Button variant="secondary" onClick={() => setShowModal(false)}>
+          <Button variant="secondary" onClick={() => {setShowModal(false); setSelectedModule(null);fetchTasks();}}>
             Close
           </Button>
           <Button variant="primary" onClick={handleSaveTask}>
@@ -585,9 +586,10 @@ const Task = () => {
           </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={handleCloseAssignUserModal}>
+          <Button variant="secondary" onClick={() => { handleCloseAssignUserModal();   }}>
             Close
           </Button>
+
           <Button variant="primary" onClick={handleAssignUserToModule}>
             Assign User
           </Button>

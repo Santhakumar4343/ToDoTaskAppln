@@ -42,7 +42,7 @@ const Admins = () => {
         formData.append('mobileNumber', updatedAdmin.mobileNumber);
 
         // Make a backend request to update the admin
-        const response = await fetch(`http://13.233.111.56:8082/api/users/update-user/${selectedAdmin.id}`, {
+        const response = await fetch(`http://localhost:8082/api/users/update-user/${selectedAdmin.id}`, {
             method: 'PUT',
             body: formData,
         });
@@ -63,7 +63,7 @@ const Admins = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await fetch('http://13.233.111.56:8082/api/users/getAll');
+                const response = await fetch('http://localhost:8082/api/users/getAll');
                 if (!response.ok) {
                     throw new Error('Failed to fetch admins');
                 }
@@ -102,7 +102,7 @@ const Admins = () => {
       }).then((result) => {
         if (result.isConfirmed) {
           // Make a DELETE request to delete the user
-          fetch(`http://13.233.111.56:8082/api/users/delete/${adminId}`, {
+          fetch(`http://localhost:8082/api/users/delete/${adminId}`, {
             method: 'DELETE',
           })
             .then((response) => {
@@ -161,8 +161,8 @@ const Admins = () => {
         <div>
           <FormControl
                 type="text"
-                placeholder="Search by Module Name, Remarks, or Status"
-                className="mb-5 "
+                placeholder="Search by User Name, Email, or UserId"
+                className="mb-4 "
                 style={{ border: '1px solid black' }}
                 onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -170,8 +170,8 @@ const Admins = () => {
                 <Table striped bordered hover className="text-center border border-dark" style={{ borderRadius: '10px !important' }}>
                     <thead>
                         <tr>
-                            <th className='h6'>Admin ID</th>
-                            <th className='h6'>Admin Name</th>
+                            <th className='h6'>User ID</th>
+                            <th className='h6'>User Name</th>
                             <th className='h6'>Email</th>
                             <th className='h6'>Password</th>
                             <th className='h6'>Mobile Number</th>

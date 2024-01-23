@@ -13,9 +13,9 @@ import Modules from './components/Modules';
 import Task from './components/Task';
 import SuperUserLogin from './components/SuperUser/SuperUserLogin';
 import SuperUserDashboard from './components/SuperUser/SuperUserDashboard';
-import Users from './components/SuperUser/Users';
-import Admins from './components/SuperUser/Admins';
+
 function Home() {
+ 
   const fadeIn = useSpring({
     opacity: 1,
     from: { opacity: 0 },
@@ -27,13 +27,14 @@ function Home() {
     left: '50%', // Adjust as needed
     transform: 'translate(-50%, -50%)', // Center the div
   };
+
   const backgroundStyle = {
     backgroundImage: `url(${backgroundImage})`,
     backgroundSize: 'cover',
     backgroundRepeat: 'no-repeat',
     backgroundPosition: 'center',
   };
-
+ 
   return (
     
     <div style={backgroundStyle}>
@@ -56,6 +57,7 @@ function Home() {
   );
 }
 
+
 function App() {
  
   return (
@@ -64,12 +66,17 @@ function App() {
         <header className="text-center mt-4">
           
           <div className="col-md-2">
+           <Link to="/" className="logo-link">
+             
+               
             <img
               src={Logo}
               className="img-fluid mt-3 ml-3"
               alt="logo"
+             
               style={{ width: "200px", height: "80px", borderRadius: "10px" }}
-            /></div>
+            />
+            </Link></div>
         </header>
 
         <div className="row justify-content-center mt-1">

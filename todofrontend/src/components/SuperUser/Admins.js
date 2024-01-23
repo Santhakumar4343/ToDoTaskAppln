@@ -8,7 +8,6 @@ const Admins = () => {
     const [error, setError] = useState(null);
     const [showPassword, setShowPassword] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
-    // State for update modal
     const [showUpdateModal, setShowUpdateModal] = useState(false);
     const [selectedAdmin, setSelectedAdmin] = useState({});
     const [updatedAdmin, setUpdatedAdmin] = useState({
@@ -42,7 +41,7 @@ const Admins = () => {
         formData.append('mobileNumber', updatedAdmin.mobileNumber);
 
         // Make a backend request to update the admin
-        const response = await fetch(`http://13.233.111.56:8082/api/admins/update-admin/${selectedAdmin.id}`, {
+        const response = await fetch(`http://localhost:8082/api/admins/update-admin/${selectedAdmin.id}`, {
             method: 'PUT',
             body: formData,
         });
@@ -59,11 +58,10 @@ const Admins = () => {
             console.error('Failed to update admin:', response.statusText);
         }
     };
-
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await fetch('http://13.233.111.56:8082/api/admins/getAll');
+                const response = await fetch('http://localhost:8082/api/admins/getAll');
                 if (!response.ok) {
                     throw new Error('Failed to fetch admins');
                 }
@@ -75,18 +73,14 @@ const Admins = () => {
                 setLoading(false);
             }
         };
-
         fetchData();
     }, []);
-
     if (loading) {
         return <p>Loading...</p>;
     }
-
     if (error) {
         return <p>Error: {error}</p>;
     }
-
     const handleDeleteUser = (adminId) => {
         Swal.fire({
             title: 'Are you sure?',
@@ -103,7 +97,7 @@ const Admins = () => {
         }).then((result) => {
             if (result.isConfirmed) {
                 // Make a DELETE request to delete the user
-                fetch(`http://13.233.111.56:8082/api/admins/delete/${adminId}`, {
+                fetch(`http://localhost:8082/api/admins/delete/${adminId}`, {
                     method: 'DELETE',
                 })
                     .then((response) => {
@@ -120,8 +114,6 @@ const Admins = () => {
                                     popup: 'max-width-100',
                                 },
                             });
-
-
                         } else {
                             console.error('Error deleting user:', response.status);
                             Swal.fire({
@@ -161,8 +153,8 @@ const Admins = () => {
         <div>
             <FormControl
                 type="text"
-                placeholder="Search by Module Name, Remarks, or Status"
-                className="mb-6 "
+                placeholder="Search by Admin Name, Email, or Admin Id"
+                className="mb-4 "
                 style={{ border: '1px solid black' }}
                 onChange={(e) => setSearchTerm(e.target.value)}
             />

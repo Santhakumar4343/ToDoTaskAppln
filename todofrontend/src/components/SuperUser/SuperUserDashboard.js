@@ -2,13 +2,19 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Users from './Users';
 import Admins from './Admins';
-
+import { useNavigate } from "react-router-dom";
+import { Dropdown } from 'react-bootstrap';
 function SuperUserDashboard() {
   const [selectedNavLink, setSelectedNavLink] = useState('admins');
   const handleNavLinkClick = (navLink, event) => {
     event.preventDefault();
     setSelectedNavLink(navLink);
   };
+  const Navigate = useNavigate();
+  const handleLogout = () => {
+    window.history.replaceState(null, '', '/');
+    Navigate('/');
+  }
   const renderContent = () => {
     switch (selectedNavLink) {
       case 'users':
@@ -39,7 +45,20 @@ function SuperUserDashboard() {
             </li>
           </ul>
         </div>
-        <div className="col-md-9" style={{ padding: '20px' }}>
+        <div
+          className="col-md-9"
+          style={{ padding: "20px", position: "relative" }}
+        >
+          <div className="d-flex justify-content-end mb-4">
+            <Dropdown>
+              <Dropdown.Toggle variant="secondary" id="userDropdown">
+                <i className="bi bi-person-circle fs-7"></i>
+              </Dropdown.Toggle>
+              <Dropdown.Menu>
+                <Dropdown.Item onClick={handleLogout} style={{ fontSize: '14px' }}>Logout</Dropdown.Item>
+              </Dropdown.Menu>
+            </Dropdown>
+          </div>
           {renderContent()}
         </div>
       </div>

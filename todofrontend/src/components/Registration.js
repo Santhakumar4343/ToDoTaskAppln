@@ -13,6 +13,8 @@ const RegistrationForm = () => {
   const [otpError, setOtpError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [userType, setUserType] = useState("user");
+
 
   const [formData, setFormData] = useState({
     username: "",
@@ -93,7 +95,7 @@ const RegistrationForm = () => {
         formData.userType === "admin"
           ? "http://13.233.111.56:8082/api/admins"
           : "http://13.233.111.56:8082/api/users";
-  
+
       // Assuming you have an endpoint to save the user after OTP verification
       await axios.post(saveEndpoint + "/save", formDataForSave);
       console.log("User saved successfully!");
@@ -116,15 +118,14 @@ const RegistrationForm = () => {
 
     switch (name) {
       case "username":
-        newErrors.username =
-          value.length < 3 ? "Username must be 3 characters" : "";
-  
+        newErrors.username = value.length < 3 ? "Username must be 3 characters" : "";
+
         // Check if the username already exists
         try {
           const response = await axios.get(
-            "http://13.233.111.56:8082/api/users/allUsernames"
+            `http://13.233.111.56:8082/api/${formData.userType === 'admin' ? 'admins' : 'users'}/allUsernames`
           );
-  
+
           if (response.data.includes(value)) {
             newErrors.username = "Username already exists";
           }
@@ -133,16 +134,14 @@ const RegistrationForm = () => {
         }
         break;
         case "employeeId":
-          newErrors.employeeId ="";
-            // Implement uniqueness check here (e.g., make an API call to check if the employee ID is unique)
-            // If not unique, set newErrors.employeeId = 'Employee ID must be unique';
-    
+          newErrors.employeeId = "";
+  
           // Check if the employee ID already exists
           try {
             const response = await axios.get(
-              "http://13.233.111.56:8082/api/users/allEmployeeIds"
+              `http://13.233.111.56:8082/api/${formData.userType === 'admin' ? 'admins' : 'users'}/allEmployeeIds`
             );
-    
+  
             if (response.data.includes(value)) {
               newErrors.employeeId = "Employee ID already exists";
             }
@@ -150,7 +149,7 @@ const RegistrationForm = () => {
             console.error("Error fetching employee IDs:", error);
           }
           break;
-         case "password":
+      case "password":
         newErrors.password =
           !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(
             value
@@ -164,18 +163,18 @@ const RegistrationForm = () => {
       //   break;
       case "password":
         const isPasswordValid = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(value)
-        ? "Password must be 8 characters "
-               : "";
-  
+          ? "Password must be 8 characters "
+          : "";
+
         setErrors((prevErrors) => ({
           ...prevErrors,
           password: isPasswordValid
             ? ''
             : 'Password must be 8 characters and include at least one lowercase letter, one uppercase letter, one number, and one special character (!@#$%^&*)',
         }));
-  
+
         // Display SweetAlert2 alert for password validation error after 8 characters
-        if (!isPasswordValid && value.length >=8) {
+        if (!isPasswordValid && value.length >= 8) {
           Swal.fire({
             icon: 'error',
             title: 'Invalid Password',
@@ -189,7 +188,7 @@ const RegistrationForm = () => {
               popup: 'max-width-100',
             },
           });
-          
+
         }
         break;
       case "confirmPassword":
@@ -198,26 +197,44 @@ const RegistrationForm = () => {
             ? "Passwords do not match"
             : "";
         break;
-        case "email":
-          newErrors.email = !/^[a-z0-9.]+@[a-z]+\.[a-z]+$/.test(value)
-            ? "Invalid email format"
-            : "";
-    
-          // Check if the email already exists
-          try {
-            const response = await axios.get(
-              "http://13.233.111.56:8082/api/users/allEmails"
-            );
-    
-            if (response.data.includes(value)) {
-              newErrors.email = "Email already exists";
-            }
-          } catch (error) {
-            console.error("Error fetching emails:", error);
+      // case "email":
+      //   newErrors.email = !/^[a-z0-9.]+@[a-z]+\.[a-z]+$/.test(value)
+      //     ? "Invalid email format"
+      //     : "";
+
+      //   // Check if the email already exists
+      //   try {
+      //     const response = await axios.get(
+      //       "http://13.233.111.56:8082/api/users/allEmails"
+      //     );
+
+      //     if (response.data.includes(value)) {
+      //       newErrors.email = "Email already exists";
+      //     }
+      //   } catch (error) {
+      //     console.error("Error fetching emails:", error);
+      //   }
+      //   break;
+
+      case "email":
+        newErrors.email = !/^[a-z0-9.]+@[a-z]+\.[a-z]+$/.test(value)
+          ? "Invalid email format"
+          : "";
+
+        // Check if the email already exists
+        try {
+          const response = await axios.get(
+            `http://13.233.111.56:8082/api/${formData.userType === 'admin' ? 'admins' : 'users'}/allEmails`
+          );
+
+          if (response.data.includes(value)) {
+            newErrors.email = "Email already exists";
           }
-          break;
-    
-    
+        } catch (error) {
+          console.error("Error fetching emails:", error);
+        }
+        break;
+
       case "mobileNumber":
         newErrors.mobileNumber = !/^[6-9]\d{9}$/.test(value)
           ? "please enter a valid 10 digit number"
@@ -229,10 +246,39 @@ const RegistrationForm = () => {
 
     setErrors(newErrors);
   };
+  const [newErrors, setNewErrors] = useState({
+    email: '',
+    employeeId: '',
+    username: '',
+    
+  });
 
-  const handleUserTypeChange = (e) => {
-    setFormData({ ...formData, userType: e.target.value });
+  // const handleUserTypeChange = (e) => {
+  //   setFormData({ ...formData, userType: e.target.value });
+  // };
+  const handleUserTypeChange = (event) => {
+    const newUserType = event.target.value;
+    setFormData({ ...formData, userType: newUserType });
+  
+    // Clear previous errors when user type changes
+    setErrors({
+      username: "",
+      employeeId: "",
+      password: "",
+      confirmPassword: "",
+      email: "",
+      mobileNumber: "",
+    });
+  
+    
+    setNewErrors({
+      email: '',
+      employeeId: '',
+      username: '',
+      // add other admin-specific error fields...
+    });
   };
+  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
