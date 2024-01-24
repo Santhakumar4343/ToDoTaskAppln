@@ -17,6 +17,9 @@ const Login = () => {
   const [forgotPasswordNewPassword, setForgotPasswordNewPassword] = useState('');
   const [forgotPasswordConfirmNewPassword, setForgotPasswordConfirmNewPassword] = useState('');
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [otp, setOtp] = useState("");
+  const [showOtpModal, setShowOtpModal] = useState(false);
+  const [otpError, setOtpError] = useState("");
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const handleUserTypeChange = (e) => {
@@ -31,44 +34,13 @@ const Login = () => {
     setShowForgotPasswordModal(true);
   };
 
-
-  //   const handleForgotPasswordSubmit = async () => {
-  //     try {
-  //         // Make a backend request to get the user ID based on the entered username
-  //         const response = await axios.get(`http://localhost:8082/api/admins/get-user-id/${forgotPasswordUsername}`);
-  //         const userId = response.data;
-
-  //         if (!userId) {
-  //             // Handle the case where the user is not found
-  //             console.error('User not found.');
-  //             return;
-  //         }
-
-  //         const formData = new FormData();
-  //         formData.append('newPassword', forgotPasswordNewPassword);
-  //         formData.append('confirmNewPassword', forgotPasswordConfirmNewPassword);
-  //         formData.append("userType", userType);
-
-  //         // Make a backend request to update the password
-  //         const updatePasswordResponse = await axios.put(`http://localhost:8082/api/admins/update-password/${userId}`, formData, {
-  //             headers: {
-  //                 'Content-Type': 'multipart/form-data',
-  //             },
-  //         });
-  //         console.log('Password updated successfully:', updatePasswordResponse.data);
-  //         // Close the modal after the request is completed
-  //         setShowForgotPasswordModal(false);
-  //     } catch (error) {
-  //         // Handle errors
-  //         console.error('Failed to update password:', error.response.data);
-  //     }
-  // };
   const handleCloseForgotPasswordModal = () => {
     // Reset modal input data when it's closed
     setForgotPasswordUsername('');
     setForgotPasswordNewPassword('');
     setForgotPasswordConfirmNewPassword('');
     setShowForgotPasswordModal(false);
+    resetModalDetails(); 
   };
   const handleForgotPasswordSubmit = async () => {
     try {
@@ -103,68 +75,99 @@ const Login = () => {
         });
         return;
       }
+      sendOtpToSuperUser();
+    } catch (error) {
+    }
+  };
 
-      // Determine the appropriate API endpoints based on userType
+  
+  const handleUpdatePassword = async () => {
+    try {
       let getUserIdEndpoint;
       let updatePasswordEndpoint;
-
+  
+      // Determine the appropriate API endpoints based on userType
       if (userType === "user") {
-        getUserIdEndpoint = `http://localhost:8082/api/users/get-user-id/${forgotPasswordUsername}`;
-        updatePasswordEndpoint = `http://localhost:8082/api/users/update-password`;
+        getUserIdEndpoint = `http://13.233.111.56:8082/api/users/get-user-id/${forgotPasswordUsername}`;
+        updatePasswordEndpoint = `http://13.233.111.56:8082/api/users/update-password`;
       } else if (userType === "admin") {
-        getUserIdEndpoint = `http://localhost:8082/api/admins/get-user-id/${forgotPasswordUsername}`;
-        updatePasswordEndpoint = `http://localhost:8082/api/admins/update-password`;
+        getUserIdEndpoint = `http://13.233.111.56:8082/api/admins/get-user-id/${forgotPasswordUsername}`;
+        updatePasswordEndpoint = `http://13.233.111.56:8082/api/admins/update-password`;
       } else {
         console.error("Unknown userType:", userType);
         return;
       }
-
+  
       // Make a backend request to get the user ID based on the entered username
-      const response = await axios.get(getUserIdEndpoint);
-      const userId = response.data;
-
+      const getUserIdResponse = await axios.get(getUserIdEndpoint);
+      const userId = getUserIdResponse.data;
+  
       if (!userId) {
         // Handle the case where the user is not found
         console.error('User not found.');
+        Swal.fire({
+          icon: 'error',
+          title: 'User not found',
+          text: `User with username ${forgotPasswordUsername} not found.`,
+          customClass: {
+            popup: 'max-width-100',
+          },
+        });
         return;
       }
-
+  
       const formData = new FormData();
       formData.append('newPassword', forgotPasswordNewPassword);
       formData.append('confirmNewPassword', forgotPasswordConfirmNewPassword);
-      formData.append("userType", userType);
-
+      formData.append('userType', userType);
+  
       // Make a backend request to update the password
-      const updatePasswordResponse = await axios.put(`${updatePasswordEndpoint}/${userId}`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      const updatePasswordResponse = await axios.put(
+        `${updatePasswordEndpoint}/${userId}`,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
+  
       console.log('Password updated successfully:', updatePasswordResponse.data);
+  
       Swal.fire({
         icon: 'success',
         title: 'Password updated',
-        text: `Password updated successfully! ${username}`,
+        text: `Password updated successfully for ${forgotPasswordUsername}`,
         customClass: {
           popup: 'max-width-100',
         },
       });
+  
       // Close the modal after the request is completed
       setShowForgotPasswordModal(false);
     } catch (error) {
-      // Handle errors
+      // Handle specific error cases
       console.error('Failed to update password:', error.response.data);
+  
+      let errorMessage = 'Failed to update the password';
+  
+      if (error.response.status === 404) {
+        errorMessage = `User with username ${forgotPasswordUsername} not found.`;
+      } else if (error.response.status === 400) {
+        errorMessage = 'Invalid input. Please check your data and try again.';
+      }
+  
       Swal.fire({
         icon: 'error',
-        title: 'Failed to update the password',
-        text: `Failed to update the password ${username} `,
+        title: 'Error',
+        text: errorMessage,
         customClass: {
           popup: 'max-width-100',
         },
       });
     }
   };
-
+  
 
   const handleLogin = async () => {
     try {
@@ -179,9 +182,9 @@ const Login = () => {
       let endpoint;
 
       if (userType === "user") {
-        endpoint = "http://localhost:8082/api/users/login";
+        endpoint = "http://13.233.111.56:8082/api/users/login";
       } else if (userType === "admin") {
-        endpoint = "http://localhost:8082/api/admins/login";
+        endpoint = "http://13.233.111.56:8082/api/admins/login";
       } else {
         console.error("Unknown userType:", userType);
         return;
@@ -226,8 +229,39 @@ const Login = () => {
   };
   const handleCancelForgotPassword = () => {
     setShowForgotPasswordModal(false);
+    resetModalDetails(); 
   };
 
+  const sendOtpToSuperUser = async () => {
+    try {
+      const requestData = {
+        username: forgotPasswordUsername,
+        otp: otp,
+        userType: userType,
+      };
+  
+      // Determine the appropriate API endpoint based on userType
+      const otpEndpoint = userType === "admin"
+        ? 'http://13.233.111.56:8082/api/admins/send-otp-admin-forgot-password'
+        : 'http://13.233.111.56:8082/api/users/send-otp-user-forgot-password';
+  
+      // Send OTP to the respective endpoint
+      await axios.post(otpEndpoint, requestData, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+  
+      // Assuming your server sends the OTP to the SuperUser's email
+      console.log("OTP sent to SuperUser's email");
+  
+      // Open the OTP modal after sending OTP
+      setShowOtpModal(true);
+    } catch (error) {
+      console.error("Error sending OTP to SuperUser's email:", error);
+    }
+  };
+  
 
 
 
@@ -237,27 +271,11 @@ const Login = () => {
 
     switch (inputName) {
       case "forgotPasswordNewPassword":
-        const isPasswordValid = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(value);
-        newErrors.forgotPasswordNewPassword = isPasswordValid
-          ? ''
-          : 'Password must be 8 characters ';
-
-        // Display SweetAlert2 alert for password validation error after 8 characters
-        if (!isPasswordValid && value.length >= 8) {
-          Swal.fire({
-            icon: 'error',
-            title: 'Invalid Password',
-            text:
-              'Password must be 8 characters and include at least:\n' +
-              'one lowercase letter (a-z)\n' +
-              'one uppercase letter (A-Z)\n' +
-              'one number (0-9)\n' +
-              'one special character (!@#$%^&*)',
-            customClass: {
-              popup: 'max-width-100',
-            },
-          });
-        }
+        newErrors.forgotPasswordNewPassword = value.length < 8 ? "Password must be 8 characters" : "";
+        newErrors.forgotPasswordConfirmNewPassword =
+          forgotPasswordConfirmNewPassword && value !== forgotPasswordConfirmNewPassword
+            ? "Passwords do not match"
+            : "";
         break;
 
       case "forgotPasswordConfirmNewPassword":
@@ -274,6 +292,81 @@ const Login = () => {
     setErrors(newErrors);
   };
 
+  const handleOtpSubmit = async () => {
+    try {
+        if (!otp || otp.length !== 6 || !/^\d+$/.test(otp)) {
+            setOtpError("Invalid OTP. Please enter a 6-digit numeric code.");
+            return;
+        }
+
+        const otpVerificationEndpoint =
+            userType === "admin"
+                ? 'http://13.233.111.56:8082/api/admins/verify-otp-admin-forgot-password'
+                : 'http://13.233.111.56:8082/api/users/verify-otp-user-forgot-password';
+
+        const otpVerificationResponse = await axios.post(otpVerificationEndpoint, {
+            username: forgotPasswordUsername,
+            otp: otp,
+            userType: userType,
+        });
+
+        // Check for success based on the actual response structure
+        if (otpVerificationResponse.data.includes("OTP verified successfully")) {
+            // Handle success
+            await handleUpdatePassword();
+            setShowOtpModal(false);
+
+            Swal.fire({
+                icon: 'success',
+                title: 'OTP Verified',
+                text: 'OTP verification successful!',
+                customClass: {
+                    popup: 'max-width-100',
+                },
+            });
+        } else {
+            // Handle other scenarios, e.g., invalid OTP
+            setOtpError("Invalid OTP. Please try again.");
+            console.error("Invalid OTP:", otpVerificationResponse.data);
+
+            Swal.fire({
+                icon: 'error',
+                title: 'OTP Verification Failed',
+                text: 'Invalid OTP. Please try again.',
+                customClass: {
+                    popup: 'max-width-100',
+                },
+            });
+        }
+    } catch (error) {
+        // Handle other errors
+        console.error("Error verifying OTP:", error);
+
+        setOtpError("Failed to verify OTP. Please try again.");
+
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Failed to verify OTP. Please try again.',
+            customClass: {
+                popup: 'max-width-100',
+            },
+        });
+    }
+};
+const resetModalDetails = () => {
+  setForgotPasswordUsername('');
+  setForgotPasswordNewPassword('');
+  setForgotPasswordConfirmNewPassword('');
+  setShowPassword(false);
+  setShowConfirmPassword(false);
+  setUserType('user'); // Reset to default value
+  setErrors({}); // Reset errors
+};
+  const resetOtpModal = () => {
+    setOtp(''); 
+    setOtpError(''); 
+  };
   return (
     <div>
       <marquee behavior="slide" direction="down" scrollamount="10">
@@ -506,6 +599,31 @@ const Login = () => {
                   </Button>
                 </div>
               </Modal.Body>
+            </Modal>
+            <Modal show={showOtpModal} onHide={() => {setShowOtpModal(false); resetOtpModal();}} backdrop="static" keyboard={false}>
+              <Modal.Header closeButton>
+                <Modal.Title>Enter OTP</Modal.Title>
+              </Modal.Header>
+              <Modal.Body>
+                <Form.Control
+                  type="text"
+                  placeholder="Enter OTP"
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value)}
+                />
+                {otpError && <div className="text-danger mt-2">{otpError}</div>}
+              </Modal.Body>
+              <Modal.Footer>
+                <Button
+                  variant="secondary"
+                  onClick={() => setShowOtpModal(false)}
+                >
+                  Close
+                </Button>
+                <Button variant="primary" onClick={handleOtpSubmit}>
+                  Submit OTP
+                </Button>
+              </Modal.Footer>
             </Modal>
           </div>
         </Form>

@@ -131,13 +131,20 @@ public class UserController {
 	    }
 	}
 
-
-
-	
-
-
 	@PostMapping("/send-otp")
 	public ResponseEntity<String> sendOtpToSuperUser(@RequestBody User user) {
+	    try {
+	    	
+	        userService.sendOtpToSuperUser(user);
+	        return new ResponseEntity<>("OTP sent to SuperUser's email", HttpStatus.OK);
+	    } catch (Exception e) {
+	        return new ResponseEntity<>("Failed to send OTP to SuperUser's email", HttpStatus.INTERNAL_SERVER_ERROR);
+	    }
+	}
+	
+	//sending otp to user for forgot password
+	@PostMapping("/send-otp-user-forgot-password")
+	public ResponseEntity<String> sendOtpToSuperUserForForgotPassword(@RequestBody User user) {
 	    try {
 	    	
 	        userService.sendOtpToSuperUser(user);
@@ -150,6 +157,12 @@ public class UserController {
 
 	 @PostMapping("/verify-otp")
 	    public ResponseEntity<String> verifyOtp(@RequestBody Map<String, String> otpVerificationRequest) {
+	        String username = otpVerificationRequest.get("username");
+	        String enteredOtp = otpVerificationRequest.get("otp");
+	        return userService.verifyOtp(username, enteredOtp);
+	    }
+	 @PostMapping("/verify-otp-user-forgot-password")
+	    public ResponseEntity<String> verifyOtpforUser(@RequestBody Map<String, String> otpVerificationRequest) {
 	        String username = otpVerificationRequest.get("username");
 	        String enteredOtp = otpVerificationRequest.get("otp");
 	        return userService.verifyOtp(username, enteredOtp);

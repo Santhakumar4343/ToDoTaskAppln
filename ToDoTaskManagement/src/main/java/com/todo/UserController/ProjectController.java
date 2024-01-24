@@ -68,10 +68,6 @@ public class ProjectController {
 		// Retrieve the current project
 		Project existingProject = projectRepository.getProjectById(projectId);
 
-		// If the existing project is not found, you may want to handle this scenario
-		// accordingly
-
-		// Create a new list to preserve the existing assignedTo values
 		List<String> updatedAssignedTo = new ArrayList<>(existingProject.getAssignedTo());
 
 		// Append new users if provided

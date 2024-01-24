@@ -113,6 +113,7 @@ const RegistrationForm = () => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
 
+   
     // Validate input fields
     const newErrors = { ...errors };
 
@@ -133,89 +134,37 @@ const RegistrationForm = () => {
           console.error("Error fetching usernames:", error);
         }
         break;
-        case "employeeId":
-          newErrors.employeeId = "";
-  
-          // Check if the employee ID already exists
-          try {
-            const response = await axios.get(
-              `http://13.233.111.56:8082/api/${formData.userType === 'admin' ? 'admins' : 'users'}/allEmployeeIds`
-            );
-  
-            if (response.data.includes(value)) {
-              newErrors.employeeId = "Employee ID already exists";
-            }
-          } catch (error) {
-            console.error("Error fetching employee IDs:", error);
+      case "employeeId":
+        newErrors.employeeId = "";
+
+        // Check if the employee ID already exists
+        try {
+          const response = await axios.get(
+            `http://13.233.111.56:8082/api/${formData.userType === 'admin' ? 'admins' : 'users'}/allEmployeeIds`
+          );
+
+          if (response.data.includes(value)) {
+            newErrors.employeeId = "Employee ID already exists";
           }
-          break;
-      case "password":
-        newErrors.password =
-          !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(
-            value
-          )
-            ? "Password must be 8 characters "
-            : "";
-      //   newErrors.confirmPassword =
-      //     formData.confirmPassword && value !== formData.confirmPassword
-      //       ? "Passwords do not match"
-      //       : "";
-      //   break;
-      case "password":
-        const isPasswordValid = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(value)
-          ? "Password must be 8 characters "
-          : "";
-
-        setErrors((prevErrors) => ({
-          ...prevErrors,
-          password: isPasswordValid
-            ? ''
-            : 'Password must be 8 characters and include at least one lowercase letter, one uppercase letter, one number, and one special character (!@#$%^&*)',
-        }));
-
-        // Display SweetAlert2 alert for password validation error after 8 characters
-        if (!isPasswordValid && value.length >= 8) {
-          Swal.fire({
-            icon: 'error',
-            title: 'Invalid Password',
-            text:
-              'Password must be 8 characters and include at least:\n' +
-              'one lowercase letter (a-z)\n' +
-              'one uppercase letter (A-Z)\n' +
-              'one number (0-9)\n' +
-              'one special character (!@#$%^&*)',
-            customClass: {
-              popup: 'max-width-100',
-            },
-          });
-
+        } catch (error) {
+          console.error("Error fetching employee IDs:", error);
         }
         break;
-      case "confirmPassword":
-        newErrors.confirmPassword =
-          formData.password && value !== formData.password
-            ? "Passwords do not match"
-            : "";
-        break;
-      // case "email":
-      //   newErrors.email = !/^[a-z0-9.]+@[a-z]+\.[a-z]+$/.test(value)
-      //     ? "Invalid email format"
-      //     : "";
-
-      //   // Check if the email already exists
-      //   try {
-      //     const response = await axios.get(
-      //       "http://13.233.111.56:8082/api/users/allEmails"
-      //     );
-
-      //     if (response.data.includes(value)) {
-      //       newErrors.email = "Email already exists";
-      //     }
-      //   } catch (error) {
-      //     console.error("Error fetching emails:", error);
-      //   }
-      //   break;
-
+        case "password":
+          newErrors.password = value.length < 8 ? "Password must be 8 characters" : "";
+          // Check confirmPassword dynamically when password changes
+          newErrors.confirmPassword =
+            formData.confirmPassword && value !== formData.confirmPassword
+              ? "Passwords do not match"
+              : "";
+          break;
+    
+        case "confirmPassword":
+          newErrors.confirmPassword =
+            formData.password && value !== formData.password
+              ? "Passwords do not match"
+              : "";
+          break;
       case "email":
         newErrors.email = !/^[a-z0-9.]+@[a-z]+\.[a-z]+$/.test(value)
           ? "Invalid email format"
@@ -250,7 +199,7 @@ const RegistrationForm = () => {
     email: '',
     employeeId: '',
     username: '',
-    
+
   });
 
   // const handleUserTypeChange = (e) => {
@@ -259,7 +208,7 @@ const RegistrationForm = () => {
   const handleUserTypeChange = (event) => {
     const newUserType = event.target.value;
     setFormData({ ...formData, userType: newUserType });
-  
+
     // Clear previous errors when user type changes
     setErrors({
       username: "",
@@ -269,8 +218,8 @@ const RegistrationForm = () => {
       email: "",
       mobileNumber: "",
     });
-  
-    
+
+
     setNewErrors({
       email: '',
       employeeId: '',
@@ -278,11 +227,28 @@ const RegistrationForm = () => {
       // add other admin-specific error fields...
     });
   };
-  
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+        // Validate password
+  const isPasswordValid = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(formData.password);
 
+  if (!isPasswordValid) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Invalid Password',
+      text: 'Password must be 8 characters and include at least:\n' +
+        'one lowercase letter (a-z)\n' +
+        'one uppercase letter (A-Z)\n' +
+        'one number (0-9)\n' +
+        'one special character (!@#$%^&*)',
+      customClass: {
+        popup: 'max-width-100',
+      },
+    });
+    return;
+  }
     // Check if there are any validation errors
     const hasErrors = Object.values(errors).some((error) => error !== "");
 
@@ -313,233 +279,238 @@ const RegistrationForm = () => {
   };
 
   return (
-    <div className="d-flex justify-content-center align-items-center vh-85  ">
-      <form
-        onSubmit={handleSubmit}
-        className="p-4 border  "
-        style={{
-          minWidth: "300px",
-          maxWidth: "750px",
-          width: "100%",
-          marginBottom: "80px",
-        }}
-      >
-        <h2 className="mb-4 text-center">Registration</h2>
+    <div className="mb-4">
+      <marquee behavior="slide" direction="down" scrollamount="10">
+        <h3 className="mb-4  text-center">Welcome to the To-Do List</h3>
+      </marquee>
+      <div className=" mt-4 d-flex justify-content-center align-items-center vh-85  ">
+        <form
+          onSubmit={handleSubmit}
+          className="p-4 border  "
+          style={{
+            minWidth: "300px",
+            maxWidth: "750px",
+            width: "100%",
+            marginBottom: "80px",
+          }}
+        >
+          <h2 className="mb-4 text-center">Registration</h2>
 
-        <div className="row g-3 d-flex justify-content-center align-items-center  ">
-          <div className="col-md-4 mb-2">
-            <input
-              placeholder="username"
-              type="text"
-              className="form-control border border-dark"
-              id="username"
-              name="username"
-              value={formData.username}
-              onChange={handleChange}
-              required
-            />
-            {errors.username && (
-              <div className="text-danger">{errors.username}</div>
-            )}
-          </div>
-          <div className="col-md-4 mb-2">
-            <input
-              placeholder="Employee ID"
-              type="text"
-              className="form-control border border-dark "
-              id="employeeId"
-              name="employeeId"
-              value={formData.employeeId}
-              onChange={handleChange}
-              required
-            />
-            {errors.employeeId && (
-              <div className="text-danger">{errors.employeeId}</div>
-            )}
-          </div>
-        </div>
-        <div className="row g-3 d-flex justify-content-center align-items-center">
-          <div className="col-md-4 mb-2">
-            <div className="input-group">
+          <div className="row g-3 d-flex justify-content-center align-items-center  ">
+            <div className="col-md-4 mb-2">
               <input
-                placeholder="Password"
-                type={showPassword ? "text" : "password"}
-                className="form-control border border-dark border-left-0"
-                id="password"
-                name="password"
-                value={formData.password}
+                placeholder="username"
+                type="text"
+                className="form-control border border-dark"
+                id="username"
+                name="username"
+                value={formData.username}
                 onChange={handleChange}
                 required
               />
-              <div className="input-group-append">
-                <div
-                  className="input-group-text cursor-pointer border border-dark rounded-left"
-                  style={{
-                    borderTopLeftRadius: "0",
-                    borderBottomLeftRadius: "0",
-                  }}
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? (
-                    <i className="bi bi-eye-fill"></i>
-                  ) : (
-                    <i className="bi bi-eye-slash-fill"></i>
-                  )}
-                </div>
-              </div>
-            </div>
-            {errors.password && (
-              <div className="text-danger">{errors.password}</div>
-            )}
-          </div>
-
-          <div className="col-md-4 mb-2">
-            <div className="input-group">
-              <input
-                placeholder="Confirm Password"
-                type={showConfirmPassword ? "text" : "password"}
-                className="form-control border border-dark border-right-0 rounded-right"
-                id="confirmPassword"
-                name="confirmPassword"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                required
-              />
-              <div className="input-group-append">
-                <div
-                  className="input-group-text cursor-pointer border border-dark rounded-left"
-                  style={{
-                    borderTopLeftRadius: "0",
-                    borderBottomLeftRadius: "0",
-                  }}
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                >
-                  {showConfirmPassword ? (
-                    <i className="bi bi-eye-fill"></i>
-                  ) : (
-                    <i className="bi bi-eye-slash-fill"></i>
-                  )}
-                </div>
-              </div>
-            </div>
-            {errors.confirmPassword && (
-              <div className="text-danger">{errors.confirmPassword}</div>
-            )}
-          </div>
-        </div>
-        <div className="row g-3 d-flex justify-content-center align-items-center">
-          <div className="col-md-4 mb-2">
-            <input
-              placeholder="Email"
-              type="email"
-              className="form-control border border-dark"
-              id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              required
-            />
-            {errors.email && <div className="text-danger">{errors.email}</div>}
-          </div>
-          <div className="col-md-4 mb-2">
-            <input
-              placeholder="Mobile Number"
-              type="tel"
-              className="form-control border border-dark"
-              id="mobileNumber"
-              name="mobileNumber"
-              value={formData.mobileNumber}
-              onChange={handleChange}
-              required
-            />
-            {errors.mobileNumber && (
-              <div className="text-danger">{errors.mobileNumber}</div>
-            )}
-          </div>
-        </div>
-        <div className="mb-2   d-flex justify-content-center align-items-center">
-          <div className="form-check">
-            <input
-              type="radio"
-              className="form-check-input border border-dark"
-              id="user"
-              name="userType"
-              value="user"
-              checked={formData.userType === "user"}
-              onChange={handleUserTypeChange}
-            />
-            <label className="form-check-label" htmlFor="user">
-              User
-            </label>
-          </div>
-          <div className="form-check">
-            <input
-              type="radio"
-              className="form-check-input m-1 border border-dark"
-              id="admin"
-              name="userType"
-              value="admin"
-              checked={formData.userType === "admin"}
-              onChange={handleUserTypeChange}
-            />
-            <label className="form-check-label" htmlFor="admin">
-              Admin
-            </label>
-          </div>
-        </div>
-        <div className="row g-3  d-flex justify-content-center align-items-center">
-          <div className="col-md-4 ">
-            <Button
-              type="submit"
-              variant="primary"
-              className="w-100"
-              disabled={loading}
-            >
-              {loading ? (
-                <>
-                  <Spinner animation="border" size="sm" className="me-2" />
-                  Loading...
-                </>
-              ) : (
-                "Register"
+              {errors.username && (
+                <div className="text-danger">{errors.username}</div>
               )}
-            </Button>
+            </div>
+            <div className="col-md-4 mb-2">
+              <input
+                placeholder="Employee ID"
+                type="text"
+                className="form-control border border-dark "
+                id="employeeId"
+                name="employeeId"
+                value={formData.employeeId}
+                onChange={handleChange}
+                required
+              />
+              {errors.employeeId && (
+                <div className="text-danger">{errors.employeeId}</div>
+              )}
+            </div>
           </div>
-          <div className="col-md-4">
-            <button
-              type="button"
-              className="btn btn-secondary w-100 "
-              onClick={handleCancel}
-            >
-              Cancel
-            </button>
-            <Modal show={showOtpModal} onHide={() => setShowOtpModal(false)} backdrop="static" keyboard={false}>
-              <Modal.Header closeButton>
-                <Modal.Title>Enter OTP</Modal.Title>
-              </Modal.Header>
-              <Modal.Body>
-                <Form.Control
-                  type="text"
-                  placeholder="Enter OTP"
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value)}
+          <div className="row g-3 d-flex justify-content-center align-items-center">
+            <div className="col-md-4 mb-2">
+              <div className="input-group">
+                <input
+                  placeholder="Password"
+                  type={showPassword ? "text" : "password"}
+                  className="form-control border border-dark border-left-0"
+                  id="password"
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  required
                 />
-              </Modal.Body>
-              <Modal.Footer>
-                <Button
-                  variant="secondary"
-                  onClick={() => setShowOtpModal(false)}
-                >
-                  Close
-                </Button>
-                <Button variant="primary" onClick={handleOtpSubmit}>
-                  Submit OTP
-                </Button>
-              </Modal.Footer>
-            </Modal>
+                <div className="input-group-append">
+                  <div
+                    className="input-group-text cursor-pointer border border-dark rounded-left"
+                    style={{
+                      borderTopLeftRadius: "0",
+                      borderBottomLeftRadius: "0",
+                    }}
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? (
+                      <i className="bi bi-eye-fill"></i>
+                    ) : (
+                      <i className="bi bi-eye-slash-fill"></i>
+                    )}
+                  </div>
+                </div>
+              </div>
+              {errors.password && (
+                <div className="text-danger">{errors.password}</div>
+              )}
+            </div>
+
+            <div className="col-md-4 mb-2">
+              <div className="input-group">
+                <input
+                  placeholder="Confirm Password"
+                  type={showConfirmPassword ? "text" : "password"}
+                  className="form-control border border-dark border-right-0 rounded-right"
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  required
+                />
+                <div className="input-group-append">
+                  <div
+                    className="input-group-text cursor-pointer border border-dark rounded-left"
+                    style={{
+                      borderTopLeftRadius: "0",
+                      borderBottomLeftRadius: "0",
+                    }}
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  >
+                    {showConfirmPassword ? (
+                      <i className="bi bi-eye-fill"></i>
+                    ) : (
+                      <i className="bi bi-eye-slash-fill"></i>
+                    )}
+                  </div>
+                </div>
+              </div>
+              {errors.confirmPassword && (
+                <div className="text-danger">{errors.confirmPassword}</div>
+              )}
+            </div>
           </div>
-        </div>
-      </form>
+          <div className="row g-3 d-flex justify-content-center align-items-center">
+            <div className="col-md-4 mb-2">
+              <input
+                placeholder="Email"
+                type="email"
+                className="form-control border border-dark"
+                id="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                required
+              />
+              {errors.email && <div className="text-danger">{errors.email}</div>}
+            </div>
+            <div className="col-md-4 mb-2">
+              <input
+                placeholder="Mobile Number"
+                type="tel"
+                className="form-control border border-dark"
+                id="mobileNumber"
+                name="mobileNumber"
+                value={formData.mobileNumber}
+                onChange={handleChange}
+                required
+              />
+              {errors.mobileNumber && (
+                <div className="text-danger">{errors.mobileNumber}</div>
+              )}
+            </div>
+          </div>
+          <div className="mb-2   d-flex justify-content-center align-items-center">
+            <div className="form-check">
+              <input
+                type="radio"
+                className="form-check-input border border-dark"
+                id="user"
+                name="userType"
+                value="user"
+                checked={formData.userType === "user"}
+                onChange={handleUserTypeChange}
+              />
+              <label className="form-check-label" htmlFor="user">
+                User
+              </label>
+            </div>
+            <div className="form-check">
+              <input
+                type="radio"
+                className="form-check-input m-1 border border-dark"
+                id="admin"
+                name="userType"
+                value="admin"
+                checked={formData.userType === "admin"}
+                onChange={handleUserTypeChange}
+              />
+              <label className="form-check-label" htmlFor="admin">
+                Admin
+              </label>
+            </div>
+          </div>
+          <div className="row g-3  d-flex justify-content-center align-items-center">
+            <div className="col-md-4 ">
+              <Button
+                type="submit"
+                variant="primary"
+                className="w-100"
+                disabled={loading}
+              >
+                {loading ? (
+                  <>
+                    <Spinner animation="border" size="sm" className="me-2" />
+                    Loading...
+                  </>
+                ) : (
+                  "Register"
+                )}
+              </Button>
+            </div>
+            <div className="col-md-4">
+              <button
+                type="button"
+                className="btn btn-secondary w-100 "
+                onClick={handleCancel}
+              >
+                Cancel
+              </button>
+              <Modal show={showOtpModal} onHide={() => setShowOtpModal(false)} backdrop="static" keyboard={false}>
+                <Modal.Header closeButton>
+                  <Modal.Title>Enter OTP</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                  <Form.Control
+                    type="text"
+                    placeholder="Enter OTP"
+                    value={otp}
+                    onChange={(e) => setOtp(e.target.value)}
+                  />
+                </Modal.Body>
+                <Modal.Footer>
+                  <Button
+                    variant="secondary"
+                    onClick={() => setShowOtpModal(false)}
+                  >
+                    Close
+                  </Button>
+                  <Button variant="primary" onClick={handleOtpSubmit}>
+                    Submit OTP
+                  </Button>
+                </Modal.Footer>
+              </Modal>
+            </div>
+          </div>
+        </form>
+      </div>
     </div>
   );
 };

@@ -150,42 +150,29 @@ public class AdminController {
 	    }
 	}
 	
-   
-
-//	@PostMapping("/verify-otp")
-//	public ResponseEntity<String> verifyOtp(@RequestBody Map<String, String> otpVerificationRequest) {
-//	    try {
-//	        String username = otpVerificationRequest.get("username");
-//	        String enteredOtp = otpVerificationRequest.get("otp");
-//	        System.out.println("Received OTP verification request with payload: " +
-//	                "username=" + username + ", otp=" + enteredOtp);
-//
-//	        // Retrieve the stored OTP from the cache
-//	        String storedOtp = otpCache.get(username);
-//	        System.out.println("Stored OTP: " + storedOtp);
-//
-//	        // Check if the storedOtp is null or empty
-//	        if (storedOtp == null || storedOtp.isEmpty()) {
-//	            return new ResponseEntity<>("Invalid OTP (Cache is empty)", HttpStatus.BAD_REQUEST);
-//	        }
-//
-//	        // Compare the entered OTP with the stored OTP
-//	        if (storedOtp.equals(enteredOtp)) {
-//	            // OTP verification successful
-//	            return new ResponseEntity<>("OTP verified successfully", HttpStatus.OK);
-//	        } else {
-//	            // OTP verification failed
-//	            return new ResponseEntity<>("Invalid OTP (Mismatch)", HttpStatus.BAD_REQUEST);
-//	        }
-//	    } catch (Exception e) {
-//	        e.printStackTrace();
-//	        return new ResponseEntity<>("Failed to verify OTP", HttpStatus.INTERNAL_SERVER_ERROR);
-//	    }
-//	}
+	//send otp to the admin forgot password 
+	@PostMapping("/send-otp-admin-forgot-password")
+	public ResponseEntity<String> sendOtpToSuperUserForForgotPassword(@RequestBody Admin user) {
+	    try {
+	    	
+	        adminService.sendOtpToSuperUser(user);
+	        return new ResponseEntity<>("OTP sent to SuperUser's email", HttpStatus.OK);
+	    } catch (Exception e) {
+	        return new ResponseEntity<>("Failed to send OTP to SuperUser's email", HttpStatus.INTERNAL_SERVER_ERROR);
+	    }
+	}
+	
 	 @PostMapping("/verify-otp")
 	    public ResponseEntity<String> verifyOtp(@RequestBody Map<String, String> otpVerificationRequest) {
 	        String username = otpVerificationRequest.get("username");
 	        String enteredOtp = otpVerificationRequest.get("otp");
+	        return adminService.verifyOtp(username, enteredOtp);
+	    }
+	 @PostMapping("/verify-otp-admin-forgot-password")
+	    public ResponseEntity<String> verifyOtpForAdmin(@RequestBody Map<String, String> otpVerificationRequest) {
+	        String username = otpVerificationRequest.get("username");
+	        String enteredOtp = otpVerificationRequest.get("otp");
+	        String userType = otpVerificationRequest.get("userType"); 
 	        return adminService.verifyOtp(username, enteredOtp);
 	    }
 	 @GetMapping("/allUsernames")
