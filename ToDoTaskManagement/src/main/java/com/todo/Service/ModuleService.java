@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.todo.entity.Modules;
 import com.todo.entity.Project;
+import com.todo.entity.Task;
 
 public interface ModuleService {
 	public Modules saveModule(Modules module);

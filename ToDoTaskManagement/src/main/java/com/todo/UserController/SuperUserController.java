@@ -1,6 +1,6 @@
 package com.todo.UserController;
-
 import java.io.IOException;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -13,11 +13,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.todo.UserServiceImpl.SuperUserService;
 import com.todo.entity.SuperUser;
+
 
 @RestController
 @RequestMapping("/api/superuser")
@@ -87,6 +87,26 @@ public class SuperUserController {
         javaMailSender.send(mailMessage);
 
         System.out.println("Password reset email sent to: " + userEmail);
+    }
+    
+    
+    @PostMapping("/send-otp-to-superuser")
+	public ResponseEntity<String> sendOtpToSuperUser(@RequestBody SuperUser user) {
+	    try {
+	    	
+	    	superUserService.sendOtpToSuperUser(user);
+	        return new ResponseEntity<>("OTP sent to SuperUser's email", HttpStatus.OK);
+	    } catch (Exception e) {
+	        return new ResponseEntity<>("Failed to send OTP to SuperUser's email", HttpStatus.INTERNAL_SERVER_ERROR);
+	    }
+	}
+    
+    
+    @PostMapping("/verify-otp-for-superuser")
+    public ResponseEntity<String> verifyOtp(@RequestBody Map<String, String> otpVerificationRequest) {
+        String username = otpVerificationRequest.get("username");
+        String enteredOtp = otpVerificationRequest.get("otp");
+        return superUserService.verifyOtp(username, enteredOtp);
     }
 
 }

@@ -201,67 +201,98 @@ const Modules = () => {
       });
   };
   const handleDeleteModule = (moduleId) => {
-    Swal.fire({
-      title: 'Are you sure?',
-      text: 'Once deleted, you will not be able to recover this module!',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#d33',
-      cancelButtonColor: '#3085d6',
-      confirmButtonText: 'Yes, delete it!',
-      cancelButtonText: 'Cancel',
-      customClass: {
-        popup: 'max-width-100',
-      },
-    }).then((result) => {
-      if (result.isConfirmed) {
-        // Make a DELETE request to delete the module
-        fetch(`http://13.233.111.56:8082/api/modules/deleteModule/${moduleId}`, {
-          method: 'DELETE',
-        })
-          .then((response) => {
-            if (response.ok) {
-              console.log('Module deleted successfully');
-              // Close the initial confirmation dialog
-              Swal.close();
-              // Inform the user about the successful deletion
-              Swal.fire({
-                icon: 'success',
-                title: 'Module Deleted',
-                text: 'The module has been deleted successfully!',
-                customClass: {
-                  popup: 'max-width-100',
-                },
-              });
-              // Fetch the updated list of modules after deletion
-              fetchModules();
-            } else {
-              console.error('Error deleting module:', response.status);
-              Swal.fire({
-                icon: 'error',
-                title: 'Error Deleting Module',
-                text: 'An error occurred during deletion. Please try again.',
-                customClass: {
-                  popup: 'max-width-100',
-                },
-              });
+    // Fetch the module details to check its status
+    fetch(`http://13.233.111.56:8082/api/modules/getModuleById/${moduleId}`)
+      .then((response) => response.json())
+      .then((module) => {
+        const moduleStatus = module.status;
+  
+        // Check if the module status is "Closed"
+        if (moduleStatus === 'Closed') {
+          Swal.fire({
+            title: 'Are you sure?',
+            text: `Once deleted, you will not be able to recover this ${module.moduleName}`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, delete it!',
+            cancelButtonText: 'Cancel',
+            customClass: {
+              popup: 'max-width-100',
+            },
+          }).then((result) => {
+            if (result.isConfirmed) {
+              // Make a DELETE request to delete the module
+              fetch(`http://13.233.111.56:8082/api/modules/deleteModule/${moduleId}`, {
+                method: 'DELETE',
+              })
+                .then((response) => {
+                  if (response.ok) {
+                    console.log('Module deleted successfully');
+                    // Close the initial confirmation dialog
+                    Swal.close();
+                    // Inform the user about the successful deletion
+                    Swal.fire({
+                      icon: 'success',
+                      title: 'Module Deleted',
+                      text: `The module "${module.moduleName}" has been deleted successfully!`,
+                      customClass: {
+                        popup: 'max-width-100',
+                      },
+                    });
+                    // Fetch the updated list of modules after deletion
+                    fetchModules();
+                  } else {
+                    console.error('Error deleting module:', response.status);
+                    Swal.fire({
+                      icon: 'error',
+                      title: `Error Deleting ${response.moduleName}`,
+                      text: 'An error occurred during deletion. Please try again.',
+                      customClass: {
+                        popup: 'max-width-100',
+                      },
+                    });
+                  }
+                })
+                .catch((error) => {
+                  console.error('Error deleting module:', error);
+                  Swal.fire({
+                    icon: 'error',
+                    title: 'Error Deleting Module',
+                    text: 'An error occurred during deletion. Please try again.',
+                    customClass: {
+                      popup: 'max-width-100',
+                    },
+                  });
+                });
             }
-          })
-          .catch((error) => {
-            console.error('Error deleting module:', error);
-            Swal.fire({
-              icon: 'error',
-              title: 'Error Deleting Module',
-              text: 'An error occurred during deletion. Please try again.',
-              customClass: {
-                popup: 'max-width-100',
-              },
-            });
           });
-      }
-    });
+        } else {
+          // Display an error message if the module status is not "Closed"
+          Swal.fire({
+            icon: 'error',
+            title: `Cannot Delete Module`,
+            text: `You can only delete "${module.moduleName}" with the status "Closed".`,
+            customClass: {
+              popup: 'max-width-100',
+            },
+          });
+        }
+      })
+      .catch((error) => {
+        console.error('Error fetching module details:', error);
+        Swal.fire({
+          icon: 'error',
+          title: `Error Deleting Module`,
+          text: 'An error occurred. Please try again.',
+          customClass: {
+            popup: 'max-width-100',
+          },
+        });
+      });
   };
-
+  
   const [showAssignUserModal, setShowAssignUserModal] = useState(false);
   // ... other state variables
 

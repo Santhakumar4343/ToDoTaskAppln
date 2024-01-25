@@ -116,6 +116,7 @@ const Task = () => {
     setStatus(selectedTask.status);
     setPriority(selectedTask.priority);
     setRemarks(selectedTask.remarks);
+    setAssignedTo(selectedTask.assignedTo);
     setSelectedTaskId(taskId);
     // Fetch modules for the selected project
     axios.get(`http://13.233.111.56:8082/api/modules/getModuleByPId/${selectedTask.module.project.id}`)
@@ -195,53 +196,83 @@ const Task = () => {
     )
     : [];
 
-  const handleDeleteTask = (taskId) => {
-    Swal.fire({
-      title: 'Are you sure?',
-      text: 'Once deleted, you will not be able to recover this task!',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#d33',
-      cancelButtonColor: '#3085d6',
-      confirmButtonText: 'Yes, delete it!',
-      cancelButtonText: 'Cancel',
-      customClass: {
-        popup: 'max-width-100',
-      },
-    }).then((result) => {
-      if (result.isConfirmed) {
-        // Make a DELETE request to delete the task
-        axios.delete(`http://13.233.111.56:8082/api/tasks/deleteTaskById/${taskId}`)
-          .then(response => {
-            console.log('Task deleted successfully');
-            // Close the initial confirmation dialog
-            Swal.close();
-            // Inform the user about the successful deletion
+    const handleDeleteTask = (taskId) => {
+      // Fetch the task details to check its status
+      axios.get(`http://13.233.111.56:8082/api/tasks/getTaskById/${taskId}`)
+        .then(response => {
+          const taskStatus = response.data.status;
+    
+          // Check if the task status is "Closed"
+          if (taskStatus === 'Closed') {
             Swal.fire({
-              icon: 'success',
-              title: 'Task Deleted',
-              text: 'The task has been deleted successfully!',
+              title: 'Are you sure?',
+              text: `Once deleted, you will not be able to recover this ${response.data.taskName}`,
+              icon: 'warning',
+              showCancelButton: true,
+              confirmButtonColor: '#d33',
+              cancelButtonColor: '#3085d6',
+              confirmButtonText: 'Yes, delete it!',
+              cancelButtonText: 'Cancel',
               customClass: {
                 popup: 'max-width-100',
               },
+            }).then((result) => {
+              if (result.isConfirmed) {
+                // Make a DELETE request to delete the task
+                axios.delete(`http://13.233.111.56:8082/api/tasks/deleteTaskById/${taskId}`)
+                  .then(response => {
+                    console.log('Task deleted successfully');
+                    // Close the initial confirmation dialog
+                    Swal.close();
+                    // Inform the user about the successful deletion
+                    Swal.fire({
+                      icon: 'success',
+                      title: 'Task Deleted',
+                      text: `The "${response.data.taskName}" has been deleted successfully!`,
+                      customClass: {
+                        popup: 'max-width-100',
+                      },
+                    });
+                    // Fetch the updated list of tasks after deletion
+                    fetchTasks();
+                  })
+                  .catch(error => {
+                    console.error('Error deleting task:', error);
+                    Swal.fire({
+                      icon: 'error',
+                      title: 'Error Deleting Task',
+                      text: `An error occurred during deletion of "${response.data.taskName}". Please try again.`,
+                      customClass: {
+                        popup: 'max-width-100',
+                      },
+                    });
+                  });
+              }
             });
-            // Fetch the updated list of tasks after deletion
-            fetchTasks();
-          })
-          .catch(error => {
-            console.error('Error deleting task:', error);
+          } else {
+            // Display an error message if the task status is not "Closed"
             Swal.fire({
               icon: 'error',
-              title: 'Error Deleting Task',
-              text: 'An error occurred during deletion. Please try again.',
+              title: `Cannot Delete Task`,
+              text: `You can only delete "${response.data.taskName}" with the status "Closed".`,
               customClass: {
                 popup: 'max-width-100',
               },
             });
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching task details:', error);
+          Swal.fire({
+            icon: 'error',
+            title: `Error Deleting Task`,
+            text: 'An error occurred. Please try again.',
+            customClass: {
+              popup: 'max-width-100',
+            },
           });
-      }
-    });
-  };
+        });
+    };    
   const [showAssignUserModal, setShowAssignUserModal] = useState(false);
   // ... other state variables
 

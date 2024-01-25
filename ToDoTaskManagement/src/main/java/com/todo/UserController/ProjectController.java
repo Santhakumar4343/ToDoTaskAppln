@@ -83,7 +83,7 @@ public class ProjectController {
 		updatedProject.setPriority(priority);
 		updatedProject.setClosedDate(closedDate);
 		updatedProject.setRemarks(remarks);
-		
+
 		return projectService.updateProject(projectId, updatedProject);
 	}
 
@@ -102,6 +102,11 @@ public class ProjectController {
 		return projectService.getAllProjects();
 	}
 
+	@GetMapping("/getProjectById/{projectId}")
+	public Project getAllProject(@PathVariable Long projectId) {
+		return projectService.getProject(projectId);
+	}
+
 	@GetMapping("/getUserProjects")
 	public List<Project> getUserProjects(@RequestParam String username) {
 		return projectService.getUserProjects(username);
@@ -117,15 +122,16 @@ public class ProjectController {
 			return new ResponseEntity<>("Error assigning user: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-	@DeleteMapping("/remove-user/{projectId}")
-	public ResponseEntity<String> removeUserFromProject(@PathVariable Long projectId, @RequestParam String userToRemove) {
-	    try {
-	        projectService.removeUserFromProject(projectId, userToRemove);
-	        return new ResponseEntity<>("User removed successfully", HttpStatus.OK);
-	    } catch (Exception e) {
-	        return new ResponseEntity<>("Error removing user: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-	    }
-	}
 
+	@DeleteMapping("/remove-user/{projectId}")
+	public ResponseEntity<String> removeUserFromProject(@PathVariable Long projectId,
+			@RequestParam String userToRemove) {
+		try {
+			projectService.removeUserFromProject(projectId, userToRemove);
+			return new ResponseEntity<>("User removed successfully", HttpStatus.OK);
+		} catch (Exception e) {
+			return new ResponseEntity<>("Error removing user: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
 
 }

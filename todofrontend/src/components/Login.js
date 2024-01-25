@@ -76,6 +76,8 @@ const Login = () => {
         return;
       }
       sendOtpToSuperUser();
+      setShowForgotPasswordModal(false);
+      setShowOtpModal(true);
     } catch (error) {
     }
   };

@@ -70,24 +70,7 @@ public class TaskController {
 		task.setTaskName(taskName);
 		task.setStartDate(startDate);
 
-//        Task existingTask =taskRepository.getTaskById(taskId);
-//
-//        // If the existing project is not found, you may want to handle this scenario accordingly
-//
-//        
-//        List<String> updatedAssignedTo = new ArrayList<>(existingTask.getAssignedTo());
-//
-//        // Append new users if provided and not already present
-//        if (assignedTo != null) {
-//            for (String user : assignedTo) {
-//                if (!updatedAssignedTo.contains(user)) {
-//                    updatedAssignedTo.add(user);
-//                }
-//            }
-//        }
-//
-//        // Set the updated assignedTo list
-//        existingTask.setAssignedTo(updatedAssignedTo);
+
 
 		task.setAssignedTo(assignedTo);
 
@@ -112,6 +95,11 @@ public class TaskController {
 	public List<Task> getTasksByModule(@PathVariable Long moduleId) {
 		// Assuming taskService.getTasksByModule returns a list of tasks
 		return taskService.getTasksByModule(moduleId);
+	}
+	@GetMapping("/getTaskById/{taskId}")
+	public Task getTasksById(@PathVariable Long taskId) {
+		// Assuming taskService.getTasksByModule returns a list of tasks
+		return taskService.getTaskById(taskId);
 	}
 
 	@GetMapping("/getAllTasks")

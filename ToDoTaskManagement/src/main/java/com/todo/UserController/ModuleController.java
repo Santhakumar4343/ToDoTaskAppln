@@ -23,6 +23,7 @@ import com.todo.Service.ProjectService;
 import com.todo.UserServiceImpl.ModuleServiceImpl;
 import com.todo.entity.Modules;
 import com.todo.entity.Project;
+import com.todo.entity.Task;
 
 @RestController
 @RequestMapping("/api/modules")
@@ -151,14 +152,22 @@ public class ModuleController {
 	public List<Modules> getUserModules(@RequestParam String username) {
 		return moduleService.getUserModules(username);
 	}
-	
+
 	@DeleteMapping("/remove-user/{moduleId}")
-	public ResponseEntity<String> removeUserFromProject(@PathVariable Long moduleId, @RequestParam String userToRemove) {
-	    try {
-	        moduleService.removeUserFromModule(moduleId, userToRemove);
-	        return new ResponseEntity<>("User removed successfully", HttpStatus.OK);
-	    } catch (Exception e) {
-	        return new ResponseEntity<>("Error removing user: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-	    }
+	public ResponseEntity<String> removeUserFromProject(@PathVariable Long moduleId,
+			@RequestParam String userToRemove) {
+		try {
+			moduleService.removeUserFromModule(moduleId, userToRemove);
+			return new ResponseEntity<>("User removed successfully", HttpStatus.OK);
+		} catch (Exception e) {
+			return new ResponseEntity<>("Error removing user: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 	}
+
+	@GetMapping("/getModuleById/{moduleId}")
+	public Modules getTasksById(@PathVariable Long moduleId) {
+		// Assuming taskService.getTasksByModule returns a list of tasks
+		return moduleService.getModuleById(moduleId);
+	}
+
 }

@@ -136,7 +136,7 @@ function Projects() {
             },
           });
 
-          // After saving, fetch the updated list of projects
+          
           fetchProjects();
 
           // Close the modal after saving
@@ -185,68 +185,99 @@ function Projects() {
     handleShowModal();
   };
   
-
   const handleDeleteProject = (projectId) => {
-    Swal.fire({
-      title: "Are you sure?",
-      text: "Once deleted, you will not be able to recover this project!",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#d33",
-      cancelButtonColor: "#3085d6",
-      confirmButtonText: "Yes, delete it!",
-      cancelButtonText: "Cancel",
-      customClass: {
-        popup: "max-width-100",
-      },
-    }).then((result) => {
-      if (result.isConfirmed) {
-        // Make a DELETE request to delete the project
-        fetch(`http://13.233.111.56:8082/api/projects/delete/${projectId}`, {
-          method: "DELETE",
-        })
-          .then((response) => {
-            if (response.ok) {
-              console.log("Project deleted successfully");
-              // Fetch the updated list of projects after deletion
-              fetchProjects();
-              // Close the initial confirmation dialog
-              Swal.close();
-              // Inform the user about the successful deletion
-              Swal.fire({
-                icon: "success",
-                title: "Project Deleted",
-                text: "The project has been deleted successfully!",
-                customClass: {
-                  popup: "max-width-100",
-                },
-              });
-            } else {
-              console.error("Error deleting project:", response.status);
-              Swal.fire({
-                icon: "error",
-                title: "Error Deleting Project",
-                text: "An error occurred during deletion. Please try again.",
-                customClass: {
-                  popup: "max-width-100",
-                },
-              });
+    // Fetch the project details to check its status
+    fetch(`http://13.233.111.56:8082/api/projects/getProjectById/${projectId}`)
+      .then((response) => response.json())
+      .then((project) => {
+        const projectStatus = project.status;
+       const projectName=project.projectName;
+        // Check if the project status is "Closed"
+        if (projectStatus === 'Closed') {
+          Swal.fire({
+            title: 'Are you sure?',
+            text: `Once deleted, you will not be able to recover this "${projectName}"`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, delete it!',
+            cancelButtonText: 'Cancel',
+            customClass: {
+              popup: 'max-width-100',
+            },
+          }).then((result) => {
+            if (result.isConfirmed) {
+              // Make a DELETE request to delete the project
+              fetch(`http://13.233.111.56:8082/api/projects/delete/${projectId}`, {
+                method: 'DELETE',
+              })
+                .then((response) => {
+                  if (response.ok) {
+                    console.log('Project deleted successfully');
+                    // Fetch the updated list of projects after deletion
+                    fetchProjects();
+                    // Close the initial confirmation dialog
+                    Swal.close();
+                    // Inform the user about the successful deletion
+                    Swal.fire({
+                      icon: 'success',
+                      title: 'Project Deleted',
+                      text: `The project "${projectName}" has been deleted successfully!`,
+                      customClass: {
+                        popup: 'max-width-100',
+                      },
+                    });
+                  } else {
+                    console.error('Error deleting project:', response.status);
+                    Swal.fire({
+                      icon: 'error',
+                      title: 'Error Deleting Project',
+                      text: 'An error occurred during deletion. Please try again.',
+                      customClass: {
+                        popup: 'max-width-100',
+                      },
+                    });
+                  }
+                })
+                .catch((error) => {
+                  console.error('Error deleting project:', error);
+                  Swal.fire({
+                    icon: 'error',
+                    title: 'Error Deleting Project',
+                    text: 'An error occurred during deletion. Please try again.',
+                    customClass: {
+                      popup: 'max-width-100',
+                    },
+                  });
+                });
             }
-          })
-          .catch((error) => {
-            console.error("Error deleting project:", error);
-            Swal.fire({
-              icon: "error",
-              title: "Error Deleting Project",
-              text: "An error occurred during deletion. Please try again.",
-              customClass: {
-                popup: "max-width-100",
-              },
-            });
           });
-      }
-    });
+        } else {
+          // Display an error message if the project status is not "Closed"
+          Swal.fire({
+            icon: 'error',
+            title: `Cannot Delete Project`,
+            text: `You can only delete "${projectName}" with the status "Closed".`,
+            customClass: {
+              popup: 'max-width-100',
+            },
+          });
+        }
+      })
+      .catch((error) => {
+        console.error('Error fetching project details:', error);
+        Swal.fire({
+          icon: 'error',
+          title: `Error Deleting Project`,
+          text: 'An error occurred. Please try again.',
+          customClass: {
+            popup: 'max-width-100',
+          },
+        });
+      });
   };
+  
   const [showAssignUserModal, setShowAssignUserModal] = useState(false);
 
   // Function to handle showing the assign user modal
@@ -311,7 +342,7 @@ function Projects() {
           Swal.fire({
             icon: "error",
             title: "Assignment Failed",
-            text: `Selected user already assigned to the ${selectedProject.projectName}.`,
+            text: `Selected "${selectedProject.assignedTo}" already assigned to the "${selectedProject.projectName}".`,
             customClass: {
               popup: "max-width-100",
             },
@@ -375,7 +406,7 @@ function Projects() {
                 Swal.fire({
                   icon: 'error',
                   title: 'Removal Failed',
-                  text: `Error removing user "${userToRemove}" from the project.`,
+                  text: `Error removing "${userToRemove}" from the project.`,
                   customClass: {
                     popup: 'max-width-100',
                   },
@@ -388,7 +419,7 @@ function Projects() {
               Swal.fire({
                 icon: 'error',
                 title: 'Removal Failed',
-                text: `An error occurred while removing user "${userToRemove}". Please try again.`,
+                text: `An error occurred while removing  "${userToRemove}". Please try again.`,
                 customClass: {
                   popup: 'max-width-100',
                 },
