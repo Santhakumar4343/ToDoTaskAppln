@@ -12,6 +12,8 @@ import org.springframework.stereotype.Service;
 import com.todo.Repository.ProjectRepository;
 import com.todo.Service.ProjectService;
 import com.todo.entity.Project;
+
+import jakarta.transaction.Transactional;
 @Service
 public class ProjectServiceImpl implements ProjectService {
     @Autowired
@@ -52,11 +54,13 @@ public class ProjectServiceImpl implements ProjectService {
         projectRepository.deleteById(projectId);
     }
     @Override
+    @Transactional
     public Project getProject(Long projectId) {
         return projectRepository.findById(projectId)
                 .orElseThrow(() -> new RuntimeException("Project not found with id: " + projectId));
     }
     @Override
+    @Transactional
     public List<Project> getAllProjects() {
         return projectRepository.findAll();
     }

@@ -22,7 +22,7 @@ function Projects() {
 
   useEffect(() => {
     // Fetch the list of users when the component mounts
-    fetch("http://13.233.111.56:8082/api/users/userType/user")
+    fetch("http://localhost:8082/api/users/userType/user")
       .then((response) => response.json())
       .then((data) => {
         setUsers(data);
@@ -85,7 +85,7 @@ function Projects() {
 
   const fetchProjects = () => {
     // Make a GET request to fetch projects
-    fetch("http://13.233.111.56:8082/api/projects/getAllProjects")
+    fetch("http://localhost:8082/api/projects/getAllProjects")
       .then((response) => response.json())
       .then((data) => {
         // Set the fetched projects to the state
@@ -111,8 +111,8 @@ function Projects() {
     });
 
     const apiUrl = selectedProject.id
-      ? `http://13.233.111.56:8082/api/projects/update/${selectedProject.id}`
-      : "http://13.233.111.56:8082/api/projects/save";
+      ? `http://localhost:8082/api/projects/update/${selectedProject.id}`
+      : "http://localhost:8082/api/projects/save";
 
     const method = selectedProject.id ? "PUT" : "POST";
 
@@ -187,7 +187,7 @@ function Projects() {
   
   const handleDeleteProject = (projectId) => {
     // Fetch the project details to check its status
-    fetch(`http://13.233.111.56:8082/api/projects/getProjectById/${projectId}`)
+    fetch(`http://localhost:8082/api/projects/getProjectById/${projectId}`)
       .then((response) => response.json())
       .then((project) => {
         const projectStatus = project.status;
@@ -209,7 +209,7 @@ function Projects() {
           }).then((result) => {
             if (result.isConfirmed) {
               // Make a DELETE request to delete the project
-              fetch(`http://13.233.111.56:8082/api/projects/delete/${projectId}`, {
+              fetch(`http://localhost:8082/api/projects/delete/${projectId}`, {
                 method: 'DELETE',
               })
                 .then((response) => {
@@ -320,7 +320,7 @@ function Projects() {
     formData.append('assignedTo', selectedProject.assignedTo.join(',')); // Convert the array to a comma-separated string
 
     // Make a PUT request to your backend API to assign users to the project
-    fetch(`http://13.233.111.56:8082/api/projects/assign-user/${selectedProject.id}`, {
+    fetch(`http://localhost:8082/api/projects/assign-user/${selectedProject.id}`, {
       method: 'PUT',
       body: formData,
     })
@@ -386,7 +386,7 @@ function Projects() {
       }).then((result) => {
         if (result.isConfirmed) {
           // If the user confirms, proceed with the removal
-          fetch(`http://13.233.111.56:8082/api/projects/remove-user/${selectedProject.id}?userToRemove=${userToRemove}`, {
+          fetch(`http://localhost:8082/api/projects/remove-user/${selectedProject.id}?userToRemove=${userToRemove}`, {
             method: 'DELETE',
           })
             .then((response) => {
@@ -436,6 +436,111 @@ function Projects() {
       console.error('No user selected for removal.');
     }
   };
+  // const handleRemoveUser = () => {
+  //   // Check if there's a user to remove
+  //   if (userToRemove) {
+  //     // Fetch the project details to check its modules
+  //     fetch(`http://localhost:8082/api/projects/getProjectById/${selectedProject.id}`)
+  //       .then((response) => response.json())
+  //       .then((project) => {
+  //         // Ensure that 'modules' is defined and not null
+  //         const modules = project.modules || [];
+  
+  //         // Check if the user to be removed is assigned to any module
+  //         const userAssignedToModules = modules.length > 0 && modules.some(module => module.assignedTo.includes(userToRemove));
+  
+  //         if (userAssignedToModules) {
+  //           // Display an error message if the user is assigned to any module
+  //           Swal.fire({
+  //             icon: 'error',
+  //             title: `Cannot Remove User`,
+  //             text: `The user "${userToRemove}" is assigned to one or more modules in this project. Please unassign the user from modules before removing.`,
+  //             customClass: {
+  //               popup: 'max-width-100',
+  //             },
+  //           });
+  //         } else {
+  //           // If the user is not assigned to any module, proceed with removal
+  //           // Show a confirmation dialog before proceeding with the removal
+  //           Swal.fire({
+  //             title: 'Are you sure?',
+  //             text: `Do you really want to remove user "${userToRemove}" from the project "${selectedProject.projectName}"?`,
+  //             icon: 'warning',
+  //             showCancelButton: true,
+  //             confirmButtonColor: '#d33',
+  //             cancelButtonColor: '#3085d6',
+  //             confirmButtonText: 'Yes, remove it!',
+  //             cancelButtonText: 'Cancel',
+  //             customClass: {
+  //               popup: 'max-width-100',
+  //             },
+  //           }).then((result) => {
+  //             if (result.isConfirmed) {
+  //               // If the user confirms, proceed with the removal
+  //               fetch(`http://localhost:8082/api/projects/remove-user/${selectedProject.id}?userToRemove=${userToRemove}`, {
+  //                 method: 'DELETE',
+  //               })
+  //                 .then((response) => {
+  //                   if (response.ok) {
+  //                     // Show success message if the request is successful
+  //                     Swal.fire({
+  //                       icon: 'success',
+  //                       title: 'User Removed',
+  //                       text: `User "${userToRemove}" has been removed from the "${selectedProject.projectName}" successfully!`,
+  //                       customClass: {
+  //                         popup: 'max-width-100',
+  //                       },
+  //                     });
+  //                     fetchProjects();
+  //                   } else {
+  //                     // Show error message if the request is not successful
+  //                     Swal.fire({
+  //                       icon: 'error',
+  //                       title: 'Removal Failed',
+  //                       text: `Error removing "${userToRemove}" from the project.`,
+  //                       customClass: {
+  //                         popup: 'max-width-100',
+  //                       },
+  //                     });
+  //                   }
+  //                 })
+  //                 .catch((error) => {
+  //                   console.error('Error removing user:', error);
+  //                   // Handle the error
+  //                   Swal.fire({
+  //                     icon: 'error',
+  //                     title: 'Removal Failed',
+  //                     text: `An error occurred while removing "${userToRemove}". Please try again.`,
+  //                     customClass: {
+  //                       popup: 'max-width-100',
+  //                     },
+  //                   });
+  //                 })
+  //                 .finally(() => {
+  //                   // Close the modal after handling the removal
+  //                   handleCloseAssignUserModal();
+  //                 });
+  //             }
+  //           });
+  //         }
+  //       })
+  //       .catch((error) => {
+  //         console.error('Error fetching project details:', error);
+  //         Swal.fire({
+  //           icon: 'error',
+  //           title: `Error Removing User`,
+  //           text: 'An error occurred. Please try again.',
+  //           customClass: {
+  //             popup: 'max-width-100',
+  //           },
+  //         });
+  //       });
+  //   } else {
+  //     // Handle the case where no user is selected for removal
+  //     console.error('No user selected for removal.');
+  //   }
+  // };
+  
   
   const [projectNameError, setProjectNameError] = useState("");
   const [assignedToError, setAssignedToError] = useState("");

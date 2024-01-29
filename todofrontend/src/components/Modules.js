@@ -25,7 +25,7 @@ const Modules = () => {
   useEffect(() => {
 
     // Fetch the list of users when the component mounts
-    fetch("http://13.233.111.56:8082/api/users/userType/user")
+    fetch("http://localhost:8082/api/users/userType/user")
       .then((response) => response.json())
       .then((data) => {
         setUsers(data);
@@ -36,7 +36,7 @@ const Modules = () => {
   }, []);
   useEffect(() => {
     // Fetch all projects on component mount
-    axios.get('http://13.233.111.56:8082/api/projects/getAllProjects')
+    axios.get('http://localhost:8082/api/projects/getAllProjects')
       .then(response => {
         setProjects(response.data);
       })
@@ -52,7 +52,7 @@ const Modules = () => {
 
   // const fetchModules = () => {
   //   // Make a GET request to fetch modules
-  //   axios.get('http://13.233.111.56:8082/api/modules/getAllModules')
+  //   axios.get('http://localhost:8082/api/modules/getAllModules')
   //     .then((response) => {
   //       // Set the fetched modules to the state
   //       setModules(response.data);
@@ -71,8 +71,8 @@ const Modules = () => {
   const fetchModules = () => {
     // Include selectedProject as a query parameter if it exists
     const apiUrl = selectedProject
-      ? `http://13.233.111.56:8082/api/modules/getModuleByPId/${selectedProject}`
-      : 'http://13.233.111.56:8082/api/modules/getAllModules';
+      ? `http://localhost:8082/api/modules/getModuleByPId/${selectedProject}`
+      : 'http://localhost:8082/api/modules/getAllModules';
   
     // Make a GET request to fetch modules
     axios.get(apiUrl)
@@ -158,8 +158,8 @@ const Modules = () => {
     formData.append('assignedTo', assignedTo.join(','));
     // Determine whether to create or update based on selectedModuleId
     const requestUrl = selectedModuleId
-      ? `http://13.233.111.56:8082/api/modules/updateModule/${selectedModuleId}`
-      : `http://13.233.111.56:8082/api/modules/saveModule/${selectedProject}`;
+      ? `http://localhost:8082/api/modules/updateModule/${selectedModuleId}`
+      : `http://localhost:8082/api/modules/saveModule/${selectedProject}`;
 
     // Use 'PUT' for updating
     const method = selectedModuleId ? 'PUT' : 'POST';
@@ -202,7 +202,7 @@ const Modules = () => {
   };
   const handleDeleteModule = (moduleId) => {
     // Fetch the module details to check its status
-    fetch(`http://13.233.111.56:8082/api/modules/getModuleById/${moduleId}`)
+    fetch(`http://localhost:8082/api/modules/getModuleById/${moduleId}`)
       .then((response) => response.json())
       .then((module) => {
         const moduleStatus = module.status;
@@ -224,7 +224,7 @@ const Modules = () => {
           }).then((result) => {
             if (result.isConfirmed) {
               // Make a DELETE request to delete the module
-              fetch(`http://13.233.111.56:8082/api/modules/deleteModule/${moduleId}`, {
+              fetch(`http://localhost:8082/api/modules/deleteModule/${moduleId}`, {
                 method: 'DELETE',
               })
                 .then((response) => {
@@ -327,7 +327,7 @@ const Modules = () => {
 
     // Make a PUT request to your backend API to assign users to the module
     axios
-      .put(`http://13.233.111.56:8082/api/modules/assign-user/${selectedModuleId}`, formData)
+      .put(`http://localhost:8082/api/modules/assign-user/${selectedModuleId}`, formData)
       .then((response) => {
         if (response.status === 200) {
           // Show success message if the request is successful
@@ -392,7 +392,7 @@ const Modules = () => {
         if (result.isConfirmed) {
           // If the user confirms, proceed with the removal
           axios
-            .delete(`http://13.233.111.56:8082/api/modules/remove-user/${selectedModuleId}?userToRemove=${userToRemove}`)
+            .delete(`http://localhost:8082/api/modules/remove-user/${selectedModuleId}?userToRemove=${userToRemove}`)
             .then((response) => {
               if (response.status === 200) {
                 // Show success message if the request is successful

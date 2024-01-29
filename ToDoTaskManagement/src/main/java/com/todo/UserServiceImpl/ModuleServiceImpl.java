@@ -14,6 +14,8 @@ import com.todo.Service.ModuleService;
 import com.todo.entity.Modules;
 import com.todo.entity.Project;
 
+import jakarta.transaction.Transactional;
+
 @Service
 	public class ModuleServiceImpl implements ModuleService {
 
@@ -38,18 +40,21 @@ import com.todo.entity.Project;
 
 	  
 	    @Override
+	    @Transactional
 	    public List<Modules> getModulesByProject(Project project) {
 	        return moduleRepository.findByProject(project);
 	    }
 	    // Implement other methods
 
 		@Override
+		@Transactional
 		public Modules getModuleById(Long moduleId) {
 			return moduleRepository.findById(moduleId)
 	                .orElseThrow(() -> new RuntimeException("Modules not found with id: " + moduleId));
 		}
 
 		@Override
+		@Transactional
 		public List<Modules> getAllModules() {
 			
 			return moduleRepository.findAll();

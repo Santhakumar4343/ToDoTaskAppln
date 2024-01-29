@@ -9,7 +9,7 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [userType, setUserType] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null); // State for error message
+  const [error, setError] = useState(null); 
   const [errors, setErrors] = useState({});
   const [formData, setFormData] = useState(new FormData());
   const [showForgotPasswordModal, setShowForgotPasswordModal] = useState(false);
@@ -90,11 +90,11 @@ const Login = () => {
   
       // Determine the appropriate API endpoints based on userType
       if (userType === "user") {
-        getUserIdEndpoint = `http://13.233.111.56:8082/api/users/get-user-id/${forgotPasswordUsername}`;
-        updatePasswordEndpoint = `http://13.233.111.56:8082/api/users/update-password`;
+        getUserIdEndpoint = `http://localhost:8082/api/users/get-user-id/${forgotPasswordUsername}`;
+        updatePasswordEndpoint = `http://localhost:8082/api/users/update-password`;
       } else if (userType === "admin") {
-        getUserIdEndpoint = `http://13.233.111.56:8082/api/admins/get-user-id/${forgotPasswordUsername}`;
-        updatePasswordEndpoint = `http://13.233.111.56:8082/api/admins/update-password`;
+        getUserIdEndpoint = `http://localhost:8082/api/admins/get-user-id/${forgotPasswordUsername}`;
+        updatePasswordEndpoint = `http://localhost:8082/api/admins/update-password`;
       } else {
         console.error("Unknown userType:", userType);
         return;
@@ -184,9 +184,9 @@ const Login = () => {
       let endpoint;
 
       if (userType === "user") {
-        endpoint = "http://13.233.111.56:8082/api/users/login";
+        endpoint = "http://localhost:8082/api/users/login";
       } else if (userType === "admin") {
-        endpoint = "http://13.233.111.56:8082/api/admins/login";
+        endpoint = "http://localhost:8082/api/admins/login";
       } else {
         console.error("Unknown userType:", userType);
         return;
@@ -244,8 +244,8 @@ const Login = () => {
   
       // Determine the appropriate API endpoint based on userType
       const otpEndpoint = userType === "admin"
-        ? 'http://13.233.111.56:8082/api/admins/send-otp-admin-forgot-password'
-        : 'http://13.233.111.56:8082/api/users/send-otp-user-forgot-password';
+        ? 'http://localhost:8082/api/admins/send-otp-admin-forgot-password'
+        : 'http://localhost:8082/api/users/send-otp-user-forgot-password';
   
       // Send OTP to the respective endpoint
       await axios.post(otpEndpoint, requestData, {
@@ -303,8 +303,8 @@ const Login = () => {
 
         const otpVerificationEndpoint =
             userType === "admin"
-                ? 'http://13.233.111.56:8082/api/admins/verify-otp-admin-forgot-password'
-                : 'http://13.233.111.56:8082/api/users/verify-otp-user-forgot-password';
+                ? 'http://localhost:8082/api/admins/verify-otp-admin-forgot-password'
+                : 'http://localhost:8082/api/users/verify-otp-user-forgot-password';
 
         const otpVerificationResponse = await axios.post(otpVerificationEndpoint, {
             username: forgotPasswordUsername,
