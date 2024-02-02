@@ -17,8 +17,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.todo.Repository.DepartmentRepository;
 import com.todo.Repository.ProjectRepository;
+import com.todo.Service.DepartmentService;
 import com.todo.UserServiceImpl.ProjectServiceImpl;
+import com.todo.entity.Department;
+import com.todo.entity.Modules;
 import com.todo.entity.Project;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -31,16 +35,19 @@ public class ProjectController {
 	private ProjectServiceImpl projectService;
 	@Autowired
 	private ProjectRepository projectRepository;
-
-	@PostMapping("/save")
-	public Project saveProject(@RequestParam String projectName, @RequestParam List<String> assignedTo,
+   
+	@Autowired
+	private DepartmentRepository departmentRepository;
+	@PostMapping("/save/{departmentId}")
+	public Project saveProject(@PathVariable Long departmentId,@RequestParam String projectName, @RequestParam List<String> assignedTo,
 
 			@RequestParam String status, @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date startDate,
 			@RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date closedDate,
 
 			@RequestParam String remarks, @RequestParam String priority) {
-
+		 Department department = departmentRepository.getDepartmentById(departmentId);
 		Project project = new Project();
+	     project.setDepartment(department);
 		project.setProjectName(projectName);
 		project.setAssignedTo(assignedTo);
 
@@ -134,4 +141,21 @@ public class ProjectController {
 		}
 	}
 
+	@GetMapping("/getProjectByDeptId/{departmentId}")
+	public ResponseEntity<List<Project>> getProjectByDepartment(@PathVariable Long departmentId) {
+
+		
+		Department department = new Department();
+		department.setId(departmentId);
+
+		// Call the service method to get modules by project
+		List<Project> projects = projectService.getProjectByDepartment(department);
+
+		// Check if modules were found
+		if (!projects.isEmpty()) {
+			return ResponseEntity.ok(projects);
+		} else {
+			return ResponseEntity.notFound().build();
+		}
+	}
 }

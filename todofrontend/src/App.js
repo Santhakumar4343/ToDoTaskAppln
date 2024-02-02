@@ -13,6 +13,7 @@ import Modules from './components/Modules';
 import Task from './components/Task';
 import SuperUserLogin from './components/SuperUser/SuperUserLogin';
 import SuperUserDashboard from './components/SuperUser/SuperUserDashboard';
+import Department from './components/Department';
 
 function Home() {
  
@@ -86,6 +87,7 @@ function App() {
             <Route path="/registration" element={<Registration />} />
             <Route path="/user-dashboard/*" element={<UserDashBoard />} />
             <Route path="/admin-dashboard" element={<AdminDashBoard />} />
+            <Route path="/admin-dashboard/departments" element={<Department />} />
             <Route path="/admin-dashboard/projects" element={<Projects />} />
             <Route path="/admin-dashboard/modules" element={<Modules />} />
             <Route path="/admin-dashboard/tasks" element={<Task />} />

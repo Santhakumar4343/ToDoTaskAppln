@@ -2,6 +2,7 @@ package com.todo.Service;
 
 import java.util.List;
 
+import com.todo.entity.Department;
 import com.todo.entity.Project;
 
 public interface ProjectService {
@@ -11,4 +12,6 @@ public interface ProjectService {
 	    Project getProject(Long projectId);
 	    List<Project> getAllProjects();
 	    public List<Project> getUserProjects(String username);
+	    List<Project> getProjectByDepartment(Department department);
+
 }

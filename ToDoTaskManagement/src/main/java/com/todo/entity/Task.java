@@ -14,24 +14,24 @@ import jakarta.persistence.ManyToOne;
 @Entity
 public class Task {
 	@Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-    private String taskName;
-    private Date startDate;
-    private Date endDate;
-    private String status;
-    private String priority;
-    private String remarks;
-    @ElementCollection
-    private List<String> assignedTo;
+	private String taskName;
+	private Date startDate;
+	private Date endDate;
+	private String status;
+	private String priority;
+	private String remarks;
+	@ElementCollection
+	private List<String> assignedTo;
 
-    @ManyToOne
-    @JoinColumn(name = "module_id")
-    private Modules module;
-    @ManyToOne
-    @JoinColumn(name = "project_id")
-    private Project project;
+	@ManyToOne
+	@JoinColumn(name = "module_id")
+	private Modules module;
+	@ManyToOne
+	@JoinColumn(name = "project_id")
+	private Project project;
 
 	public Task() {
 		super();
@@ -133,8 +133,4 @@ public class Task {
 		this.project = project;
 	}
 
-	
-    
-    
-    
 }

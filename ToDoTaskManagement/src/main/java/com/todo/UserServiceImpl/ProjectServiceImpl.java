@@ -11,6 +11,8 @@ import org.springframework.stereotype.Service;
 
 import com.todo.Repository.ProjectRepository;
 import com.todo.Service.ProjectService;
+import com.todo.entity.Department;
+import com.todo.entity.Modules;
 import com.todo.entity.Project;
 
 import jakarta.transaction.Transactional;
@@ -132,6 +134,12 @@ public class ProjectServiceImpl implements ProjectService {
             throw new RuntimeException("Project not found with ID: " + projectId);
         }
     }
+
+	@Override
+	public List<Project> getProjectByDepartment(Department department) {
+		
+		return projectRepository.findByDepartment(department);
+	}
 
 
 }

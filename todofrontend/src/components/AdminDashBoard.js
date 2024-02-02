@@ -4,9 +4,10 @@ import { Dropdown } from 'react-bootstrap';
 import Projects from './Projects';
 import Modules from './Modules';
 import Task from './Task';
+import Department from './Department';
 
 function AdminDashBoard() {
-  const [selectedNavLink, setSelectedNavLink] = useState('projects');
+  const [selectedNavLink, setSelectedNavLink] = useState('departments');
   const Navigate = useNavigate();
   const handleNavLinkClick = (navLink, event) => {
     event.preventDefault();
@@ -20,6 +21,8 @@ function AdminDashBoard() {
 
   const renderContent = () => {
     switch (selectedNavLink) {
+      case 'departments':
+        return <Department />;
       case 'projects':
         return <Projects />;
       case 'modules':
@@ -38,6 +41,11 @@ function AdminDashBoard() {
         <div className="col-md-3" style={{ backgroundColor: '', padding: '20px', width: "200px", height: '400px', overflowY: 'auto', borderColor: "1px" }}>
 
           <ul className="list-unstyled">
+          <li className=" mb-4">
+              <Link to="/admin-dashboard/departments" onClick={(e) => handleNavLinkClick('departments', e)} className="btn btn-link text-decoration-none text-dark fs-5">
+             Departments
+              </Link>
+            </li>
             <li className=" mb-4">
               <Link to="/admin-dashboard/projects" onClick={(e) => handleNavLinkClick('projects', e)} className="btn btn-link text-decoration-none text-dark fs-5">
                 Projects

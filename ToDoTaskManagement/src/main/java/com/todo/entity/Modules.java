@@ -1,30 +1,19 @@
 package com.todo.entity;
-
 import java.util.Date;
 import java.util.List;
-
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
-
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 
 @Entity
-
- 
 public class Modules {
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private String moduleName;
     private Date startDate;
     private Date endDate;
@@ -37,12 +26,9 @@ public class Modules {
     @JoinColumn(name = "project_id")
     private Project project;
    
-
 	public Modules() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
-
 
 	public Modules(Long id, String moduleName, Date startDate, Date endDate, String status, String remarks,
 			String priority, List<String> assignedTo, Project project) {

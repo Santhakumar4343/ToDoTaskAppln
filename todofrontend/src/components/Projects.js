@@ -8,18 +8,20 @@ import {
   Table,
   FormControl,
   Alert,
+  Pagination,
 } from "react-bootstrap";
 import Swal from "sweetalert2";
 import moment from "moment";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import "./styles.css"
+import axios from "axios";
 function Projects() {
   const [showModal, setShowModal] = useState(false);
   const [projects, setProjects] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [users, setUsers] = useState([]);
   const [userToRemove, setUserToRemove] = useState("");
-
+  const [selectedDepartment, setSelectedDepartment] = useState("");
   useEffect(() => {
     // Fetch the list of users when the component mounts
     fetch("http://localhost:8082/api/users/userType/user")
@@ -40,10 +42,22 @@ function Projects() {
     priority: "",
     closedDate: "",
     remarks: "",
+    
   });
 
-  const handleShowModal = () => setShowModal(true);
+  const handleShowModal = () => {
+    // Check if a department is selected
+    if (!selectedDepartment) {
+      alert('Please select a department');
+      return;
+    }
+  
+    // If a department is selected, show the modal
+    setShowModal(true);
+  };
+  
   const handleCloseModal = () => {
+
     setShowModal(false);
     setSelectedProject({
       projectName: "",
@@ -101,7 +115,6 @@ function Projects() {
     const formData = new FormData();
     selectedProject.startDate = moment(selectedProject.startDate).format("YYYY-MM-DD");
     selectedProject.closedDate = moment(selectedProject.closedDate).format("YYYY-MM-DD");
-  
     Object.entries(selectedProject).forEach(([key, value]) => {
       // Convert assignedTo array to a comma-separated string
       if (key === "assignedTo" && Array.isArray(value)) {
@@ -112,8 +125,8 @@ function Projects() {
 
     const apiUrl = selectedProject.id
       ? `http://localhost:8082/api/projects/update/${selectedProject.id}`
-      : "http://localhost:8082/api/projects/save";
-
+      : `http://localhost:8082/api/projects/save/${selectedDepartment}`;
+ 
     const method = selectedProject.id ? "PUT" : "POST";
 
     fetch(apiUrl, {
@@ -579,9 +592,51 @@ function Projects() {
       });
     }
   };
+  //Pagination 
+  const ITEMS_PER_PAGE = 4;
+  const [currentPage, setCurrentPage] = useState(1);
+
+  // Calculate start and end indices based on the current page
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const endIndex = startIndex + ITEMS_PER_PAGE;
+
+  // Get projects to display for the current page
+  const projectsToShow = filteredProjects.slice(startIndex, endIndex);
+
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  // Handle next page click
+  const handleNextPage = () => {
+    if (endIndex < filteredProjects.length) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const [departments, setDepartments] = useState([]);
+
+    useEffect(() => {
+        axios.get("http://localhost:8082/api/departments/getAllDepartments")
+            .then(response => {
+                setDepartments(response.data);
+            })
+            .catch(error => {
+                console.error('Error fetching departments:', error);
+            });
+    }, []);
   return (
+
     <div>
       <h4 className="text-center ">Projects Component</h4>
+      <select id="departmentDropdown" onChange={(e) => setSelectedDepartment(e.target.value)}>
+        <option value="" className=''>-- Select Department --</option>
+        {departments.map(department => (
+          <option key={department.id} value={department.id}>{department.departmentName}</option>
+        ))}
+      </select>
       <Button variant="success" className="mb-3" onClick={handleShowModal}>
         Create Project
       </Button>
@@ -605,6 +660,7 @@ function Projects() {
         >
           <thead>
             <tr>
+            <th className=" border border-dark h6 "> Department Name</th>
               <th className=" border border-dark h6 ">Project Name</th>
               <th className=" border border-dark h6">Assigned To</th>
               <th className=" border border-dark h6">Status</th>
@@ -616,8 +672,9 @@ function Projects() {
             </tr>
           </thead>
           <tbody>
-            {filteredProjects.map((project) => (
+            {projectsToShow.map((project) => (
               <tr key={project.id}>
+                 <td className="text-center">{project.department.departmentName}</td>
                 <td className="text-center">{project.projectName}</td>
                 <td className="text-center">
                   <ol>
@@ -654,9 +711,45 @@ function Projects() {
               </tr>
             ))}
           </tbody>
+           
+          
         </Table>
+        
       )}
-      
+       <div className="d-flex ">
+           {/* <Pagination>
+                <Pagination.Prev onClick={handlePreviousPage} disabled={currentPage === 1} />
+                {[...Array(Math.ceil(filteredProjects.length / ITEMS_PER_PAGE))].map((_, index) => (
+                    <Pagination.Item
+                        key={index}
+                        active={index + 1 === currentPage}
+                        onClick={() => setCurrentPage(index + 1)}
+                    >
+                        {index + 1}
+                    </Pagination.Item>
+                ))}
+                <Pagination.Next onClick={handleNextPage} disabled={endIndex >= filteredProjects.length} />
+            </Pagination> */}
+          <nav className="pagination fixed-right fixed-bottom justify-content-center">
+                <ul className="pagination">
+                    <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+                        <button className="page-link" onClick={handlePreviousPage} aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                            <span className="sr-only">Previous</span>
+                        </button>
+                    </li>
+                    <li className="page-item">
+                        <button className="page-link" disabled>{currentPage}</button>
+                    </li>
+                    <li className={`page-item ${endIndex >= filteredProjects.length ? 'disabled' : ''}`}>
+                        <button className="page-link" onClick={handleNextPage} aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                            <span className="sr-only">Next</span>
+                        </button>
+                    </li>
+                </ul>
+            </nav>
+          </div>
       <Modal show={showModal} onHide={handleCloseModal} backdrop="static" keyboard={false}>
         <Modal.Header closeButton>
           <Modal.Title>
