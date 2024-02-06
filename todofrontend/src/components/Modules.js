@@ -25,7 +25,7 @@ const Modules = () => {
   useEffect(() => {
 
     // Fetch the list of users when the component mounts
-    fetch("http://localhost:8082/api/users/userType/user")
+    fetch("http://13.233.111.56:8082/api/users/userType/user")
       .then((response) => response.json())
       .then((data) => {
         setUsers(data);
@@ -36,7 +36,7 @@ const Modules = () => {
   }, []);
   useEffect(() => {
     // Fetch all projects on component mount
-    axios.get('http://localhost:8082/api/projects/getAllProjects')
+    axios.get('http://13.233.111.56:8082/api/projects/getAllProjects')
       .then(response => {
         setProjects(response.data);
       })
@@ -52,7 +52,7 @@ const Modules = () => {
 
   // const fetchModules = () => {
   //   // Make a GET request to fetch modules
-  //   axios.get('http://localhost:8082/api/modules/getAllModules')
+  //   axios.get('http://13.233.111.56:8082/api/modules/getAllModules')
   //     .then((response) => {
   //       // Set the fetched modules to the state
   //       setModules(response.data);
@@ -71,8 +71,8 @@ const Modules = () => {
   const fetchModules = () => {
     // Include selectedProject as a query parameter if it exists
     const apiUrl = selectedProject
-      ? `http://localhost:8082/api/modules/getModuleByPId/${selectedProject}`
-      : 'http://localhost:8082/api/modules/getAllModules';
+      ? `http://13.233.111.56:8082/api/modules/getModuleByPId/${selectedProject}`
+      : 'http://13.233.111.56:8082/api/modules/getAllModules';
   
     // Make a GET request to fetch modules
     axios.get(apiUrl)
@@ -158,8 +158,8 @@ const Modules = () => {
     formData.append('assignedTo', assignedTo.join(','));
     // Determine whether to create or update based on selectedModuleId
     const requestUrl = selectedModuleId
-      ? `http://localhost:8082/api/modules/updateModule/${selectedModuleId}`
-      : `http://localhost:8082/api/modules/saveModule/${selectedProject}`;
+      ? `http://13.233.111.56:8082/api/modules/updateModule/${selectedModuleId}`
+      : `http://13.233.111.56:8082/api/modules/saveModule/${selectedProject}`;
 
     // Use 'PUT' for updating
     const method = selectedModuleId ? 'PUT' : 'POST';
@@ -202,7 +202,7 @@ const Modules = () => {
   };
   const handleDeleteModule = (moduleId) => {
     // Fetch the module details to check its status
-    fetch(`http://localhost:8082/api/modules/getModuleById/${moduleId}`)
+    fetch(`http://13.233.111.56:8082/api/modules/getModuleById/${moduleId}`)
       .then((response) => response.json())
       .then((module) => {
         const moduleStatus = module.status;
@@ -224,7 +224,7 @@ const Modules = () => {
           }).then((result) => {
             if (result.isConfirmed) {
               // Make a DELETE request to delete the module
-              fetch(`http://localhost:8082/api/modules/deleteModule/${moduleId}`, {
+              fetch(`http://13.233.111.56:8082/api/modules/deleteModule/${moduleId}`, {
                 method: 'DELETE',
               })
                 .then((response) => {
@@ -327,7 +327,7 @@ const Modules = () => {
 
     // Make a PUT request to your backend API to assign users to the module
     axios
-      .put(`http://localhost:8082/api/modules/assign-user/${selectedModuleId}`, formData)
+      .put(`http://13.233.111.56:8082/api/modules/assign-user/${selectedModuleId}`, formData)
       .then((response) => {
         if (response.status === 200) {
           // Show success message if the request is successful
@@ -392,7 +392,7 @@ const Modules = () => {
         if (result.isConfirmed) {
           // If the user confirms, proceed with the removal
           axios
-            .delete(`http://localhost:8082/api/modules/remove-user/${selectedModuleId}?userToRemove=${userToRemove}`)
+            .delete(`http://13.233.111.56:8082/api/modules/remove-user/${selectedModuleId}?userToRemove=${userToRemove}`)
             .then((response) => {
               if (response.status === 200) {
                 // Show success message if the request is successful
@@ -555,141 +555,161 @@ const Modules = () => {
 
 
 
-      <Modal show={showModal} onHide={() => { setShowModal(false); handleModalClose(); }} backdrop="static" keyboard={false}>
-        <Modal.Header closeButton>
-          <Modal.Title>Create/Update Module</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Form>
-            <Row>
-              <Col md={4}><Form.Label>Module Name</Form.Label></Col>
-              <Col md={8} >
-                <Form.Group controlId="formModuleName">
-                  <Form.Control
-                    type="text"
-                    className="mb-3 border border-dark"
-                    value={moduleName}
-                    onChange={(e) => setModuleName(e.target.value)}
-                  />
-                  <Form.Text className="text-danger">{moduleNameError}</Form.Text>
-                </Form.Group>
-              </Col>
-            </Row>
-            <Row>
-              <Col md={4}><Form.Label>Assigned To </Form.Label></Col>
-              <Col md={8} >
-                <Form.Group controlId="formAssignedTo">
-                  <Form.Control
-                    as="select"
-                    value={assignedTo}
-                    className="border border-dark mb-3"
-                    onChange={(e) => setAssignedTo(Array.from(e.target.selectedOptions, (option) => option.value))}
-                  >
-                    <option value="">Select Assigned To</option>
-                    {filteredUsers.map((user) => (
-                      <option key={user.id} value={user.username}>
-                        {user.username}
-                      </option>
-
-                    ))}
-                  </Form.Control>
-                  <Form.Text className="text-danger">{assignedToError}</Form.Text>
-                </Form.Group>
-
-              </Col>
-            </Row>
-            <Row>
-              <Col md={4}><Form.Label>Start Date</Form.Label></Col>
-              <Col md={8}><Form.Group controlId="formStartDate">
-
+<Modal show={showModal} onHide={() => { setShowModal(false); handleModalClose(); }} backdrop="static" keyboard={false}>
+  <Modal.Header closeButton>
+    <Modal.Title>{selectedModuleId ? 'Update Module' : 'Create Module'}</Modal.Title>
+  </Modal.Header>
+  <Modal.Body>
+    <Form>
+      <Row>
+        <Col md={4}><Form.Label>Module Name</Form.Label></Col>
+        <Col md={8} >
+          <Form.Group controlId="formModuleName">
+            <Form.Control
+              type="text"
+              className="mb-3 border border-dark"
+              value={moduleName}
+              onChange={(e) => setModuleName(e.target.value)}
+            />
+            <Form.Text className="text-danger">{moduleNameError}</Form.Text>
+          </Form.Group>
+        </Col>
+      </Row>
+      {/* Conditionally render fields based on whether module is being updated */}
+      {selectedModuleId && (
+        <>
+          <Row>
+            <Col md={4}><Form.Label>Assigned To </Form.Label></Col>
+            <Col md={8} >
+              <Form.Group controlId="formAssignedTo">
                 <Form.Control
-                  type="date"
-                  className=" mb-3 border border-dark"
-                  value={startDate}
-                  onChange={(e) => setStartDate(e.target.value)}
-                />
-              </Form.Group></Col>
-            </Row>
+                  as="select"
+                  value={assignedTo}
+                  className="border border-dark mb-3"
+                  onChange={(e) => setAssignedTo(Array.from(e.target.selectedOptions, (option) => option.value))}
+                >
+                  <option value="">Select Assigned To</option>
+                  {filteredUsers.map((user) => (
+                    <option key={user.id} value={user.username}>
+                      {user.username}
+                    </option>
+                  ))}
+                </Form.Control>
+                <Form.Text className="text-danger">{assignedToError}</Form.Text>
+              </Form.Group>
+            </Col>
+          </Row>
+          <Row>
+            <Col md={4}>
+              <Form.Label>Status</Form.Label>
+            </Col>
+            <Col md={8}>
+              <Form.Group controlId="formStatus">
+                <Form.Select
+                  className="mb-3 border border-dark"
+                  value={status}
+                  onChange={(e) => setStatus(e.target.value)}
+                >
+                  <option value="">Select Status</option>
+                  <option value="Open">Open</option>
+                  <option value="In Progress">In Progress</option>
+                  <option value="Fix/Fixed">Fix/Fixed</option>
+                  <option value="Reopened">Reopened</option>
+                  <option value="Closed">Closed</option>
+                </Form.Select>
+              </Form.Group>
+            </Col>
+          </Row>
+          <Row>
+            <Col md={4}>
+              <Form.Label>Priority</Form.Label>
+            </Col>
+            <Col md={8}>
+              <Form.Group controlId="formPriority">
+                <Form.Select
+                  className="border border-black mb-3"
+                  value={priority}
+                  onChange={(e) => setPriority(e.target.value)}
+                >
+                  <option value="">Select Priority</option>
+                  <option value="Critical">Critical</option>
+                  <option value="High">High</option>
+                  <option value="Medium">Medium</option>
+                  <option value="Low">Low</option>
+                </Form.Select>
+              </Form.Group>
+            </Col>
+          </Row>
+        </>
+      )}
+      <Row>
+        <Col md={4}><Form.Label>Start Date</Form.Label></Col>
+        <Col md={8}><Form.Group controlId="formStartDate">
+          <Form.Control
+            type="date"
+            className=" mb-3 border border-dark"
+            value={startDate}
+            onChange={(e) => setStartDate(e.target.value)}
+          />
+        </Form.Group></Col>
+      </Row>
+      <Row>
+        <Col md={4}> <Form.Label>End Date</Form.Label></Col>
+        <Col md={8}> <Form.Group controlId="formEndDate">
+          <Form.Control
+            type="date"
+            className=" mb-3 border border-dark"
+            value={endDate}
+            onChange={(e) => setEndDate(e.target.value)}
+          />
+        </Form.Group></Col>
+      </Row>
+      <Row>
+        <Col md={4}><Form.Label>Remarks</Form.Label></Col>
+        <Col md={8}><Form.Group controlId="formRemarks">
+          <Form.Control
+            type="text"
+            className=" mb-3 border border-dark"
+            value={remarks}
+            onChange={(e) => setRemarks(e.target.value)}
+          />
+        </Form.Group></Col>
+      </Row>
+    </Form>
+  </Modal.Body>
+  <Modal.Footer className="d-flex justify-content-center align-content-center">
+        <Button variant="secondary" onClick={() => { setShowModal(false); handleModalClose(); }}>
+          Close
+        </Button>
+        <Button variant="primary" onClick={handleSaveModule}>
+          {selectedModuleId ? 'Update Module' : 'Create Module'}
+        </Button>
+      </Modal.Footer>
+</Modal>
 
-            <Row>
-              <Col md={4}> <Form.Label>End Date</Form.Label></Col>
-              <Col md={8}> <Form.Group controlId="formEndDate">
 
-                <Form.Control
-                  type="date"
-                  className=" mb-3 border border-dark"
-                  value={endDate}
-                  onChange={(e) => setEndDate(e.target.value)}
-                />
-              </Form.Group></Col>
-            </Row>
 
-            <Row>
-              <Col md={4}>
-                <Form.Label>Status</Form.Label>
-              </Col>
-              <Col md={8}>
-                <Form.Group controlId="formStatus">
-                  <Form.Select
-                    className="mb-3 border border-dark"
-                    value={status}
-                    onChange={(e) => setStatus(e.target.value)}
-                  >
-                    <option value="">Select Status</option>
-                    <option value="Open">Open</option>
-                    <option value="In Progress">In Progress</option>
-                    <option value="Fix/Fixed">Fix/Fixed</option>
-                    <option value="Reopened">Reopened</option>
-                    <option value="Closed">Closed</option>
-                  </Form.Select>
-                </Form.Group>
-              </Col>
-            </Row>
 
-            <Row>
-              <Col md={4}>
-                <Form.Label>Priority</Form.Label>
-              </Col>
-              <Col md={8}>
-                <Form.Group controlId="formPriority">
-                  <Form.Select
-                    className="border border-black mb-3"
-                    value={priority}
-                    onChange={(e) => setPriority(e.target.value)}
-                  >
-                    <option value="">Select Priority</option>
-                    <option value="Critical">Critical</option>
-                    <option value="High">High</option>
-                    <option value="Medium">Medium</option>
-                    <option value="Low">Low</option>
-                  </Form.Select>
-                </Form.Group>
-              </Col>
-            </Row>
-            <Row>
-              <Col md={4}><Form.Label>Remarks</Form.Label></Col>
-              <Col md={8}><Form.Group controlId="formRemarks">
 
-                <Form.Control
-                  type="text"
-                  className=" mb-3 border border-dark"
-                  value={remarks}
-                  onChange={(e) => setRemarks(e.target.value)}
-                />
-              </Form.Group></Col>
-            </Row>
 
-          </Form>
-        </Modal.Body>
-        <Modal.Footer className="d-flex justify-content-center align-content-center" >
-          <Button variant="secondary" onClick={() => {setShowModal(false);setSelectedProject(null);fetchModules();}}>
-            Close
-          </Button>
-          <Button variant="primary" onClick={handleSave}>
-            Save Module
-          </Button>
-        </Modal.Footer>
-      </Modal>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
       <Modal show={showAssignUserModal} onHide={handleCloseAssignUserModal} backdrop="static" keyboard={false}>
         <Modal.Header closeButton>
           <Modal.Title>Assign Users to Module</Modal.Title>

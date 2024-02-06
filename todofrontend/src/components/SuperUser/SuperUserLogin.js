@@ -34,7 +34,7 @@ function SuperUserLogin() {
     }
     try {
       const response = await axios.get(
-        "http://localhost:8082/api/superuser/get/1"
+        "http://13.233.111.56:8082/api/superuser/get/1"
       );
       const userData = response.data;
 
@@ -63,7 +63,7 @@ function SuperUserLogin() {
     try {
 
       const response = await axios.get(
-        "http://localhost:8082/api/superuser/get/1"
+        "http://13.233.111.56:8082/api/superuser/get/1"
       );
       const userData = response.data;
 
@@ -99,7 +99,7 @@ function SuperUserLogin() {
     try {
       // Make a request to verify the OTP
       const otpVerificationResponse = await axios.post(
-        'http://localhost:8082/api/superuser/verify-otp-for-superuser',
+        'http://13.233.111.56:8082/api/superuser/verify-otp-for-superuser',
         {
           username: username,
           otp: otp,
@@ -137,7 +137,7 @@ function SuperUserLogin() {
     try {
       // Make a request to send OTP to the SuperUser
       await axios.post(
-        'http://localhost:8082/api/superuser/send-otp-to-superuser',
+        'http://13.233.111.56:8082/api/superuser/send-otp-to-superuser',
         {
           username: username,
         }
@@ -162,7 +162,7 @@ function SuperUserLogin() {
       
      
       const resetResponse = await axios.post(
-        `http://localhost:8082/api/superuser/reset-password/1`,
+        `http://13.233.111.56:8082/api/superuser/reset-password/1`,
         {
           newPassword: newPassword,
         }

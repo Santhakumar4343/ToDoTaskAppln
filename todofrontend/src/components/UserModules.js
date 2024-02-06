@@ -33,13 +33,13 @@ const Modules = () => {
     // Fetch the projects for the specific user when the component mounts
     fetchUserModules(username);
   }, [username]);
-
+  const titleColors = ["#42ff75", "#3ba3ed", "#fc47ed", "#e82e44", "#f2fa5f","#f2a04e"];
   const fetchUserModules = (username) => {
     console.log("Fetching modules for user:", username);
 
     // Make a GET request to fetch user-specific projects
     fetch(
-      `http://localhost:8082/api/modules/getUserModules?username=${username}`
+      `http://13.233.111.56:8082/api/modules/getUserModules?username=${username}`
     )
       .then((response) => response.json())
       .then((data) => {
@@ -101,8 +101,8 @@ const Modules = () => {
 //   try {
 //     // Include projectId as a query parameter
 //     const apiUrl = projectId
-//       ? `http://localhost:8082/api/modules/getModuleByPId/${projectId}`
-//       : "http://localhost:8082/api/modules/getAllModules";
+//       ? `http://13.233.111.56:8082/api/modules/getModuleByPId/${projectId}`
+//       : "http://13.233.111.56:8082/api/modules/getAllModules";
 
 //     // Make a GET request to fetch modules
 //     const response = await axios.get(apiUrl);
@@ -198,8 +198,8 @@ const Modules = () => {
 
     // Determine whether to create or update based on selectedModuleId
     const requestUrl = selectedModuleId
-      ? `http://localhost:8082/api/modules/updateModule/${selectedModuleId}`
-      : `http://localhost:8082/api/modules/saveModule/${selectedProject}`;
+      ? `http://13.233.111.56:8082/api/modules/updateModule/${selectedModuleId}`
+      : `http://13.233.111.56:8082/api/modules/saveModule/${selectedProject}`;
 
     // Use 'PUT' for updating
     const method = selectedModuleId ? "PUT" : "POST";
@@ -262,7 +262,7 @@ const Modules = () => {
     }).then((result) => {
       if (result.isConfirmed) {
         // Make a DELETE request to delete the module
-        fetch(`http://localhost:8082/api/modules/deleteModule/${moduleId}`, {
+        fetch(`http://13.233.111.56:8082/api/modules/deleteModule/${moduleId}`, {
           method: 'DELETE',
         })
           .then((response) => {
@@ -341,82 +341,69 @@ const Modules = () => {
         onChange={(e) => setSearchTerm(e.target.value)}
       />
    {filteredModules.length === 0 ? (
-        searchTerm !== "" ? (
-          <Alert variant="danger text-center" className="mb-3">
-            No results found for "{searchTerm}".
-          </Alert>
-        ) : (
-          <Alert variant="info text-center" className="mb-3">
-            No Modules found.
-          </Alert>
-        )
-      ) : (
-       <Table
-            striped
-            bordered
-            hover
-            className="text-center border border-dark"
-          >
-            <thead>
-
-              <tr>
-              <th className="h6">Project Name</th>
-                <th className="h6">Module Name</th>
-                <th className=" border border-dark h6">Assigned To</th>
-                <th className="h6">Status</th>
-                <th className="h6">Planned Start Date</th>
-                <th className="h6">Planned Closed Date</th>
-                <th className="h6">Comments</th>
-                {/* <th className="h6">Actions</th> */}
-              </tr>
-            </thead>
-            <tbody>
-              {filteredModules.map((module, index) => (
-                <tr key={index}>
-                   <td>{module.project.projectName}</td>
-                  <td>{module.moduleName}</td>
-                  <td className="text-center">
-                    <ol>
-                      {module.assignedTo.map((user, index) => (
-                        <li key={index}>{user}</li>
-                      ))}
-                    </ol>
-                  </td>
-                  <td>{module.status}</td>
-                  <td>{moment(module.startDate).format("YYYY-MM-DD")}</td>
-                  <td>{moment(module.endDate).format("YYYY-MM-DD")}</td>
-
-                  <td style={{ maxWidth: "200px", overflowX: "auto" }}>
-                    {module.remarks}
-                  </td>
-                  {/* <td> */}
-                    {/* <Button
-                      variant="primary"
-                      className='mb-1'
-                      onClick={() => handleUpdateModule(module.id)}
-                    >
-                      Update
-                    </Button>{' '}
-                    <Button
-                      variant="danger"
-                      onClick={() => handleDeleteModule(module.id)}
-                    >
-                      Delete
-                    </Button> */}
-                    {/* <i
-                      className="bi bi-pencil fs-4"
-                      onClick={() => handleUpdateModule(module.id)}
-                    ></i>{" "}
-                    <i
-                      class="bi bi-trash3 fs-4 m-2"
-                      onClick={() => handleDeleteModule(module.id)}
-                    ></i>
-                  </td> */}
-                </tr>
+  searchTerm !== "" ? (
+    <Alert variant="danger text-center" className="mb-3">
+      No results found for "{searchTerm}".
+    </Alert>
+  ) : (
+    <Alert variant="info text-center" className="mb-3">
+      No modules found.
+    </Alert>
+  )
+) : (
+  <div className="row">
+    {filteredModules.map((module, index) => (
+      <div className="col-md-4 mb-3" key={module.id}>
+        <div className="card h-100 d-flex flex-column border border-dark"  style={{ backgroundColor: index < titleColors.length ? titleColors[index] : titleColors[index % titleColors.length] }}>
+          <div className="card-body d-flex flex-column">
+            <h5 className="card-title text-center" style={{ color: "black" }}>{module.moduleName}</h5>
+            <ul className="list-unstyled">
+              <li><strong style={{ color: "black" }}>Assigned To:</strong></li>
+              {module.assignedTo.map((user, userIndex) => (
+                <li key={userIndex} style={{ color: "black" }}>{user}</li>
               ))}
-            </tbody>
-          </Table>
-      )}
+            </ul>
+           
+            <p className="card-text" style={{ color: "black" }}><strong>Planned Start Date:</strong> {moment(module.startDate).format("DD-MM-YYYY")}</p>
+            <p className="card-text" style={{ color: "black" }}><strong>Planned Closed Date:</strong> {moment(module.endDate).format("DD-MM-YYYY")}</p>
+            <div className="flex-grow-1" style={{ overflowY: "auto", overflowX: "auto" }}>
+              <p className="card-text" style={{ color: "black" }}><strong>Comments:</strong></p>
+              <p className="card-text" style={{ color: "black" }}>{module.remarks}</p>
+            </div>
+          
+            <div className="d-flex align-items-center justify-content-center">
+                    <div className="card-text " style={{ color: "black" }}>
+                      {module.status === "Closed" ? (
+                        <button className="btn btn-danger" style={{ borderRadius: "20px" }}>{module.status}</button>
+                      ) : module.status === "Open" ? (
+                        <button className="btn btn-success" style={{ borderRadius: "20px" }}>{module.status}</button>
+                      ) : (
+                        <button className="btn btn-warning" style={{ borderRadius: "20px" }}>{module.status}</button>
+                      )}
+                    </div>
+                    <div className="card-text m-3" style={{ color: "black" }}>
+
+                      {module.priority === "Critical" ? (
+                        <button className="btn btn-danger" style={{ borderRadius: "20px" }}>{module.priority}</button>
+                      ) : module.priority === "High" ? (
+                        <button className="btn btn-warning" style={{ borderRadius: "20px" }}>{module.priority}</button>
+                      ) : module.priority === "Medium" ? (
+                        <button className="btn btn-primary" style={{ borderRadius: "20px" }}>{module.priority}</button>
+                      ) : (
+                        <button className="btn btn-secondary" style={{ borderRadius: "20px" }}>{module.priority}</button>
+                      )}
+                    </div>
+                  </div>
+
+                
+                
+          </div>
+        </div>
+      </div>
+    ))}
+  </div>
+)}
+
       <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
           <Modal.Title>Create/Update Module</Modal.Title>

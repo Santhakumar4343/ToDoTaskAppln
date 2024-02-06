@@ -13,7 +13,7 @@ import Swal from "sweetalert2";
 import moment from "moment";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
-
+import "./Department.css"
 function Projects() {
   const [showModal, setShowModal] = useState(false);
   const [projects, setProjects] = useState([]);
@@ -54,7 +54,7 @@ function Projects() {
     const projectName = project.projectName && project.projectName.toLowerCase();
     const assignedTo = project.assignedTo && project.assignedTo.map((user) => user.toLowerCase());
     const status = project.status && project.status.toLowerCase();
-  
+
     return (
       (projectName && projectName.includes(searchTerm.toLowerCase())) ||
       (assignedTo && assignedTo.some((user) => user.includes(searchTerm.toLowerCase()))) ||
@@ -71,7 +71,7 @@ function Projects() {
 
     // Make a GET request to fetch user-specific projects
     fetch(
-      `http://localhost:8082/api/projects/getUserProjects?username=${username}`
+      `http://13.233.111.56:8082/api/projects/getUserProjects?username=${username}`
     )
       .then((response) => response.json())
       .then((data) => {
@@ -94,8 +94,8 @@ function Projects() {
     });
 
     const apiUrl = selectedProject.id
-      ? `http://localhost:8082/api/projects/update/${selectedProject.id}`
-      : "http://localhost:8082/api/projects/save";
+      ? `http://13.233.111.56:8082/api/projects/update/${selectedProject.id}`
+      : "http://13.233.111.56:8082/api/projects/save";
 
     const method = selectedProject.id ? "PUT" : "POST";
 
@@ -112,9 +112,8 @@ function Projects() {
               "Project " +
               (selectedProject.id ? "Updated" : "Created") +
               " Successfully",
-            text: `The project has been ${
-              selectedProject.id ? "updated" : "created"
-            } successfully!`,
+            text: `The project has been ${selectedProject.id ? "updated" : "created"
+              } successfully!`,
             customClass: {
               popup: "max-width-100",
             },
@@ -130,9 +129,8 @@ function Projects() {
           Swal.fire({
             icon: "error",
             title: "Operation Failed",
-            text: `An error occurred during the ${
-              selectedProject.id ? "update" : "creation"
-            } of the project. Please try again.`,
+            text: `An error occurred during the ${selectedProject.id ? "update" : "creation"
+              } of the project. Please try again.`,
             customClass: {
               popup: "max-width-100",
             },
@@ -174,7 +172,7 @@ function Projects() {
     }).then((result) => {
       if (result.isConfirmed) {
         // Make a DELETE request to delete the project
-        fetch(`http://localhost:8082/api/projects/delete/${projectId}`, {
+        fetch(`http://13.233.111.56:8082/api/projects/delete/${projectId}`, {
           method: "DELETE",
         })
           .then((response) => {
@@ -219,8 +217,8 @@ function Projects() {
       }
     });
   };
-  
 
+  const titleColors = ["#42ff75", "#3ba3ed", "#fc47ed", "#e82e44", "#f2fa5f","#f2a04e"];
   return (
     <div>
       <h4 className="text-center ">Projects Component</h4>
@@ -230,10 +228,14 @@ function Projects() {
       <FormControl
         type="text"
         placeholder="Search by Project Name, Assigned To, or Status"
-        className="mb-4 mt-4 "
-        style={{ border: "1px solid black" }}
+        className="mb-4 mt-4"
+        style={{ border: "1px solid black", position: 'relative' }} 
         onChange={(e) => setSearchTerm(e.target.value)}
       />
+
+      <span style={{ position: 'absolute', top: '50%', right: '10px', transform: 'translateY(-50%)', pointerEvents: 'none' }}>
+      <i class="bi bi-search"></i>
+      </span>
 
       {filteredProjects.length === 0 ? (
         searchTerm !== "" ? (
@@ -246,66 +248,58 @@ function Projects() {
           </Alert>
         )
       ) : (
-        <Table
-          striped
-          bordered
-          hover
-          className="text-center border border-dark"
-        >
-          <thead>
-            <tr>
-              <th className=" border border-dark h6 ">Project Name</th>
-              <th className=" border border-dark h6">Assigned To</th>
-              <th className=" border border-dark h6">Status</th>
-              <th className=" border border-dark h6">Planned Start Date</th>
-              <th className=" border border-dark h6">Planned Closed Date</th>
-              <th className=" border border-dark h6">Comments</th>
-              {/* <th className=" border border-dark h6">Actions</th> */}
-            </tr>
-          </thead>
-          <tbody>
-            {filteredProjects.map((project) => (
-              <tr key={project.id}>
-                <td className="text-center">{project.projectName}</td>
-                <td className="text-center">
-                  <ol>
-                    {project.assignedTo.map((user, index) => (
-                      <li key={index}>{user}</li>
-                    ))}
-                  </ol>
-                </td>
 
-                <td className="text-center">{project.status}</td>
-                <td className="text-center">
-                  {moment(project.startDate).format("DD-MM-YYYY")}
-                </td>
-                <td className="text-center">
-                  {moment(project.closedDate).format("DD-MM-YYYY")}
-                </td>
-                <td style={{ maxWidth: "200px", overflowX: "auto" }}>
-                  {project.remarks}
-                </td>
-                {/* <td> */}
-                  {/* <Button variant="primary" className='mb-1' >
-                    Update
-                  </Button>  */}
-                  {/* <i
-                    class="bi bi-pencil fs-4"
-                    onClick={() => handleUpdateProject(project.id)}
-                  ></i>{" "} */}
-                  {/* <Button variant="danger" >
-                    Delete
-                  </Button> */}
-                  {/* <i
-                    class="bi bi-trash3 fs-4 m-2"
-                    onClick={() => handleDeleteProject(project.id)}
-                  ></i> */}
-                {/* </td> */}
-              </tr>
-            ))}
-          </tbody>
-        </Table>
+
+        <div className="row">
+          {filteredProjects.map((project, index) => (
+            <div className="col-md-4 mb-3" key={project.id}>
+              <div className="card h-100 d-flex flex-column border border-dark"  style={{ backgroundColor: index < titleColors.length ? titleColors[index] : titleColors[index % titleColors.length] }}>
+                <div className="card-body d-flex flex-column">
+                  <h5 className="card-title text-center" style={{ color: "black" }}>{project.projectName}</h5>
+                  <ul className="list-unstyled">
+                    <li><strong style={{ color: "black" }}>Assigned To:</strong></li>
+                    {project.assignedTo.map((user, userIndex) => (
+                      <li key={userIndex} style={{ color: "black" }}>{user}</li>
+                    ))}
+                  </ul>
+                 <p className="card-text" style={{ color: "black" }}><strong>Planned Start Date:</strong> {moment(project.startDate).format("DD-MM-YYYY")}</p>
+                  <p className="card-text" style={{ color: "black" }}><strong>Planned Closed Date:</strong> {moment(project.closedDate).format("DD-MM-YYYY")}</p>
+                  <div className="flex-grow-1" style={{ overflowY: "auto" }}>
+                    <p className="card-text" style={{ color: "black" }}><strong>Comments:</strong></p>
+                    <p className="card-text" style={{ color: "black" }}>{project.remarks}</p>
+                  </div>
+                  <div className="d-flex align-items-center justify-content-center">
+                    <div className="card-text " style={{ color: "black" }}>
+                      {project.status === "Closed" ? (
+                        <button className="btn btn-danger" style={{ borderRadius: "20px" }}>{project.status}</button>
+                      ) : project.status === "Open" ? (
+                        <button className="btn btn-success" style={{ borderRadius: "20px" }}>{project.status}</button>
+                      ) : (
+                        <button className="btn btn-warning" style={{ borderRadius: "20px" }}>{project.status}</button>
+                      )}
+                    </div>
+                    <div className="card-text m-3" style={{ color: "black" }}>
+
+                      {project.priority === "Critical" ? (
+                        <button className="btn btn-danger" style={{ borderRadius: "20px" }}>{project.priority}</button>
+                      ) : project.priority === "High" ? (
+                        <button className="btn btn-warning" style={{ borderRadius: "20px" }}>{project.priority}</button>
+                      ) : project.priority === "Medium" ? (
+                        <button className="btn btn-primary" style={{ borderRadius: "20px" }}>{project.priority}</button>
+                      ) : (
+                        <button className="btn btn-secondary" style={{ borderRadius: "20px" }}>{project.priority}</button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+
       )}
+
       {/* Modal for creating or updating a project */}
       <Modal show={showModal} onHide={handleCloseModal}>
         <Modal.Header closeButton>

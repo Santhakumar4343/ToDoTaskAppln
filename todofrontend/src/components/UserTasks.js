@@ -15,7 +15,7 @@ import axios from "axios";
 import { useLocation } from "react-router";
 const Task = () => {
   const [showModal, setShowModal] = useState(false);
- 
+
   const [selectedModule, setSelectedModule] = useState("");
   const [taskName, setTaskName] = useState("");
   const [startDate, setStartDate] = useState("");
@@ -28,16 +28,16 @@ const Task = () => {
   const [searchTerm, setSearchTerm] = useState("");
 
   const [selectedProject, setSelectedProject] = useState("");
-  
+
   const location = useLocation();
   const { state: { username } = {} } = location;
   const [assignedTo, setAssignedTo] = useState([]);
 
   const [users, setUsers] = useState([]);
-
+  const titleColors = ["#42ff75", "#3ba3ed", "#fc47ed", "#e82e44", "#f2fa5f","#f2a04e"];
   useEffect(() => {
     // Fetch the list of users when the component mounts
-    fetch("http://localhost:8082/api/users/userType/user")
+    fetch("http://13.233.111.56:8082/api/users/userType/user")
       .then((response) => response.json())
       .then((data) => {
         setUsers(data);
@@ -46,7 +46,7 @@ const Task = () => {
         console.error("Error fetching users:", error);
       });
   }, []);
- 
+
   useEffect(() => {
     // Fetch the projects for the specific user when the component mounts
     fetchUserTasks(username);
@@ -57,7 +57,7 @@ const Task = () => {
 
     // Make a GET request to fetch user-specific projects
     fetch(
-      `http://localhost:8082/api/tasks/getUserTasks?username=${username}`
+      `http://13.233.111.56:8082/api/tasks/getUserTasks?username=${username}`
     )
       .then((response) => response.json())
       .then((data) => {
@@ -80,7 +80,7 @@ const Task = () => {
       });
   };
 
-  
+
   const handleCreateTask = () => {
     setTaskName("");
     setStartDate("");
@@ -130,10 +130,10 @@ const Task = () => {
     formData.append("priority", priority);
     formData.append("remarks", remarks);
     formData.append('assignedTo', assignedTo.join(','));
-   
+
     const requestUrl = selectedTaskId
-      ? `http://localhost:8082/api/tasks/updateTask/${selectedTaskId}`
-      : `http://localhost:8082/api/tasks/saveTask/${selectedProject}/${selectedModule}`;
+      ? `http://13.233.111.56:8082/api/tasks/updateTask/${selectedTaskId}`
+      : `http://13.233.111.56:8082/api/tasks/saveTask/${selectedProject}/${selectedModule}`;
 
     const method = selectedTaskId ? "PUT" : "POST";
 
@@ -161,7 +161,7 @@ const Task = () => {
         });
         fetchUserTasks(username);
         setShowModal(false);
-       
+
       })
       .catch((error) => {
         console.error("Error saving task:", error);
@@ -206,7 +206,7 @@ const Task = () => {
     }).then((result) => {
       if (result.isConfirmed) {
         // Make a DELETE request to delete the task
-        axios.delete(`http://localhost:8082/api/tasks/deleteTaskById/${taskId}`)
+        axios.delete(`http://13.233.111.56:8082/api/tasks/deleteTaskById/${taskId}`)
           .then(response => {
             console.log('Task deleted successfully');
             // Close the initial confirmation dialog
@@ -281,61 +281,67 @@ const Task = () => {
           No results found for "{searchTerm}".
         </Alert>
       ) : (
-        <Table
-          striped
-          bordered
-          hover
-          className="text-center border border-dark"
-        >
-          <thead>
-            <tr>
-              <th className="h6">Project Name</th>
-              <th className="h6">Module Name</th>
-              <th className="h6">Task Name</th>
-              <th className=" border border-dark h6">Assigned To</th>
-              <th className="h6">Status</th>
-              <th className="h6">Planned Start Date</th>
-              <th className="h6">Planned Closed Date</th>
-              <th className="h6">Priority</th>
-              <th className="h6">Comments</th>
-              <th className="h6">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredTasks.map((task) => (
-              <tr key={task.id}>
-                <td>{task.module.project.projectName}</td>
-                <td>{task.module.moduleName}</td>
-                <td>{task.taskName}</td>
-                <td className="text-center">
-                  <ol>
-                    {task.assignedTo.map((user, index) => (
-                      <li key={index}>{user}</li>
+        <div className="row">
+          {filteredTasks.map((task, index) => (
+            <div className="col-md-4 mb-3" key={task.id}>
+              <div className="card h-80 d-flex flex-column border border-dark zoom-in"  style={{ backgroundColor: index < titleColors.length ? titleColors[index] : titleColors[index % titleColors.length] }}>
+                <div className="card-body d-flex flex-column ">
+                  <h5 className="card-title text-center" style={{ color: "black" }}>{task.taskName}</h5>
+                  <ul className="list-unstyled">
+                    <li><strong style={{ color: "black" }}>Assigned To:</strong></li>
+                    {task.assignedTo.map((user, userIndex) => (
+                      <li key={userIndex} style={{ color: "black" }}>{user}</li>
                     ))}
-                  </ol>
-                </td>
-                <td>{task.status}</td>
-                <td>{moment(task.startDate).format("YYYY-MM-DD")}</td>
-                <td>{moment(task.endDate).format("YYYY-MM-DD")}</td>
-                <td>{task.priority}</td>
-                <td>{task.remarks}</td>
-                <td>
-                  <i
-                    className="bi bi-pencil fs-4"
-                    onClick={() => handleUpdateTask(task.id)}
-                  ></i>{" "}
-                  {/* <i
-                    className="bi bi-trash3 fs-4 m-2 text-danger"
-                    onClick={() => handleDeleteTask(task.id)}
-                  ></i> */}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </Table>
-      )
+                  </ul>
 
-      }
+                  <p className="card-text" style={{ color: "black" }}><strong>Planned Start Date:</strong> {moment(task.startDate).format("DD-MM-YYYY")}</p>
+                  <p className="card-text" style={{ color: "black" }}><strong>Planned Closed Date:</strong> {moment(task.endDate).format("DD-MM-YYYY")}</p>
+
+                  <div className="flex-grow-1" style={{ overflowY: "auto" }}>
+                    <p className="card-text" style={{ color: "black" }}><strong>Comments:</strong></p>
+                    <p className="card-text" style={{ color: "black" }}>{task.remarks}</p>
+                  </div>
+
+                  <div className="d-flex align-items-center justify-content-center">
+                    <div className="card-text " style={{ color: "black" }}>
+                      {task.status === "Closed" ? (
+                        <button className="btn btn-danger" style={{ borderRadius: "20px" }}>{task.status}</button>
+                      ) : task.status === "Open" ? (
+                        <button className="btn btn-success" style={{ borderRadius: "20px" }}>{task.status}</button>
+                      ) : (
+                        <button className="btn btn-warning" style={{ borderRadius: "20px" }}>{task.status}</button>
+                      )}
+                    </div>
+                    <div className="card-text m-3" style={{ color: "black" }}>
+
+                      {task.priority === "Critical" ? (
+                        <button className="btn btn-danger" style={{ borderRadius: "20px" }}>{task.priority}</button>
+                      ) : task.priority === "High" ? (
+                        <button className="btn btn-warning" style={{ borderRadius: "20px" }}>{task.priority}</button>
+                      ) : task.priority === "Medium" ? (
+                        <button className="btn btn-primary" style={{ borderRadius: "20px" }}>{task.priority}</button>
+                      ) : (
+                        <button className="btn btn-secondary" style={{ borderRadius: "20px" }}>{task.priority}</button>
+                      )}
+                    </div>
+                  </div>
+
+                </div>
+                <div className="card-footer d-flex justify-content-center aligin-items-center border border-dark">
+                  <i
+                    className="bi bi-pencil-square fs-3"
+                    style={{ color: "black" }}
+                    onClick={() => handleUpdateTask(task.id)}
+                  ></i>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+      )}
+
+
       <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
           <Modal.Title>Create/Update Task</Modal.Title>
@@ -367,15 +373,15 @@ const Task = () => {
                     value={assignedTo}
                     className="border border-dark mb-3"
                     onChange={(e) => setAssignedTo(Array.from(e.target.selectedOptions, (option) => option.value))}
-                   disabled
+                    disabled
                   >
 
-                   
+
                     {users.map((user) => (
                       <option key={user.id} value={user.username}>
                         {user.username}
                       </option>
-                      
+
                     ))}
                   </Form.Control>
                 </Form.Group>
