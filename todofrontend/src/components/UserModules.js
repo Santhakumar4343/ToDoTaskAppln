@@ -27,6 +27,7 @@ const Modules = () => {
   const [selectedModuleId, setSelectedModuleId] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const location = useLocation();
+  console.log(location);
   const { state: { username } = {} } = location;
 
   useEffect(() => {
@@ -39,7 +40,7 @@ const Modules = () => {
 
     // Make a GET request to fetch user-specific projects
     fetch(
-      `http://13.233.111.56:8082/api/modules/getUserModules?username=${username}`
+      `http://localhost:8082/api/modules/getUserModules?username=${username}`
     )
       .then((response) => response.json())
       .then((data) => {
@@ -101,8 +102,8 @@ const Modules = () => {
 //   try {
 //     // Include projectId as a query parameter
 //     const apiUrl = projectId
-//       ? `http://13.233.111.56:8082/api/modules/getModuleByPId/${projectId}`
-//       : "http://13.233.111.56:8082/api/modules/getAllModules";
+//       ? `http://localhost:8082/api/modules/getModuleByPId/${projectId}`
+//       : "http://localhost:8082/api/modules/getAllModules";
 
 //     // Make a GET request to fetch modules
 //     const response = await axios.get(apiUrl);
@@ -198,8 +199,8 @@ const Modules = () => {
 
     // Determine whether to create or update based on selectedModuleId
     const requestUrl = selectedModuleId
-      ? `http://13.233.111.56:8082/api/modules/updateModule/${selectedModuleId}`
-      : `http://13.233.111.56:8082/api/modules/saveModule/${selectedProject}`;
+      ? `http://localhost:8082/api/modules/updateModule/${selectedModuleId}`
+      : `http://localhost:8082/api/modules/saveModule/${selectedProject}`;
 
     // Use 'PUT' for updating
     const method = selectedModuleId ? "PUT" : "POST";
@@ -262,7 +263,7 @@ const Modules = () => {
     }).then((result) => {
       if (result.isConfirmed) {
         // Make a DELETE request to delete the module
-        fetch(`http://13.233.111.56:8082/api/modules/deleteModule/${moduleId}`, {
+        fetch(`http://localhost:8082/api/modules/deleteModule/${moduleId}`, {
           method: 'DELETE',
         })
           .then((response) => {

@@ -4,6 +4,7 @@ import Users from './Users';
 import Admins from './Admins';
 import { useNavigate } from "react-router-dom";
 import { Dropdown } from 'react-bootstrap';
+import Department from '../Department';
 function SuperUserDashboard() {
   const [selectedNavLink, setSelectedNavLink] = useState('admins');
   const handleNavLinkClick = (navLink, event) => {
@@ -19,6 +20,8 @@ function SuperUserDashboard() {
     switch (selectedNavLink) {
       case 'users':
         return <Users />;
+        case 'departments':
+          return <Department />;
       case 'admins':
         return <Admins />;
       default:
@@ -33,6 +36,11 @@ function SuperUserDashboard() {
         
           <ul className="list-unstyled">
            
+          <li className=" mb-4">
+              <Link to="/superuserdashboard/admins" onClick={(e) => handleNavLinkClick('departments', e)} className="text-decoration-none btn btn-link text-decoration-none text-dark fs-5">
+                Departments
+              </Link>
+            </li >
             <li className=" mb-4">
               <Link to="/superuserdashboard/admins" onClick={(e) => handleNavLinkClick('admins', e)} className="text-decoration-none btn btn-link text-decoration-none text-dark fs-5">
                 Admins

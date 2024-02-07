@@ -69,23 +69,7 @@ public class ProjectServiceImpl implements ProjectService {
     public List<Project> getUserProjects(String username) {
         return projectRepository.findByAssignedTo(username);
     }
-//    public void assignUserToProject(Long projectId, String assignedTo) {
-//        Optional<Project> optionalProject = projectRepository.findById(projectId);
-//
-//        if (optionalProject.isPresent()) {
-//            Project project = optionalProject.get();
-//            List<String> assignedToList = project.getAssignedTo();
-//
-//            // Add the user to the list if not already present
-//            if (!assignedToList.contains(assignedTo)) {
-//                assignedToList.add(assignedTo);
-//                project.setAssignedTo(assignedToList);
-//                projectRepository.save(project);
-//            }
-//        } else {
-//            throw new RuntimeException("Project not found with ID: " + projectId);
-//        }
-//    }
+
     public void assignUserToProject(Long projectId, String assignedTo) {
         Optional<Project> optionalProject = projectRepository.findById(projectId);
 
@@ -104,9 +88,7 @@ public class ProjectServiceImpl implements ProjectService {
                 if (!assignedToList.contains(newUser)) {
                     assignedToList.add(newUser);
                 } else {
-                    // Handle the case where the user is already assigned
-                    // You can log an error or throw an exception based on your requirements
-                    // For example:
+                    
                     // throw new IllegalArgumentException("User " + newUser + " is already assigned to the project.");
                     throw new RuntimeException("User " + newUser + " is already assigned to the project.");
                 }

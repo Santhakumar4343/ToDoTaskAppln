@@ -1,9 +1,12 @@
 import axios from 'axios';
 import Swal from 'sweetalert2';
 import React, { useEffect, useState } from 'react';
-
+import { useLocation } from "react-router-dom";
 import { Button, Col, Form, Modal, Row } from 'react-bootstrap';
 function Department() {
+    const location = useLocation();
+    const { state: { username } = {} } = location;
+   
     const [departments, setDepartments] = useState([]);
     const [showModal, setShowModal] = useState(false);
     const [departmentName, setDepartmentName] = useState("");
@@ -13,15 +16,25 @@ function Department() {
     const [modalTitle, setModalTitle] = useState("");
     const [userToRemove, setUserToRemove] = useState("");
     const titleColors = ["#42ff75", "#3ba3ed", "#fc47ed", "#e82e44", "#f2fa5f","#f2a04e"];
-    useEffect(() => {
-        axios.get("http://localhost:8082/api/departments/getAllDepartments")
+   
+ useEffect(() => {
+        if (username) {
+            fetchUserDepartments(username);
+        }
+    }, [username]);
+
+    const fetchUserDepartments = (username) => {
+        console.log("Fetching departments for user:", username);
+
+        axios.get(`http://localhost:8082/api/departments/getAdminDepartments?username=${username}`)
             .then(response => {
                 setDepartments(response.data);
             })
             .catch(error => {
                 console.error('Error fetching departments:', error);
             });
-    }, []);
+    };
+
     useEffect(() => {
         fetch("http://localhost:8082/api/admins/userType/admin")
             .then((response) => response.json())

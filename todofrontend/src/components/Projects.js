@@ -15,7 +15,10 @@ import moment from "moment";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import "./styles.css"
 import axios from "axios";
+import { useLocation } from "react-router-dom";
 function Projects() {
+  const location = useLocation();
+  const { state: { username } = {} } = location;
   const [showModal, setShowModal] = useState(false);
   const [projects, setProjects] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -24,7 +27,7 @@ function Projects() {
   const [selectedDepartment, setSelectedDepartment] = useState("");
   useEffect(() => {
     // Fetch the list of users when the component mounts
-    fetch("http://13.233.111.56:8082/api/users/userType/user")
+    fetch("http://localhost:8082/api/users/userType/user")
       .then((response) => response.json())
       .then((data) => {
         setUsers(data);
@@ -70,16 +73,6 @@ function Projects() {
       remarks: "",
     });
   };
-
-
-  //   //filter Project
-  //   const filteredProjects = projects.filter((project) =>
-  //   project.assignedTo.some((user) =>
-  //     user.toLowerCase().includes(searchTerm.toLowerCase())
-  //   ) ||
-  //   project.projectName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-  //   project.status.toLowerCase().includes(searchTerm.toLowerCase())
-  // );
   const filteredProjects = projects.filter((project) => {
     const projectName = project.projectName && project.projectName.toLowerCase();
     const assignedTo = project.assignedTo && project.assignedTo.map((user) => user.toLowerCase());
@@ -92,25 +85,7 @@ function Projects() {
     );
   });
 
-  useEffect(() => {
-    // Fetch the projects when the component mounts
-    fetchProjects();
-  }, []);
-
-  const fetchProjects = () => {
-    // Make a GET request to fetch projects
-    fetch("http://13.233.111.56:8082/api/projects/getAllProjects")
-      .then((response) => response.json())
-      .then((data) => {
-        // Set the fetched projects to the state
-        setProjects(data);
-      })
-      .catch((error) => {
-        console.error("Error fetching projects:", error);
-        // Handle the error
-      });
-  };
-
+  
   const handleSaveProject = () => {
     const formData = new FormData();
     selectedProject.startDate = moment(selectedProject.startDate).format("YYYY-MM-DD");
@@ -124,8 +99,8 @@ function Projects() {
     });
 
     const apiUrl = selectedProject.id
-      ? `http://13.233.111.56:8082/api/projects/update/${selectedProject.id}`
-      : `http://13.233.111.56:8082/api/projects/save/${selectedDepartment}`;
+      ? `http://localhost:8082/api/projects/update/${selectedProject.id}`
+      : `http://localhost:8082/api/projects/save/${selectedDepartment}`;
  
     const method = selectedProject.id ? "PUT" : "POST";
 
@@ -200,7 +175,7 @@ function Projects() {
   
   const handleDeleteProject = (projectId) => {
     // Fetch the project details to check its status
-    fetch(`http://13.233.111.56:8082/api/projects/getProjectById/${projectId}`)
+    fetch(`http://localhost:8082/api/projects/getProjectById/${projectId}`)
       .then((response) => response.json())
       .then((project) => {
         const projectStatus = project.status;
@@ -222,7 +197,7 @@ function Projects() {
           }).then((result) => {
             if (result.isConfirmed) {
               // Make a DELETE request to delete the project
-              fetch(`http://13.233.111.56:8082/api/projects/delete/${projectId}`, {
+              fetch(`http://localhost:8082/api/projects/delete/${projectId}`, {
                 method: 'DELETE',
               })
                 .then((response) => {
@@ -333,7 +308,7 @@ function Projects() {
     formData.append('assignedTo', selectedProject.assignedTo.join(',')); // Convert the array to a comma-separated string
 
     // Make a PUT request to your backend API to assign users to the project
-    fetch(`http://13.233.111.56:8082/api/projects/assign-user/${selectedProject.id}`, {
+    fetch(`http://localhost:8082/api/projects/assign-user/${selectedProject.id}`, {
       method: 'PUT',
       body: formData,
     })
@@ -399,7 +374,7 @@ function Projects() {
       }).then((result) => {
         if (result.isConfirmed) {
           // If the user confirms, proceed with the removal
-          fetch(`http://13.233.111.56:8082/api/projects/remove-user/${selectedProject.id}?userToRemove=${userToRemove}`, {
+          fetch(`http://localhost:8082/api/projects/remove-user/${selectedProject.id}?userToRemove=${userToRemove}`, {
             method: 'DELETE',
           })
             .then((response) => {
@@ -453,7 +428,7 @@ function Projects() {
   //   // Check if there's a user to remove
   //   if (userToRemove) {
   //     // Fetch the project details to check its modules
-  //     fetch(`http://13.233.111.56:8082/api/projects/getProjectById/${selectedProject.id}`)
+  //     fetch(`http://localhost:8082/api/projects/getProjectById/${selectedProject.id}`)
   //       .then((response) => response.json())
   //       .then((project) => {
   //         // Ensure that 'modules' is defined and not null
@@ -490,7 +465,7 @@ function Projects() {
   //           }).then((result) => {
   //             if (result.isConfirmed) {
   //               // If the user confirms, proceed with the removal
-  //               fetch(`http://13.233.111.56:8082/api/projects/remove-user/${selectedProject.id}?userToRemove=${userToRemove}`, {
+  //               fetch(`http://localhost:8082/api/projects/remove-user/${selectedProject.id}?userToRemove=${userToRemove}`, {
   //                 method: 'DELETE',
   //               })
   //                 .then((response) => {
@@ -618,15 +593,67 @@ function Projects() {
 
   const [departments, setDepartments] = useState([]);
 
-    useEffect(() => {
-        axios.get("http://13.233.111.56:8082/api/departments/getAllDepartments")
-            .then(response => {
-                setDepartments(response.data);
-            })
-            .catch(error => {
-                console.error('Error fetching departments:', error);
-            });
-    }, []);
+  useEffect(() => {
+    if (username) {
+        fetchUserDepartments(username);
+    }
+}, [username]);
+
+
+const fetchUserDepartments = (username) => {
+  console.log("Fetching departments for user:", username);
+
+  return axios.get(`http://localhost:8082/api/departments/getAdminDepartments?username=${username}`)
+    .then(response => {
+      setDepartments(response.data);
+      return response.data; // Return the departments
+    })
+    .catch(error => {
+      console.error('Error fetching departments:', error);
+      throw error; // Throw the error to be caught by fetchProjects
+    });
+};
+
+useEffect(() => {
+  const fetchData = async () => {
+      try {
+          if (username) {
+              const userDepartments = await fetchUserDepartments(username);
+              fetchProjects(userDepartments);
+          }
+      } catch (error) {
+          console.error("Error fetching user departments:", error);
+      }
+  };
+
+  fetchData();
+}, [username]);
+
+const fetchProjects = (userDepartments) => {
+return fetch("http://localhost:8082/api/projects/getAllProjects")
+  .then((response) => response.json())
+  .then((projectsData) => {
+    try {
+      // Filter projects to include only those that contain at least one of the user's assigned departments
+      const filteredProjects = projectsData.filter((project) => {
+        // Check if any of the user's departments match the project's department
+        return userDepartments.some((userDepartment) =>
+          project.department.departmentName === userDepartment.departmentName
+        );
+      });
+      // Set the filtered projects directly to the projects state
+      setProjects(filteredProjects);
+    } catch (error) {
+      console.error("Error filtering projects:", error);
+      // Handle the error
+    }
+  })
+  .catch((error) => {
+    console.error("Error fetching projects:", error);
+    // Handle the error
+  });
+};
+
   return (
 
     <div>

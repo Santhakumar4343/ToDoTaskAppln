@@ -42,7 +42,7 @@ const Admins = () => {
         formData.append('mobileNumber', updatedAdmin.mobileNumber);
 
         // Make a backend request to update the admin
-        const response = await fetch(`http://13.233.111.56:8082/api/users/update-user/${selectedAdmin.id}`, {
+        const response = await fetch(`http://localhost:8082/api/users/update-user/${selectedAdmin.id}`, {
             method: 'PUT',
             body: formData,
         });
@@ -63,7 +63,7 @@ const Admins = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await fetch('http://13.233.111.56:8082/api/users/getAll');
+                const response = await fetch('http://localhost:8082/api/users/getAll');
                 if (!response.ok) {
                     throw new Error('Failed to fetch admins');
                 }
@@ -102,7 +102,7 @@ const Admins = () => {
       }).then((result) => {
         if (result.isConfirmed) {
           // Make a DELETE request to delete the user
-          fetch(`http://13.233.111.56:8082/api/users/delete/${adminId}`, {
+          fetch(`http://localhost:8082/api/users/delete/${adminId}`, {
             method: 'DELETE',
           })
             .then((response) => {

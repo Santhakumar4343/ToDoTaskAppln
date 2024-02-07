@@ -4,7 +4,7 @@ import { Dropdown } from 'react-bootstrap';
 import Projects from './Projects';
 import Modules from './Modules';
 import Task from './Task';
-import Department from './Department';
+import AdminDepartments from './AdminDepartments';
 
 function AdminDashBoard() {
   const [selectedNavLink, setSelectedNavLink] = useState('departments');
@@ -22,7 +22,7 @@ function AdminDashBoard() {
   const renderContent = () => {
     switch (selectedNavLink) {
       case 'departments':
-        return <Department />;
+        return <AdminDepartments />;
       case 'projects':
         return <Projects />;
       case 'modules':
