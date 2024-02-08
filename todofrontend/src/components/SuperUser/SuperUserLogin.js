@@ -3,7 +3,7 @@ import axios from "axios";
 import Swal from "sweetalert2";
 import { Link, useNavigate } from "react-router-dom";
 import { Modal, Button, Spinner, Form } from "react-bootstrap";
-
+import {API_BASE_URL} from "../../Api.js";
 function SuperUserLogin() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -34,7 +34,7 @@ function SuperUserLogin() {
     }
     try {
       const response = await axios.get(
-        "http://localhost:8082/api/superuser/get/1"
+        `${API_BASE_URL}/api/superuser/get/1`
       );
       const userData = response.data;
 
@@ -63,15 +63,14 @@ function SuperUserLogin() {
     try {
 
       const response = await axios.get(
-        "http://localhost:8082/api/superuser/get/1"
+        `${API_BASE_URL}/api/superuser/get/1`
       );
       const userData = response.data;
 
       if (userData.username === username && userData.password === password) {
         console.log("Authentication successful");
 
-        // Trigger OTP verification when authentication is successful
-        sendOtpToSuperUser();
+        navigate("/superuserdashboard")
       } else {
         setError("Invalid username or password");
         Swal.fire({
@@ -99,7 +98,7 @@ function SuperUserLogin() {
     try {
       // Make a request to verify the OTP
       const otpVerificationResponse = await axios.post(
-        'http://localhost:8082/api/superuser/verify-otp-for-superuser',
+        `${API_BASE_URL}/api/superuser/verify-otp-for-superuser`,
         {
           username: username,
           otp: otp,
@@ -137,7 +136,7 @@ function SuperUserLogin() {
     try {
       // Make a request to send OTP to the SuperUser
       await axios.post(
-        'http://localhost:8082/api/superuser/send-otp-to-superuser',
+        `${API_BASE_URL}/api/superuser/send-otp-to-superuser`,
         {
           username: username,
         }
@@ -162,7 +161,7 @@ function SuperUserLogin() {
       
      
       const resetResponse = await axios.post(
-        `http://localhost:8082/api/superuser/reset-password/1`,
+        `${API_BASE_URL}/api/superuser/reset-password/1`,
         {
           newPassword: newPassword,
         }

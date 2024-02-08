@@ -3,7 +3,7 @@ import { Form, Button, Spinner, Modal, Alert } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import Swal from "sweetalert2";
-
+import {API_BASE_URL} from "../Api.js";
 const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -90,11 +90,11 @@ const Login = () => {
   
       // Determine the appropriate API endpoints based on userType
       if (userType === "user") {
-        getUserIdEndpoint = `http://localhost:8082/api/users/get-user-id/${forgotPasswordUsername}`;
-        updatePasswordEndpoint = `http://localhost:8082/api/users/update-password`;
+        getUserIdEndpoint = `${API_BASE_URL}/api/users/get-user-id/${forgotPasswordUsername}`;
+        updatePasswordEndpoint = `${API_BASE_URL}/api/users/update-password`;
       } else if (userType === "admin") {
-        getUserIdEndpoint = `http://localhost:8082/api/admins/get-user-id/${forgotPasswordUsername}`;
-        updatePasswordEndpoint = `http://localhost:8082/api/admins/update-password`;
+        getUserIdEndpoint = `${API_BASE_URL}/api/admins/get-user-id/${forgotPasswordUsername}`;
+        updatePasswordEndpoint = `${API_BASE_URL}/api/admins/update-password`;
       } else {
         console.error("Unknown userType:", userType);
         return;
@@ -184,9 +184,9 @@ const Login = () => {
       let endpoint;
 
       if (userType === "user") {
-        endpoint = "http://localhost:8082/api/users/login";
+        endpoint = `${API_BASE_URL}/api/users/login`;
       } else if (userType === "admin") {
-        endpoint = "http://localhost:8082/api/admins/login";
+        endpoint = `${API_BASE_URL}/api/admins/login`;
       } else {
         console.error("Unknown userType:", userType);
         return;
@@ -244,8 +244,8 @@ const Login = () => {
   
       // Determine the appropriate API endpoint based on userType
       const otpEndpoint = userType === "admin"
-        ? 'http://localhost:8082/api/admins/send-otp-admin-forgot-password'
-        : 'http://localhost:8082/api/users/send-otp-user-forgot-password';
+        ? `${API_BASE_URL}/api/admins/send-otp-admin-forgot-password`
+        : `${API_BASE_URL}/api/users/send-otp-user-forgot-password`;
   
       // Send OTP to the respective endpoint
       await axios.post(otpEndpoint, requestData, {
@@ -303,8 +303,8 @@ const Login = () => {
 
         const otpVerificationEndpoint =
             userType === "admin"
-                ? 'http://localhost:8082/api/admins/verify-otp-admin-forgot-password'
-                : 'http://localhost:8082/api/users/verify-otp-user-forgot-password';
+                ? `${API_BASE_URL}/api/admins/verify-otp-admin-forgot-password`
+                : `${API_BASE_URL}/api/users/verify-otp-user-forgot-password`;
 
         const otpVerificationResponse = await axios.post(otpVerificationEndpoint, {
             username: forgotPasswordUsername,

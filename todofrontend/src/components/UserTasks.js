@@ -13,6 +13,7 @@ import moment from "moment";
 import Swal from "sweetalert2";
 import axios from "axios";
 import { useLocation } from "react-router";
+import { API_BASE_URL } from "../Api";
 const Task = () => {
   const [showModal, setShowModal] = useState(false);
 
@@ -37,7 +38,7 @@ const Task = () => {
   const titleColors = ["#42ff75", "#3ba3ed", "#fc47ed", "#e82e44", "#f2fa5f","#f2a04e"];
   useEffect(() => {
     // Fetch the list of users when the component mounts
-    fetch("http://localhost:8082/api/users/userType/user")
+    fetch(`${API_BASE_URL}/api/users/userType/user`)
       .then((response) => response.json())
       .then((data) => {
         setUsers(data);
@@ -57,7 +58,7 @@ const Task = () => {
 
     // Make a GET request to fetch user-specific projects
     fetch(
-      `http://localhost:8082/api/tasks/getUserTasks?username=${username}`
+      `${API_BASE_URL}/api/tasks/getUserTasks?username=${username}`
     )
       .then((response) => response.json())
       .then((data) => {
@@ -132,8 +133,8 @@ const Task = () => {
     formData.append('assignedTo', assignedTo.join(','));
 
     const requestUrl = selectedTaskId
-      ? `http://localhost:8082/api/tasks/updateTask/${selectedTaskId}`
-      : `http://localhost:8082/api/tasks/saveTask/${selectedProject}/${selectedModule}`;
+      ? `${API_BASE_URL}/api/tasks/updateTask/${selectedTaskId}`
+      : `${API_BASE_URL}/api/tasks/saveTask/${selectedProject}/${selectedModule}`;
 
     const method = selectedTaskId ? "PUT" : "POST";
 
@@ -206,7 +207,7 @@ const Task = () => {
     }).then((result) => {
       if (result.isConfirmed) {
         // Make a DELETE request to delete the task
-        axios.delete(`http://localhost:8082/api/tasks/deleteTaskById/${taskId}`)
+        axios.delete(`${API_BASE_URL}/api/tasks/deleteTaskById/${taskId}`)
           .then(response => {
             console.log('Task deleted successfully');
             // Close the initial confirmation dialog

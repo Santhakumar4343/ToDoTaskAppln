@@ -3,8 +3,11 @@ import { Button, Modal, Form, Table, FormControl, Alert, Row, Col } from 'react-
 import moment from 'moment';
 import Swal from 'sweetalert2';
 import axios from 'axios';
-
+import { useLocation } from "react-router-dom";
+import { API_BASE_URL } from '../Api';
 const Task = () => {
+  const location = useLocation();
+  const { state: { username } = {} } = location;
   const [showModal, setShowModal] = useState(false);
   const [modules, setModules] = useState([]);
   const [selectedModule, setSelectedModule] = useState('');
@@ -25,7 +28,7 @@ const Task = () => {
 
   useEffect(() => {
     // Fetch the list of users when the component mounts
-    fetch("http://localhost:8082/api/users/userType/user")
+    fetch(`${API_BASE_URL}/api/users/userType/user`)
       .then((response) => response.json())
       .then((data) => {
         setUsers(data);
@@ -36,7 +39,7 @@ const Task = () => {
   }, []);
   useEffect(() => {
     // Fetch all projects on component mount
-    axios.get('http://localhost:8082/api/projects/getAllProjects')
+    axios.get( `${API_BASE_URL}/api/projects/getAllProjects`)
       .then(response => {
         setProjects(response.data);
       })
@@ -48,7 +51,7 @@ const Task = () => {
   useEffect(() => {
     // Fetch modules when the selected project changes
     if (selectedProject) {
-      axios.get(`http://localhost:8082/api/modules/getModuleByPId/${selectedProject}`)
+      axios.get(`${API_BASE_URL}/api/modules/getModuleByPId/${selectedProject}`)
         .then(response => {
           setModules(response.data);
         })
@@ -58,30 +61,30 @@ const Task = () => {
     }
   }, [selectedProject]);
 
-  useEffect(() => {
-    // Fetch tasks when the selected module changes
-    fetchTasks();
-  }, [selectedModule]);
+  // useEffect(() => {
+  //   // Fetch tasks when the selected module changes
+  //   fetchTasks();
+  // }, [selectedModule]);
 
-  const fetchTasks = () => {
-    const apiUrl = selectedModule
-      ? `http://localhost:8082/api/tasks/getTaskByModule/${selectedModule}`
-      : 'http://localhost:8082/api/tasks/getAllTasks';
+  // const fetchTasks = () => {
+  //   const apiUrl = selectedModule
+  //     ? `${API_BASE_URL}/api/tasks/getTaskByModule/${selectedModule}`
+  //     : '${API_BASE_URL}/api/tasks/getAllTasks';
 
-    axios.get(apiUrl)
-      .then(response => {
-        // Ensure that the response data is an array before setting it to state
-        if (Array.isArray(response.data)) {
-          setTasks(response.data);
-        } else {
-          console.error('Error: Response data is not an array', response.data);
-          setTasks([]);
-        }
-      })
-      .catch(error => {
-        console.error('Error fetching tasks:', error);
-      });
-  };
+  //   axios.get(apiUrl)
+  //     .then(response => {
+  //       // Ensure that the response data is an array before setting it to state
+  //       if (Array.isArray(response.data)) {
+  //         setTasks(response.data);
+  //       } else {
+  //         console.error('Error: Response data is not an array', response.data);
+  //         setTasks([]);
+  //       }
+  //     })
+  //     .catch(error => {
+  //       console.error('Error fetching tasks:', error);
+  //     });
+  // };
 
   const handleCreateTask = () => {
     setTaskName('');
@@ -119,7 +122,7 @@ const Task = () => {
     setAssignedTo(selectedTask.assignedTo);
     setSelectedTaskId(taskId);
     // Fetch modules for the selected project
-    axios.get(`http://localhost:8082/api/modules/getModuleByPId/${selectedTask.module.project.id}`)
+    axios.get(`${API_BASE_URL}/api/modules/getModuleByPId/${selectedTask.module.project.id}`)
       .then(response => {
         setModules(response.data);
 
@@ -147,8 +150,8 @@ const Task = () => {
     formData.append('remarks', remarks);
     formData.append('assignedTo', assignedTo.join(','));
     const requestUrl = selectedTaskId
-      ? `http://localhost:8082/api/tasks/updateTask/${selectedTaskId}`
-      : `http://localhost:8082/api/tasks/saveTask/${selectedProject}/${selectedModule}`;
+      ? `${API_BASE_URL}/api/tasks/updateTask/${selectedTaskId}`
+      : `${API_BASE_URL}/api/tasks/saveTask/${selectedProject}/${selectedModule}`;
 
     const method = selectedTaskId ? 'PUT' : 'POST';
 
@@ -198,7 +201,7 @@ const Task = () => {
 
     const handleDeleteTask = (taskId) => {
       // Fetch the task details to check its status
-      axios.get(`http://localhost:8082/api/tasks/getTaskById/${taskId}`)
+      axios.get(`${API_BASE_URL}/api/tasks/getTaskById/${taskId}`)
         .then(response => {
           const taskStatus = response.data.status;
     
@@ -219,7 +222,7 @@ const Task = () => {
             }).then((result) => {
               if (result.isConfirmed) {
                 // Make a DELETE request to delete the task
-                axios.delete(`http://localhost:8082/api/tasks/deleteTaskById/${taskId}`)
+                axios.delete(`${API_BASE_URL}/api/tasks/deleteTaskById/${taskId}`)
                   .then(response => {
                     console.log('Task deleted successfully');
                     // Close the initial confirmation dialog
@@ -304,7 +307,7 @@ const Task = () => {
 
     // Make a PUT request to your backend API to assign users to the module
     axios
-      .put(`http://localhost:8082/api/modules/assign-user/${selectedTaskId}`, formData)
+      .put(`${API_BASE_URL}/api/modules/assign-user/${selectedTaskId}`, formData)
       .then((response) => {
         if (response.status === 200) {
           // Show success message if the request is successful
@@ -391,6 +394,153 @@ const Task = () => {
     setSelectedModule(null);
     fetchTasks();
   };
+
+
+
+
+  const [departments, setDepartments] = useState([]);
+
+  useEffect(() => {
+    if (username) {
+        fetchUserDepartments(username);
+    }
+}, [username]);
+
+
+const fetchUserDepartments = (username) => {
+  console.log("Fetching departments for user:", username);
+
+  return axios.get(`${API_BASE_URL}/api/departments/getAdminDepartments?username=${username}`)
+    .then(response => {
+      setDepartments(response.data);
+      return response.data; // Return the departments
+    })
+    .catch(error => {
+      console.error('Error fetching departments:', error);
+      throw error; // Throw the error to be caught by fetchProjects
+    });
+};
+
+useEffect(() => {
+  const fetchData = async () => {
+      try {
+          if (username) {
+              const userDepartments = await fetchUserDepartments(username);
+              fetchProjects(userDepartments);
+          }
+      } catch (error) {
+          console.error("Error fetching user departments:", error);
+      }
+  };
+
+  fetchData();
+}, [username]);
+
+const fetchProjects = (userDepartments) => {
+  return fetch(`${API_BASE_URL}/api/projects/getAllProjects`)
+    .then((response) => response.json())
+    .then((projectsData) => {
+      try {
+        // Filter projects to include only those that contain at least one of the user's assigned departments
+        const filteredProjects = projectsData.filter((project) => {
+          // Check if any of the user's departments match the project's department
+          return userDepartments.some((userDepartment) =>
+            project.department.departmentName === userDepartment.departmentName
+          );
+        });
+        // Set the filtered projects directly to the projects state
+        setProjects(filteredProjects);
+        return filteredProjects; 
+      } catch (error) {
+        console.error("Error filtering projects:", error);
+        // Handle the error
+        throw error;
+      }
+    })
+    .catch((error) => {
+      console.error("Error fetching projects:", error);
+      // Handle the error
+      throw error;
+    });
+};
+
+const fetchModules = (userProjects) => {
+  // Check if userProjects is available
+  if (!userProjects || userProjects.length === 0) {
+    console.error("No user projects available");
+    return;
+  }
+
+  // Extract project names from userProjects
+  const projectNames = userProjects.map(project => project.projectName);
+
+  // Fetch all modules
+  const apiUrl = `${API_BASE_URL}/api/modules/getAllModules`;
+
+  // Make a GET request to fetch modules
+  return axios.get(apiUrl)
+    .then((response) => {
+      // Filter modules to include only those associated with user projects
+      const filteredModules = response.data.filter(module => projectNames.includes(module.project.projectName));
+      console.log("Filtered modules:", filteredModules); // Log filtered modules
+      // Set the fetched modules to the state
+      setModules(filteredModules);
+      return filteredModules; // Return filtered modules
+    })
+    .catch((error) => {
+      console.error('Error fetching modules:', error);
+      // Handle the error
+      throw error;
+    });
+};
+
+
+
+useEffect(() => {
+  const fetchData = async () => {
+    try {
+      if (username) {
+        const userDepartments = await fetchUserDepartments(username);
+        const userProjects = await fetchProjects(userDepartments);
+        const userModules = await fetchModules(userProjects);
+        console.log(userModules);
+        fetchTasks(userModules);
+      }
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+    }
+  };
+
+  fetchData();
+}, [username]);
+
+const fetchTasks = (userModules) => {
+  // Check if userModules is available
+  if (!userModules || userModules.length === 0) {
+    console.error("No user modules available");
+    return;
+  }
+
+  // Extract module names from userModules
+  const moduleNames = userModules.map(module => module.moduleName);
+
+  // Fetch all tasks
+  const apiUrl = `${API_BASE_URL}/api/tasks/getAllTasks`;
+
+  // Make a GET request to fetch tasks
+  axios.get(apiUrl)
+    .then((response) => {
+      // Filter tasks to include only those associated with user modules
+      const filteredTasks = response.data.filter(task => moduleNames.includes(task.module.moduleName));
+      // Set the fetched tasks to the state
+      setTasks(filteredTasks);
+    })
+    .catch((error) => {
+      console.error('Error fetching tasks:', error);
+      // Handle the error
+    });
+};
+
   return (
     <div>
       <h4 className='text-center '>Tasks Component </h4>

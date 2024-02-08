@@ -14,6 +14,7 @@ import moment from "moment";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import {  useLocation } from "react-router-dom";
 import "./Department.css"
+import { API_BASE_URL } from "../Api";
 function Projects() {
   const [showModal, setShowModal] = useState(false);
   const [projects, setProjects] = useState([]);
@@ -43,13 +44,7 @@ function Projects() {
       remarks: "",
     });
   };
-  //project search function
-  // const filteredProjects = projects.filter(
-  //   (project) =>
-  //     project.projectName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-  //     project.assignedTo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-  //     project.status.toLowerCase().includes(searchTerm.toLowerCase())
-  // );
+ 
   const filteredProjects = projects.filter((project) => {
     const projectName = project.projectName && project.projectName.toLowerCase();
     const assignedTo = project.assignedTo && project.assignedTo.map((user) => user.toLowerCase());
@@ -71,7 +66,7 @@ function Projects() {
 
     // Make a GET request to fetch user-specific projects
     fetch(
-      `http://localhost:8082/api/projects/getUserProjects?username=${username}`
+      `${API_BASE_URL}/api/projects/getUserProjects?username=${username}`
     )
       .then((response) => response.json())
       .then((data) => {
@@ -94,8 +89,8 @@ function Projects() {
     });
 
     const apiUrl = selectedProject.id
-      ? `http://localhost:8082/api/projects/update/${selectedProject.id}`
-      : "http://localhost:8082/api/projects/save";
+      ? `${API_BASE_URL}/api/projects/update/${selectedProject.id}`
+      : `${API_BASE_URL}/api/projects/save`;
 
     const method = selectedProject.id ? "PUT" : "POST";
 
@@ -172,7 +167,7 @@ function Projects() {
     }).then((result) => {
       if (result.isConfirmed) {
         // Make a DELETE request to delete the project
-        fetch(`http://localhost:8082/api/projects/delete/${projectId}`, {
+        fetch(`${API_BASE_URL}/api/projects/delete/${projectId}`, {
           method: "DELETE",
         })
           .then((response) => {

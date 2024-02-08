@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { Dropdown } from 'react-bootstrap';
 import Department from '../Department';
 function SuperUserDashboard() {
-  const [selectedNavLink, setSelectedNavLink] = useState('admins');
+  const [selectedNavLink, setSelectedNavLink] = useState('departments');
   const handleNavLinkClick = (navLink, event) => {
     event.preventDefault();
     setSelectedNavLink(navLink);

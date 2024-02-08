@@ -4,6 +4,7 @@ import moment from 'moment';
 import Swal from "sweetalert2";
 import axios from 'axios';
 import { useLocation } from "react-router-dom";
+import { API_BASE_URL } from '../Api';
 const Modules = () => {
   const location = useLocation();
   const { state: { username } = {} } = location;
@@ -27,7 +28,7 @@ const Modules = () => {
   useEffect(() => {
 
     // Fetch the list of users when the component mounts
-    fetch("http://localhost:8082/api/users/userType/user")
+    fetch(`${API_BASE_URL}/api/users/userType/user`)
       .then((response) => response.json())
       .then((data) => {
         setUsers(data);
@@ -37,60 +38,6 @@ const Modules = () => {
       });
   }, []);
   
-
-  // useEffect(() => {
-  //   // Fetch all modules on component mount and when modules change
-  //   fetchModules();
-  // }, []);
-
-  // const fetchModules = () => {
-  //   // Make a GET request to fetch modules
-  //   axios.get('http://localhost:8082/api/modules/getAllModules')
-  //     .then((response) => {
-  //       // Set the fetched modules to the state
-  //       setModules(response.data);
-  //     })
-  //     .catch((error) => {
-  //       console.error('Error fetching modules:', error);
-  //       // Handle the error
-  //     });
-
-  // };
-  useEffect(() => {
-    // Fetch all modules on component mount and when modules or selectedProject change
-    fetchModules();
-  }, [selectedProject]); // Include selectedProject in the dependency array
-
-  const fetchModules = () => {
-    // Include selectedProject as a query parameter if it exists
-    const apiUrl = selectedProject
-      ? `http://localhost:8082/api/modules/getModuleByPId/${selectedProject}`
-      : 'http://localhost:8082/api/modules/getAllModules';
-  
-    // Make a GET request to fetch modules
-    axios.get(apiUrl)
-      .then((response) => {
-        // Set the fetched modules to the state
-        setModules(response.data);
-      })
-      .catch((error) => {
-        console.error('Error fetching modules:', error);
-        // Handle the error
-      });
-  };
-  
-
-  const filteredModules = modules.filter((module) => {
-    const lowerSearchTerm = searchTerm.toLowerCase();
-
-    return (
-      (module.moduleName && module.moduleName.toLowerCase().includes(lowerSearchTerm)) ||
-      (module.status && module.status.toLowerCase().includes(lowerSearchTerm)) ||
-      (module.remarks && module.remarks.toLowerCase().includes(lowerSearchTerm))
-    );
-  });
-
-
   const handleCreateModule = () => {
 
     setModuleName('');
@@ -151,8 +98,8 @@ const Modules = () => {
     formData.append('assignedTo', assignedTo.join(','));
     // Determine whether to create or update based on selectedModuleId
     const requestUrl = selectedModuleId
-      ? `http://localhost:8082/api/modules/updateModule/${selectedModuleId}`
-      : `http://localhost:8082/api/modules/saveModule/${selectedProject}`;
+      ? `${API_BASE_URL}/api/modules/updateModule/${selectedModuleId}`
+      : `${API_BASE_URL}/api/modules/saveModule/${selectedProject}`;
 
     // Use 'PUT' for updating
     const method = selectedModuleId ? 'PUT' : 'POST';
@@ -195,7 +142,7 @@ const Modules = () => {
   };
   const handleDeleteModule = (moduleId) => {
     // Fetch the module details to check its status
-    fetch(`http://localhost:8082/api/modules/getModuleById/${moduleId}`)
+    fetch(`${API_BASE_URL}/api/modules/getModuleById/${moduleId}`)
       .then((response) => response.json())
       .then((module) => {
         const moduleStatus = module.status;
@@ -217,7 +164,7 @@ const Modules = () => {
           }).then((result) => {
             if (result.isConfirmed) {
               // Make a DELETE request to delete the module
-              fetch(`http://localhost:8082/api/modules/deleteModule/${moduleId}`, {
+              fetch(`${API_BASE_URL}/api/modules/deleteModule/${moduleId}`, {
                 method: 'DELETE',
               })
                 .then((response) => {
@@ -320,7 +267,7 @@ const Modules = () => {
 
     // Make a PUT request to your backend API to assign users to the module
     axios
-      .put(`http://localhost:8082/api/modules/assign-user/${selectedModuleId}`, formData)
+      .put(`${API_BASE_URL}/api/modules/assign-user/${selectedModuleId}`, formData)
       .then((response) => {
         if (response.status === 200) {
           // Show success message if the request is successful
@@ -385,7 +332,7 @@ const Modules = () => {
         if (result.isConfirmed) {
           // If the user confirms, proceed with the removal
           axios
-            .delete(`http://localhost:8082/api/modules/remove-user/${selectedModuleId}?userToRemove=${userToRemove}`)
+            .delete(`${API_BASE_URL}/api/modules/remove-user/${selectedModuleId}?userToRemove=${userToRemove}`)
             .then((response) => {
               if (response.status === 200) {
                 // Show success message if the request is successful
@@ -482,7 +429,7 @@ const Modules = () => {
 const fetchUserDepartments = (username) => {
   console.log("Fetching departments for user:", username);
 
-  return axios.get(`http://localhost:8082/api/departments/getAdminDepartments?username=${username}`)
+  return axios.get(`${API_BASE_URL}/api/departments/getAdminDepartments?username=${username}`)
     .then(response => {
       setDepartments(response.data);
       return response.data; // Return the departments
@@ -509,29 +456,88 @@ useEffect(() => {
 }, [username]);
 
 const fetchProjects = (userDepartments) => {
-return fetch("http://localhost:8082/api/projects/getAllProjects")
-  .then((response) => response.json())
-  .then((projectsData) => {
-    try {
-      // Filter projects to include only those that contain at least one of the user's assigned departments
-      const filteredProjects = projectsData.filter((project) => {
-        // Check if any of the user's departments match the project's department
-        return userDepartments.some((userDepartment) =>
-          project.department.departmentName === userDepartment.departmentName
-        );
-      });
-      // Set the filtered projects directly to the projects state
-      setProjects(filteredProjects);
-    } catch (error) {
-      console.error("Error filtering projects:", error);
+  return fetch(`${API_BASE_URL}/api/projects/getAllProjects`)
+    .then((response) => response.json())
+    .then((projectsData) => {
+      try {
+        // Filter projects to include only those that contain at least one of the user's assigned departments
+        const filteredProjects = projectsData.filter((project) => {
+          // Check if any of the user's departments match the project's department
+          return userDepartments.some((userDepartment) =>
+            project.department.departmentName === userDepartment.departmentName
+          );
+        });
+        // Set the filtered projects directly to the projects state
+        setProjects(filteredProjects);
+        return filteredProjects; 
+      } catch (error) {
+        console.error("Error filtering projects:", error);
+        // Handle the error
+        throw error;
+      }
+    })
+    .catch((error) => {
+      console.error("Error fetching projects:", error);
       // Handle the error
-    }
-  })
-  .catch((error) => {
-    console.error("Error fetching projects:", error);
-    // Handle the error
-  });
+      throw error;
+    });
 };
+
+const fetchModules = (userProjects) => {
+  // Check if userProjects is available
+  if (!userProjects || userProjects.length === 0) {
+    console.error("No user projects available");
+    return;
+  }
+
+  // Extract project names from userProjects
+  const projectNames = userProjects.map(project => project.projectName);
+
+  // Fetch all modules
+  const apiUrl = `${API_BASE_URL}/api/modules/getAllModules`;
+
+  // Make a GET request to fetch modules
+  axios.get(apiUrl)
+    .then((response) => {
+      // Filter modules to include only those associated with user projects
+      const filteredModules = response.data.filter(module => projectNames.includes(module.project.projectName));
+      // Set the fetched modules to the state
+      setModules(filteredModules);
+    })
+    .catch((error) => {
+      console.error('Error fetching modules:', error);
+      // Handle the error
+    });
+};
+
+
+
+useEffect(() => {
+  const fetchData = async () => {
+    try {
+      if (username) {
+        const userDepartments = await fetchUserDepartments(username);
+        const userProjects = await fetchProjects(userDepartments);
+        fetchModules(userProjects);
+      }
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+    }
+  };
+
+  fetchData();
+}, [username]);
+
+const filteredModules = modules.filter((module) => {
+  const lowerSearchTerm = searchTerm.toLowerCase();
+
+  return (
+    (module.moduleName && module.moduleName.toLowerCase().includes(lowerSearchTerm)) ||
+    (module.status && module.status.toLowerCase().includes(lowerSearchTerm)) ||
+    (module.remarks && module.remarks.toLowerCase().includes(lowerSearchTerm))
+  );
+});
+
   return (
     <div>
       <h4 className='text-center '>Modules Component </h4>

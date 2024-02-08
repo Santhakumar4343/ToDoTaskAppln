@@ -114,7 +114,11 @@ import jakarta.transaction.Transactional;
 		        }
 		    }
 
-
+//		 @Override
+//		    public List<Modules> getModulesByProjectIds(List<Long> projectIds) {
+//		        return moduleRepository.getModulesByProjectId(projectIds);
+//
+//		 }
 		
 	}
 

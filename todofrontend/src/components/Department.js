@@ -3,6 +3,7 @@ import Swal from 'sweetalert2';
 import React, { useEffect, useState } from 'react';
 
 import { Button, Col, Form, Modal, Row } from 'react-bootstrap';
+import { API_BASE_URL } from '../Api';
 function Department() {
     const [departments, setDepartments] = useState([]);
     const [showModal, setShowModal] = useState(false);
@@ -14,7 +15,7 @@ function Department() {
     const [userToRemove, setUserToRemove] = useState("");
     const titleColors = ["#42ff75", "#3ba3ed", "#fc47ed", "#e82e44", "#f2fa5f","#f2a04e"];
     useEffect(() => {
-        axios.get("http://localhost:8082/api/departments/getAllDepartments")
+        axios.get(`${API_BASE_URL}/api/departments/getAllDepartments`)
             .then(response => {
                 setDepartments(response.data);
             })
@@ -23,7 +24,7 @@ function Department() {
             });
     }, []);
     useEffect(() => {
-        fetch("http://localhost:8082/api/admins/userType/admin")
+        fetch(`${API_BASE_URL}/api/admins/userType/admin`)
             .then((response) => response.json())
             .then((data) => {
                 setAdmins(data);
@@ -38,7 +39,7 @@ function Department() {
         departmentData.append("assignedTo", assignedTo);
 
         if (selectedDepartment && selectedDepartment.id) {
-            axios.put(`http://localhost:8082/api/departments/updateDepartment/${selectedDepartment.id}`, departmentData)
+            axios.put(`${API_BASE_URL}/api/departments/updateDepartment/${selectedDepartment.id}`, departmentData)
                 .then(response => {
                     const updatedDepartments = departments.map(department =>
                         department.id === response.data.id ? response.data : department
@@ -51,7 +52,7 @@ function Department() {
                     console.error('Error updating department:', error);
                 });
         } else {
-            axios.post("http://localhost:8082/api/departments/saveDepartment", departmentData)
+            axios.post(`${API_BASE_URL}/api/departments/saveDepartment`, departmentData)
                 .then(response => {
                     setDepartments([...departments, response.data]);
                     handleCloseModal();
@@ -76,7 +77,7 @@ function Department() {
             confirmButtonText: 'Yes, delete it!'
         }).then((result) => {
             if (result.isConfirmed) {
-                axios.delete(`http://localhost:8082/api/departments/deleteDepartment/${id}`)
+                axios.delete(`${API_BASE_URL}/api/departments/deleteDepartment/${id}`)
                     .then(() => {
                         setDepartments(departments.filter(department => department.id !== id));
                         Swal.fire('Deleted!', 'Your department has been deleted.', 'success');
@@ -155,7 +156,7 @@ function Department() {
       formData.append('assignedTo', selectedDepartment.assignedTo.join(',')); // Convert the array to a comma-separated string
   
       // Make a PUT request to your backend API to assign users to the project
-      fetch(`http://localhost:8082/api/departments/assign-user/${selectedDepartment.id}`, {
+      fetch(`${API_BASE_URL}/api/departments/assign-user/${selectedDepartment.id}`, {
         method: 'PUT',
         body: formData,
       })
@@ -224,7 +225,7 @@ const handleRemoveUser = () => {
             }).then((result) => {
                 if (result.isConfirmed) {
                     // If the user confirms, proceed with the removal
-                    fetch(`http://localhost:8082/api/departments/remove-user/${selectedDepartment.id}?userToRemove=${userToRemove}`, {
+                    fetch(`${API_BASE_URL}/api/departments/remove-user/${selectedDepartment.id}?userToRemove=${userToRemove}`, {
                         method: 'DELETE',
                     })
                         .then((response) => {
@@ -288,28 +289,28 @@ const handleRemoveUser = () => {
                     <div className="col-md-4 mb-3" key={department.id}>
                         <div className="card h-100 d-flex flex-column border border-dark" style={{ backgroundColor: index < titleColors.length ? titleColors[index] : titleColors[index % titleColors.length] }}>
                             <div className="card-body d-flex flex-column">
-                                <h5 className="card-title text-center" style={{ color: "white" }}>{department.departmentName}</h5>
+                                <h5 className="card-title text-center" style={{ color: "black" }}>{department.departmentName}</h5>
                                 <ul className="list-unstyled">
-                                    <li><strong style={{ color: "white" }}>Assigned To:</strong></li>
+                                    <li><strong style={{ color: "black" }}>Assigned To:</strong></li>
                                     {department.assignedTo.map((user, userIndex) => (
-                                        <li key={userIndex} style={{ color: "white" }}>{user}</li>
+                                        <li key={userIndex} style={{ color: "black" }}>{user}</li>
                                     ))}
                                 </ul>
                             </div>
                             <div className="card-footer d-flex justify-content-center align-items-center">
                                 <i
                                     className="bi bi-pencil fs-4 table-icon"
-                                    style={{ color: "white" }}
+                                    style={{ color: "black" }}
                                     onClick={() => handleUpdateDepartment(department)}
                                 ></i>{" "}
                                 <i
                                     className="bi bi-trash3 fs-4 m-2  table-icon"
-                                    style={{ color: "white" }}
+                                    style={{ color: "black" }}
                                     onClick={() => handleDeleteDepartment(department.id)}
                                 ></i>
                                 <i
                                     className="bi bi-person-plus fs-4 table-icon"
-                                    style={{ color: "white" }}
+                                    style={{ color: "black" }}
                                     onClick={() => handleAssignUser(department.id)}
                                 ></i>
                             </div>

@@ -131,6 +131,23 @@ public class ModuleController {
 			return ResponseEntity.notFound().build();
 		}
 	}
+//	@GetMapping("/getModulesByProjects")
+//	public ResponseEntity<List<Modules>> getModulesByProjects(@RequestParam("projectIds") List<Long> projectIds) {
+//	    try {
+//	        // Call the service method to get modules by project IDs
+//	        List<Modules> modules = moduleService.getModulesByProjectIds(projectIds);
+//
+//	        // Check if modules were found
+//	        if (!modules.isEmpty()) {
+//	            return ResponseEntity.ok(modules);
+//	        } else {
+//	            return ResponseEntity.notFound().build();
+//	        }
+//	    } catch (Exception e) {
+//	        // Handle any exceptions
+//	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+//	    }
+//	}
 
 	@PutMapping("/assign-user/{moduleId}")
 	public ResponseEntity<String> assignUserToProject(@PathVariable Long moduleId, @RequestParam String assignedTo) {

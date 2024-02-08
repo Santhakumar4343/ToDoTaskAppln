@@ -3,7 +3,6 @@ import {
   Button,
   Modal,
   Form,
-  Table,
   FormControl,
   Alert,
   Col,
@@ -40,7 +39,7 @@ const Modules = () => {
 
     // Make a GET request to fetch user-specific projects
     fetch(
-      `http://localhost:8082/api/modules/getUserModules?username=${username}`
+      `${API_BASE_URL}/api/modules/getUserModules?username=${username}`
     )
       .then((response) => response.json())
       .then((data) => {
@@ -63,88 +62,6 @@ const Modules = () => {
       });
   };
 
-//   const fetchModulesForAllProjects = async (projects) => {
-//   // Create a Set to keep track of unique module IDs
-//   const uniqueModuleIds = new Set();
-
-//   // Create an array to store promises for each project
-//   const fetchPromises = projects.map(async (project) => {
-//     const newModules = await fetchModules(project.id);
-
-//     // Filter out modules that are already present in the Set
-//     const filteredModules = newModules.filter(
-//       (newModule) => !uniqueModuleIds.has(newModule.id)
-//     );
-
-//     // Add new module IDs to the Set
-//     filteredModules.forEach((newModule) => {
-//       uniqueModuleIds.add(newModule.id);
-//     });
-   
-//     return filteredModules;
-//   });
-
-//   // Wait for all promises to resolve
-//   const modulesArrays = await Promise.all(fetchPromises);
-
-//   // Flatten the array of arrays into a single array
-//   const allModules = modulesArrays.flat();
-
-//   // Set the fetched modules to the state
-//   setModules(allModules);
-// };
-
-  
-
-  
-
-// const fetchModules = async (projectId) => {
-//   try {
-//     // Include projectId as a query parameter
-//     const apiUrl = projectId
-//       ? `http://localhost:8082/api/modules/getModuleByPId/${projectId}`
-//       : "http://localhost:8082/api/modules/getAllModules";
-
-//     // Make a GET request to fetch modules
-//     const response = await axios.get(apiUrl);
-
-//     // Use functional update to ensure the latest state is used
-//     setModules((prevModules) => {
-//       // Filter out modules that are already present in the state
-//       const newModules = response.data.filter(
-//         (newModule) =>
-//           !prevModules.some(
-//             (existingModule) => existingModule.id === newModule.id
-//           )
-//       );
-
-//       // Return the new state
-//       return [...prevModules, ...newModules];
-//     });
-
-//     return response.data; // Return the new modules for further processing if needed
-//   } catch (error) {
-//     console.error("Error fetching modules:", error);
-//     // Handle the error
-//   }
-// };
-// useEffect(() => {
-//   console.log("Selected Project Changed:", selectedProject);
-//   // Fetch all modules on component mount and when selectedProject changes
-//   if (selectedProject) {
-//     fetchModules(selectedProject.id);
-//   }
-// }, [selectedProject]);
-
-
-
-
-  // const filteredModules = modules.filter(
-  //   (module) =>
-  //     module.moduleName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-  //     module.status.toLowerCase().includes(searchTerm.toLowerCase()) ||
-  //     module.remarks.toLowerCase().includes(searchTerm.toLowerCase())
-  // );
   const filteredModules = modules.filter((module) => {
     const lowerSearchTerm = searchTerm.toLowerCase();
   
@@ -199,8 +116,8 @@ const Modules = () => {
 
     // Determine whether to create or update based on selectedModuleId
     const requestUrl = selectedModuleId
-      ? `http://localhost:8082/api/modules/updateModule/${selectedModuleId}`
-      : `http://localhost:8082/api/modules/saveModule/${selectedProject}`;
+      ? `${API_BASE_URL}/api/modules/updateModule/${selectedModuleId}`
+      : `${API_BASE_URL}/api/modules/saveModule/${selectedProject}`;
 
     // Use 'PUT' for updating
     const method = selectedModuleId ? "PUT" : "POST";
@@ -263,7 +180,7 @@ const Modules = () => {
     }).then((result) => {
       if (result.isConfirmed) {
         // Make a DELETE request to delete the module
-        fetch(`http://localhost:8082/api/modules/deleteModule/${moduleId}`, {
+        fetch(`${API_BASE_URL}/api/modules/deleteModule/${moduleId}`, {
           method: 'DELETE',
         })
           .then((response) => {
@@ -313,27 +230,6 @@ const Modules = () => {
   return (
     <div>
       <h4 className="text-center ">Modules Component </h4>
-      {/* <select
-        id="projectDropdown"
-        onChange={(e) => setSelectedProject(e.target.value)}
-      >
-        <option value="" className="">
-          -- Select Project --
-        </option>
-        {projects.map((project) => (
-          <option key={project.id} value={project.id}>
-            {project.projectName}
-          </option>
-        ))}
-      </select>
-
-      <Button
-        variant="success"
-        className="mb-3 m-2"
-        onClick={handleCreateModule}
-      >
-        Create Module
-      </Button> */}
       <FormControl
         type="text"
         placeholder="Search by Module Name, Remarks, or Status"
@@ -357,7 +253,9 @@ const Modules = () => {
       <div className="col-md-4 mb-3" key={module.id}>
         <div className="card h-100 d-flex flex-column border border-dark"  style={{ backgroundColor: index < titleColors.length ? titleColors[index] : titleColors[index % titleColors.length] }}>
           <div className="card-body d-flex flex-column">
+           
             <h5 className="card-title text-center" style={{ color: "black" }}>{module.moduleName}</h5>
+            <p className="card-text" style={{ color: "black" }}><strong>Project Name: {(module.project.projectName)}</strong></p>
             <ul className="list-unstyled">
               <li><strong style={{ color: "black" }}>Assigned To:</strong></li>
               {module.assignedTo.map((user, userIndex) => (

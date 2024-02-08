@@ -3,6 +3,7 @@ import axios from "axios";
 import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
 import { Button, Form, Modal, Spinner } from "react-bootstrap";
+import { API_BASE_URL } from "../Api";
 
 const RegistrationForm = () => {
   const navigate = useNavigate();
@@ -39,7 +40,7 @@ const RegistrationForm = () => {
     try {
       setOtpError("");
       const response = await axios.post(
-        "http://localhost:8082/api/users/verify-otp",
+        `${API_BASE_URL}/api/users/verify-otp`,
         { username: formData.username, otp: otp }
       );
 
@@ -93,8 +94,8 @@ const RegistrationForm = () => {
     try {
       const saveEndpoint =
         formData.userType === "admin"
-          ? "http://localhost:8082/api/admins"
-          : "http://localhost:8082/api/users";
+          ? `${API_BASE_URL}/api/admins`
+          : `${API_BASE_URL}/api/users`;
 
       // Assuming you have an endpoint to save the user after OTP verification
       await axios.post(saveEndpoint + "/save", formDataForSave);
@@ -124,7 +125,7 @@ const RegistrationForm = () => {
         // Check if the username already exists
         try {
           const response = await axios.get(
-            `http://localhost:8082/api/${formData.userType === 'admin' ? 'admins' : 'users'}/allUsernames`
+            `${API_BASE_URL}/api/${formData.userType === 'admin' ? 'admins' : 'users'}/allUsernames`
           );
 
           if (response.data.includes(value)) {
@@ -140,7 +141,7 @@ const RegistrationForm = () => {
         // Check if the employee ID already exists
         try {
           const response = await axios.get(
-            `http://localhost:8082/api/${formData.userType === 'admin' ? 'admins' : 'users'}/allEmployeeIds`
+            `${API_BASE_URL}/api/${formData.userType === 'admin' ? 'admins' : 'users'}/allEmployeeIds`
           );
 
           if (response.data.includes(value)) {
@@ -173,7 +174,7 @@ const RegistrationForm = () => {
         // Check if the email already exists
         try {
           const response = await axios.get(
-            `http://localhost:8082/api/${formData.userType === 'admin' ? 'admins' : 'users'}/allEmails`
+            `${API_BASE_URL}/api/${formData.userType === 'admin' ? 'admins' : 'users'}/allEmails`
           );
 
           if (response.data.includes(value)) {
@@ -270,7 +271,7 @@ const RegistrationForm = () => {
   };
   const sendOtpToSuperUser = async () => {
     try {
-      await axios.post("http://localhost:8082/api/users/send-otp", formData);
+      await axios.post(`${API_BASE_URL}/api/users/send-otp`, formData);
       // Assuming your server sends the OTP to the SuperUser's email
       console.log("OTP sent to SuperUser's email");
     } catch (error) {

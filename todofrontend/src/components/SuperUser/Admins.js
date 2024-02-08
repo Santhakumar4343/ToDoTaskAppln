@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Table, Alert, Button, Form, Modal, Row, Col, FormControl } from 'react-bootstrap';
 import Swal from 'sweetalert2';
+import { API_BASE_URL } from '../../Api';
 
 const Admins = () => {
     const [admins, setAdmins] = useState([]);
@@ -41,7 +42,7 @@ const Admins = () => {
         formData.append('mobileNumber', updatedAdmin.mobileNumber);
 
         // Make a backend request to update the admin
-        const response = await fetch(`http://localhost:8082/api/admins/update-admin/${selectedAdmin.id}`, {
+        const response = await fetch(`${API_BASE_URL}/api/admins/update-admin/${selectedAdmin.id}`, {
             method: 'PUT',
             body: formData,
         });
@@ -61,7 +62,7 @@ const Admins = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await fetch('http://localhost:8082/api/admins/getAll');
+                const response = await fetch(`${API_BASE_URL}/api/admins/getAll`);
                 if (!response.ok) {
                     throw new Error('Failed to fetch admins');
                 }
@@ -97,7 +98,7 @@ const Admins = () => {
         }).then((result) => {
             if (result.isConfirmed) {
                 // Make a DELETE request to delete the user
-                fetch(`http://localhost:8082/api/admins/delete/${adminId}`, {
+                fetch(`${API_BASE_URL}/api/admins/delete/${adminId}`, {
                     method: 'DELETE',
                 })
                     .then((response) => {

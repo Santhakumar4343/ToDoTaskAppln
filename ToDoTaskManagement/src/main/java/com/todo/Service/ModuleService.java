@@ -14,6 +14,6 @@ public interface ModuleService {
 	public Modules getModuleById(Long moduleId);
 	List<Modules> getAllModules();
 	 public List<Modules> getUserModules(String username);
-	
+//	  public List<Modules> getModulesByProjectIds(List<Long> projectIds);
    
 }
