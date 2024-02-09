@@ -382,7 +382,7 @@ const handleRemoveUser = () => {
 
             <Modal show={showAssignUserModal} onHide={handleCloseAssignUserModal} backdrop="static" keyboard={false}>
         <Modal.Header closeButton>
-          <Modal.Title className="text-center">Assign Users to Project</Modal.Title>
+          <Modal.Title className="text-center">Assign Users to Department</Modal.Title>
         </Modal.Header>
         <Modal.Body className>
           <Form>
@@ -402,7 +402,7 @@ const handleRemoveUser = () => {
                 }
               >
                 {/* Include a default option for selecting users */}
-                <option value="">Select User to Assign</option>
+                <option value="">Select User to Department</option>
                 {admins.map((admin) => (
                   <option key={admin.id} value={admin.username}>
                     {admin.username}

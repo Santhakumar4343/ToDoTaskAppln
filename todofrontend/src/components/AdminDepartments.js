@@ -395,7 +395,7 @@ const handleRemoveUser = () => {
 
             <Modal show={showAssignUserModal} onHide={handleCloseAssignUserModal} backdrop="static" keyboard={false}>
         <Modal.Header closeButton>
-          <Modal.Title className="text-center">Assign Users to Project</Modal.Title>
+          <Modal.Title className="text-center">Assign Users to Department</Modal.Title>
         </Modal.Header>
         <Modal.Body className>
           <Form>
@@ -427,7 +427,7 @@ const handleRemoveUser = () => {
             Assign User
           </Button>
             <Form.Group controlId="formRemoveUser">
-            <Modal.Title className="mt-4">Remove Users From Project</Modal.Title>
+            <Modal.Title className="mt-4">Remove Users From Department</Modal.Title>
               <Form.Control
                 as="select"
                 className="border border-dark mt-3"

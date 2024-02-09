@@ -18,6 +18,7 @@ import axios from "axios";
 import { useLocation } from "react-router-dom";
 import { API_BASE_URL } from "../Api";
 function Projects() {
+  const titleColors = ["#42ff75", "#3ba3ed", "#fc47ed", "#e82e44", "#f2fa5f", "#f2a04e"];
   const location = useLocation();
   const { state: { username } = {} } = location;
   const [showModal, setShowModal] = useState(false);
@@ -46,23 +47,24 @@ function Projects() {
     priority: "",
     closedDate: "",
     remarks: "",
-    
+
   });
 
   const handleShowModal = () => {
     // Check if a department is selected
-    if (!selectedDepartment) {
+    if (!selectedProject.id && !selectedDepartment) {
       alert('Please select a department');
       return;
     }
-  
+
     // If a department is selected, show the modal
     setShowModal(true);
   };
-  
-  const handleCloseModal = () => {
 
+  const handleCloseModal = () => {
+    
     setShowModal(false);
+   
     setSelectedProject({
       projectName: "",
       assignedTo: [],
@@ -75,18 +77,20 @@ function Projects() {
     });
   };
   const filteredProjects = projects.filter((project) => {
+    const departmentName = project.department && project.department.departmentName && project.department.departmentName.toLowerCase();
     const projectName = project.projectName && project.projectName.toLowerCase();
     const assignedTo = project.assignedTo && project.assignedTo.map((user) => user.toLowerCase());
     const status = project.status && project.status.toLowerCase();
 
     return (
+      (departmentName && departmentName.includes(searchTerm.toLowerCase())) ||
       (projectName && projectName.includes(searchTerm.toLowerCase())) ||
       (assignedTo && assignedTo.some((user) => user.includes(searchTerm.toLowerCase()))) ||
       (status && status.includes(searchTerm.toLowerCase()))
     );
   });
 
-  
+
   const handleSaveProject = () => {
     const formData = new FormData();
     selectedProject.startDate = moment(selectedProject.startDate).format("YYYY-MM-DD");
@@ -102,7 +106,7 @@ function Projects() {
     const apiUrl = selectedProject.id
       ? `${API_BASE_URL}/api/projects/update/${selectedProject.id}`
       : `${API_BASE_URL}/api/projects/save/${selectedDepartment}`;
- 
+
     const method = selectedProject.id ? "PUT" : "POST";
 
     fetch(apiUrl, {
@@ -124,9 +128,7 @@ function Projects() {
               popup: "max-width-100",
             },
           });
-
-          
-          fetchProjects();
+          fetchProjects(departments);
 
           // Close the modal after saving
           handleCloseModal();
@@ -154,7 +156,7 @@ function Projects() {
     const selectedProject = projects.find(
       (project) => project.id === projectId
     );
-  
+
     // Format start and end dates before setting them in the state
     const formattedStartDate = selectedProject.startDate
       ? moment(selectedProject.startDate).format("YYYY-MM-DD")
@@ -162,25 +164,25 @@ function Projects() {
     const formattedClosedDate = selectedProject.closedDate
       ? moment(selectedProject.closedDate).format("YYYY-MM-DD")
       : "";
-  
+
     // Set the selected project with formatted dates to update
     setSelectedProject({
       ...selectedProject,
       startDate: formattedStartDate,
       closedDate: formattedClosedDate,
     });
-  
+
     // Show the modal for updating the project
     handleShowModal();
   };
-  
+
   const handleDeleteProject = (projectId) => {
     // Fetch the project details to check its status
     fetch(`${API_BASE_URL}/api/projects/getProjectById/${projectId}`)
       .then((response) => response.json())
       .then((project) => {
         const projectStatus = project.status;
-       const projectName=project.projectName;
+        const projectName = project.projectName;
         // Check if the project status is "Closed"
         if (projectStatus === 'Closed') {
           Swal.fire({
@@ -217,6 +219,7 @@ function Projects() {
                         popup: 'max-width-100',
                       },
                     });
+                    fetchProjects(departments);
                   } else {
                     console.error('Error deleting project:', response.status);
                     Swal.fire({
@@ -266,7 +269,7 @@ function Projects() {
         });
       });
   };
-  
+
   const [showAssignUserModal, setShowAssignUserModal] = useState(false);
 
   // Function to handle showing the assign user modal
@@ -324,8 +327,8 @@ function Projects() {
               popup: "max-width-100",
             },
           });
-          fetchProjects();
-         
+          fetchProjects(departments);
+
         } else {
           // Show error message if the request is not successful
           Swal.fire({
@@ -389,7 +392,7 @@ function Projects() {
                     popup: 'max-width-100',
                   },
                 });
-                fetchProjects();
+                fetchProjects(departments);
               } else {
                 // Show error message if the request is not successful
                 Swal.fire({
@@ -426,7 +429,7 @@ function Projects() {
     }
   };
 
-  
+
   const [projectNameError, setProjectNameError] = useState("");
   const [assignedToError, setAssignedToError] = useState("");
 
@@ -492,64 +495,64 @@ function Projects() {
 
   useEffect(() => {
     if (username) {
-        fetchUserDepartments(username);
+      fetchUserDepartments(username);
     }
-}, [username]);
+  }, [username]);
 
 
-const fetchUserDepartments = (username) => {
-  console.log("Fetching departments for user:", username);
+  const fetchUserDepartments = (username) => {
+    console.log("Fetching departments for user:", username);
 
-  return axios.get(`${API_BASE_URL}/api/departments/getAdminDepartments?username=${username}`)
-    .then(response => {
-      setDepartments(response.data);
-      return response.data; // Return the departments
-    })
-    .catch(error => {
-      console.error('Error fetching departments:', error);
-      throw error; // Throw the error to be caught by fetchProjects
-    });
-};
-
-useEffect(() => {
-  const fetchData = async () => {
-      try {
-          if (username) {
-              const userDepartments = await fetchUserDepartments(username);
-              fetchProjects(userDepartments);
-          }
-      } catch (error) {
-          console.error("Error fetching user departments:", error);
-      }
+    return axios.get(`${API_BASE_URL}/api/departments/getAdminDepartments?username=${username}`)
+      .then(response => {
+        setDepartments(response.data);
+        return response.data; // Return the departments
+      })
+      .catch(error => {
+        console.error('Error fetching departments:', error);
+        throw error; // Throw the error to be caught by fetchProjects
+      });
   };
 
-  fetchData();
-}, [username]);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        if (username) {
+          const userDepartments = await fetchUserDepartments(username);
+          fetchProjects(userDepartments);
+        }
+      } catch (error) {
+        console.error("Error fetching user departments:", error);
+      }
+    };
 
-const fetchProjects = (userDepartments) => {
-return fetch(`${API_BASE_URL}/api/projects/getAllProjects`)
-  .then((response) => response.json())
-  .then((projectsData) => {
-    try {
-      // Filter projects to include only those that contain at least one of the user's assigned departments
-      const filteredProjects = projectsData.filter((project) => {
-        // Check if any of the user's departments match the project's department
-        return userDepartments.some((userDepartment) =>
-          project.department.departmentName === userDepartment.departmentName
-        );
+    fetchData();
+  }, [username]);
+
+  const fetchProjects = (userDepartments) => {
+    return fetch(`${API_BASE_URL}/api/projects/getAllProjects`)
+      .then((response) => response.json())
+      .then((projectsData) => {
+        try {
+          // Filter projects to include only those that contain at least one of the user's assigned departments
+          const filteredProjects = projectsData.filter((project) => {
+            // Check if any of the user's departments match the project's department
+            return userDepartments.some((userDepartment) =>
+              project.department.departmentName === userDepartment.departmentName
+            );
+          });
+          // Set the filtered projects directly to the projects state
+          setProjects(filteredProjects);
+        } catch (error) {
+          console.error("Error filtering projects:", error);
+          // Handle the error
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching projects:", error);
+        // Handle the error
       });
-      // Set the filtered projects directly to the projects state
-      setProjects(filteredProjects);
-    } catch (error) {
-      console.error("Error filtering projects:", error);
-      // Handle the error
-    }
-  })
-  .catch((error) => {
-    console.error("Error fetching projects:", error);
-    // Handle the error
-  });
-};
+  };
 
   return (
 
@@ -566,12 +569,12 @@ return fetch(`${API_BASE_URL}/api/projects/getAllProjects`)
       </Button>
       <FormControl
         type="text"
-        placeholder="Search by Project Name, Assigned To, or Status"
+        placeholder="Search by Department Name, Project Name, Assigned To, or Status"
         className="mb-4 "
         style={{ border: "1px solid black" }}
         onChange={(e) => setSearchTerm(e.target.value)}
       />
-      {filteredProjects.length === 0 && searchTerm !== "" ? (
+      {/* {filteredProjects.length === 0 && searchTerm !== "" ? (
         <Alert variant="danger text-center" className="mb-3">
           No results found for "{searchTerm}".
         </Alert>
@@ -639,8 +642,68 @@ return fetch(`${API_BASE_URL}/api/projects/getAllProjects`)
           
         </Table>
         
+      )} */}
+      {filteredProjects.length === 0 && searchTerm !== "" ? (
+        <Alert variant="danger text-center" className="mb-3">
+          No results found for "{searchTerm}".
+        </Alert>
+      ) : (
+        <div className="row">
+          {filteredProjects.map((project, index) => (
+            <div className="col-md-4 mb-3" key={project.id}>
+              <div className="card h-100 d-flex flex-column border border-dark" style={{ backgroundColor: index < titleColors.length ? titleColors[index] : titleColors[index % titleColors.length] }}>
+                <div className="card-body">
+                  <h5 className="card-title text-center">{project.projectName}</h5>
+                  <p><strong>Department Name:</strong> {project.department.departmentName}</p>
+                  <p><strong>Assigned To:</strong></p>
+                  <ul >
+                    {project.assignedTo.map((user, userIndex) => (
+                      <li key={userIndex}>{user}</li>
+                    ))}
+                  </ul>
+      
+                  <p><strong>Planned Start Date:</strong> {moment(project.startDate).format("DD-MM-YYYY")}</p>
+                  <p><strong>Planned Closed Date:</strong> {moment(project.closedDate).format("DD-MM-YYYY")}</p>
+                  <p style={{ maxWidth: "200px", overflowX: "auto" }}><strong>Comments:</strong> {project.remarks}</p>
+                  <div className="d-flex justify-content-center align-items-center">
+                    <div className="mr-2">
+                      {project.status === "Closed" ? (
+                        <button className="btn btn-danger" style={{ borderRadius: "20px" }}>{project.status}</button>
+                      ) : project.status === "Open" ? (
+                        <button className="btn btn-success" style={{ borderRadius: "20px" }}>{project.status}</button>
+                      ) : (
+                        <button className="btn btn-warning" style={{ borderRadius: "20px" }}>{project.status}</button>
+                      )}
+                    </div>
+                    <div className="m-2">
+                      {project.priority === "Critical" ? (
+                        <button className="btn btn-danger" style={{ borderRadius: "20px" }}>{project.priority}</button>
+                      ) : project.priority === "High" ? (
+                        <button className="btn btn-warning" style={{ borderRadius: "20px" }}>{project.priority}</button>
+                      ) : project.priority === "Medium" ? (
+                        <button className="btn btn-primary" style={{ borderRadius: "20px" }}>{project.priority}</button>
+                      ) : (
+                        <button className="btn btn-secondary" style={{ borderRadius: "20px" }}>{project.priority}</button>
+                      )}
+                    </div>
+                  
+                  </div>
+                </div>
+                <div className=" card-footer d-flex justify-content-center align-items-center border border-dark">
+                      <i className="bi bi-pencil-square fs-4"   style={{ color: "black" }} onClick={() => handleUpdateProject(project.id)}></i>
+                      <i className="bi bi-trash3 fs-4 m-2 " style={{ color: "black" }} onClick={() => handleDeleteProject(project.id)}></i>
+                      <i className="bi bi-person-plus fs-4" style={{ color: "black" }} onClick={() => handleAssignUser(project.id)}></i>
+                    </div>
+              </div>
+             
+            </div>
+            
+          ))}
+        </div>
       )}
-       <div className="d-flex ">
+
+
+      {/* <div className="d-flex ">
            
           <nav className="pagination fixed-right fixed-bottom justify-content-center">
                 <ul className="pagination">
@@ -661,198 +724,198 @@ return fetch(`${API_BASE_URL}/api/projects/getAllProjects`)
                     </li>
                 </ul>
             </nav>
-          </div>
-          <Modal show={showModal} onHide={handleCloseModal} backdrop="static" keyboard={false}>
-  <Modal.Header closeButton>
-    <Modal.Title>
-      {selectedProject.id ? "Update Project" : "Create Project"}
-    </Modal.Title>
-  </Modal.Header>
-  <Modal.Body>
-    <Form>
-      <Row>
-        <Col md={4}>
-          <Form.Label>Project Name</Form.Label>
-        </Col>
-        <Col md={8}>
-          <Form.Group controlId="formProjectName">
-            <Form.Control
-              type="text"
-              value={selectedProject.projectName}
-              className="border border-dark mb-3"
-              onChange={(e) =>
-                setSelectedProject({
-                  ...selectedProject,
-                  projectName: e.target.value,
-                })
-              }
-            />
-            <Form.Text className="text-danger">{projectNameError}</Form.Text>
-          </Form.Group>
-        </Col>
-      </Row>
-      {/* Conditionally render fields for updating */}
-      {selectedProject.id && (
-        <>
-          <Row>
-            <Col md={4}>
-              <Form.Label>Assigned Person</Form.Label>
-            </Col>
-            <Col md={8}>
-              <Form.Group controlId="formAssignedTo">
-                <Form.Control
-                  as="select"
-                  value={selectedProject.assignedTo}
-                  className="border border-dark mb-3"
-                  onChange={(e) =>
-                    setSelectedProject({
-                      ...selectedProject,
-                      assignedTo: Array.from(e.target.selectedOptions, (option) => option.value),
-                    })
-                  }
-                >
-                  <option value="">Select Assigned To</option>
-                  {users.map((user) => (
-                    <option key={user.id} value={user.username}>
-                      {user.username}
-                    </option>
-                  ))}
-                </Form.Control>
-                <Form.Text className="text-danger">{assignedToError}</Form.Text>
-              </Form.Group>
-            </Col>
-          </Row>
-          <Row>
-            <Col md={4}>
-              <Form.Label>Status</Form.Label>
-            </Col>
-            <Col md={8}>
-              <Form.Group controlId="formStatus">
-                <Form.Select
-                  className="border border-dark mb-3"
-                  value={selectedProject.status}
-                  onChange={(e) =>
-                    setSelectedProject({
-                      ...selectedProject,
-                      status: e.target.value,
-                    })
-                  }
-                >
-                  <option value="">Select Status</option>
-                  <option value="Open">Open</option>
-                  <option value="In Progress">In Progress</option>
-                  <option value="Fix/Fixed">Fix/Fixed</option>
-                  <option value="Reopened">Reopened</option>
-                  <option value="Closed">Closed</option>
-                </Form.Select>
-              </Form.Group>
-            </Col>
-          </Row>
-          <Row>
-            <Col md={4}>
-              <Form.Label>Priority</Form.Label>
-            </Col>
-            <Col md={8}>
-              <Form.Group controlId="formPriority">
-                <Form.Select
-                  className="border border-black mb-3"
-                  value={selectedProject.priority}
-                  onChange={(e) =>
-                    setSelectedProject({
-                      ...selectedProject,
-                      priority: e.target.value,
-                    })
-                  }
-                >
-                  <option value="">Select Priority</option>
-                  <option value="Critical">Critical</option>
-                  <option value="High">High</option>
-                  <option value="Medium">Medium</option>
-                  <option value="Low">Low</option>
-                </Form.Select>
-              </Form.Group>
-            </Col>
-          </Row>
-        </>
-      )}
-      <Row>
-        <Col md={4}>
-          {" "}
-          <Form.Label>Planned Start Date</Form.Label>
-        </Col>
-        <Col md={8}>
-          <Form.Group controlId="formStartDate">
-            <Form.Control
-              type="date"
-              className="border border-dark mb-3"
-              placeholder="Planned Start Date"
-              value={selectedProject.startDate}
-              onChange={(e) =>
-                setSelectedProject({
-                  ...selectedProject,
-                  startDate: e.target.value,
-                })
-              }
-            />
-          </Form.Group>
-        </Col>
-      </Row>
-      <Row>
-        <Col md={4}>
-          {" "}
-          <Form.Label>Planned End date</Form.Label>
-        </Col>
-        <Col md={8}>
-          <Form.Group controlId="formClosedDate">
-            <Form.Control
-              type="date"
-              placeholder="Planned Closed Date"
-              className="border border-dark mb-3"
-              value={selectedProject.closedDate}
-              onChange={(e) =>
-                setSelectedProject({
-                  ...selectedProject,
-                  closedDate: e.target.value,
-                })
-              }
-            />
-          </Form.Group>
-        </Col>
-      </Row>
-      <Row>
-        <Col md={4} className="sans-serif-bold">
-          {" "}
-          <Form.Label>Remarks</Form.Label>
-        </Col>
-        <Col md={8}>
-          <Form.Group controlId="formRemarks">
-            <Form.Control
-              as="textarea"
-              rows={2}
-              placeholder="Remarks"
-              className="border border-dark mb-3"
-              value={selectedProject.remarks}
-              onChange={(e) =>
-                setSelectedProject({
-                  ...selectedProject,
-                  remarks: e.target.value,
-                })
-              }
-            />
-          </Form.Group>
-        </Col>
-      </Row>
-    </Form>
-  </Modal.Body>
-  <Modal.Footer className=" d-flex justify-content-center align-items-center">
-    <Button variant="secondary" onClick={handleCloseModal}>
-      Close
-    </Button>
-    <Button variant="primary" onClick={handleSaveProject}>
-      {selectedProject.id ? "Update Project" : "Save Project"}
-    </Button>
-  </Modal.Footer>
-</Modal>
+          </div> */}
+      <Modal show={showModal} onHide={handleCloseModal} backdrop="static" keyboard={false}>
+        <Modal.Header closeButton>
+          <Modal.Title>
+            {selectedProject.id ? "Update Project" : "Create Project"}
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form>
+            <Row>
+              <Col md={4}>
+                <Form.Label>Project Name</Form.Label>
+              </Col>
+              <Col md={8}>
+                <Form.Group controlId="formProjectName">
+                  <Form.Control
+                    type="text"
+                    value={selectedProject.projectName}
+                    className="border border-dark mb-3"
+                    onChange={(e) =>
+                      setSelectedProject({
+                        ...selectedProject,
+                        projectName: e.target.value,
+                      })
+                    }
+                  />
+                  <Form.Text className="text-danger">{projectNameError}</Form.Text>
+                </Form.Group>
+              </Col>
+            </Row>
+            {/* Conditionally render fields for updating */}
+            {selectedProject.id && (
+              <>
+                <Row>
+                  <Col md={4}>
+                    <Form.Label>Assigned Person</Form.Label>
+                  </Col>
+                  <Col md={8}>
+                    <Form.Group controlId="formAssignedTo">
+                      <Form.Control
+                        as="select"
+                        value={selectedProject.assignedTo}
+                        className="border border-dark mb-3"
+                        onChange={(e) =>
+                          setSelectedProject({
+                            ...selectedProject,
+                            assignedTo: Array.from(e.target.selectedOptions, (option) => option.value),
+                          })
+                        }
+                      >
+                        <option value="">Select Assigned To</option>
+                        {users.map((user) => (
+                          <option key={user.id} value={user.username}>
+                            {user.username}
+                          </option>
+                        ))}
+                      </Form.Control>
+                      <Form.Text className="text-danger">{assignedToError}</Form.Text>
+                    </Form.Group>
+                  </Col>
+                </Row>
+                <Row>
+                  <Col md={4}>
+                    <Form.Label>Status</Form.Label>
+                  </Col>
+                  <Col md={8}>
+                    <Form.Group controlId="formStatus">
+                      <Form.Select
+                        className="border border-dark mb-3"
+                        value={selectedProject.status}
+                        onChange={(e) =>
+                          setSelectedProject({
+                            ...selectedProject,
+                            status: e.target.value,
+                          })
+                        }
+                      >
+                        <option value="">Select Status</option>
+                        <option value="Open">Open</option>
+                        <option value="In Progress">In Progress</option>
+                        <option value="Fix/Fixed">Fix/Fixed</option>
+                        <option value="Reopened">Reopened</option>
+                        <option value="Closed">Closed</option>
+                      </Form.Select>
+                    </Form.Group>
+                  </Col>
+                </Row>
+                <Row>
+                  <Col md={4}>
+                    <Form.Label>Priority</Form.Label>
+                  </Col>
+                  <Col md={8}>
+                    <Form.Group controlId="formPriority">
+                      <Form.Select
+                        className="border border-black mb-3"
+                        value={selectedProject.priority}
+                        onChange={(e) =>
+                          setSelectedProject({
+                            ...selectedProject,
+                            priority: e.target.value,
+                          })
+                        }
+                      >
+                        <option value="">Select Priority</option>
+                        <option value="Critical">Critical</option>
+                        <option value="High">High</option>
+                        <option value="Medium">Medium</option>
+                        <option value="Low">Low</option>
+                      </Form.Select>
+                    </Form.Group>
+                  </Col>
+                </Row>
+              </>
+            )}
+            <Row>
+              <Col md={4}>
+                {" "}
+                <Form.Label>Planned Start Date</Form.Label>
+              </Col>
+              <Col md={8}>
+                <Form.Group controlId="formStartDate">
+                  <Form.Control
+                    type="date"
+                    className="border border-dark mb-3"
+                    placeholder="Planned Start Date"
+                    value={selectedProject.startDate}
+                    onChange={(e) =>
+                      setSelectedProject({
+                        ...selectedProject,
+                        startDate: e.target.value,
+                      })
+                    }
+                  />
+                </Form.Group>
+              </Col>
+            </Row>
+            <Row>
+              <Col md={4}>
+                {" "}
+                <Form.Label>Planned End date</Form.Label>
+              </Col>
+              <Col md={8}>
+                <Form.Group controlId="formClosedDate">
+                  <Form.Control
+                    type="date"
+                    placeholder="Planned Closed Date"
+                    className="border border-dark mb-3"
+                    value={selectedProject.closedDate}
+                    onChange={(e) =>
+                      setSelectedProject({
+                        ...selectedProject,
+                        closedDate: e.target.value,
+                      })
+                    }
+                  />
+                </Form.Group>
+              </Col>
+            </Row>
+            <Row>
+              <Col md={4} className="sans-serif-bold">
+                {" "}
+                <Form.Label>Remarks</Form.Label>
+              </Col>
+              <Col md={8}>
+                <Form.Group controlId="formRemarks">
+                  <Form.Control
+                    as="textarea"
+                    rows={2}
+                    placeholder="Remarks"
+                    className="border border-dark mb-3"
+                    value={selectedProject.remarks}
+                    onChange={(e) =>
+                      setSelectedProject({
+                        ...selectedProject,
+                        remarks: e.target.value,
+                      })
+                    }
+                  />
+                </Form.Group>
+              </Col>
+            </Row>
+          </Form>
+        </Modal.Body>
+        <Modal.Footer className=" d-flex justify-content-center align-items-center">
+          <Button variant="secondary" onClick={handleCloseModal}>
+            Close
+          </Button>
+          <Button variant="primary" onClick={handleSaveProject}>
+            {selectedProject.id ? "Update Project" : "Save Project"}
+          </Button>
+        </Modal.Footer>
+      </Modal>
 
       <Modal show={showAssignUserModal} onHide={handleCloseAssignUserModal} backdrop="static" keyboard={false}>
         <Modal.Header closeButton>
@@ -884,11 +947,11 @@ return fetch(`${API_BASE_URL}/api/projects/getAllProjects`)
                 ))}
               </Form.Control>
             </Form.Group>
-            <Button variant="primary" className="mt-4 "  style={{marginLeft:"160px"}}onClick={handleSaveAssignUser}>
-            Assign User
-          </Button>
+            <Button variant="primary" className="mt-4 " style={{ marginLeft: "160px" }} onClick={handleSaveAssignUser}>
+              Assign User
+            </Button>
             <Form.Group controlId="formRemoveUser">
-            <Modal.Title className="mt-4">Remove Users From Project</Modal.Title>
+              <Modal.Title className="mt-4">Remove Users From Project</Modal.Title>
               <Form.Control
                 as="select"
                 className="border border-dark mt-3"
@@ -909,7 +972,7 @@ return fetch(`${API_BASE_URL}/api/projects/getAllProjects`)
           <Button variant="secondary" onClick={handleCloseAssignUserModal}>
             Close
           </Button>
-         
+
           <Button
             variant="danger"
             onClick={() => handleRemoveUser(selectedProject.id, selectedProject.selectedUser)}

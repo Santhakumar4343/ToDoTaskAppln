@@ -16,6 +16,7 @@ import {  useLocation } from "react-router-dom";
 import "./Department.css"
 import { API_BASE_URL } from "../Api";
 function Projects() {
+  const titleColors = ["#42ff75", "#3ba3ed", "#fc47ed", "#e82e44", "#f2fa5f","#f2a04e"];
   const [showModal, setShowModal] = useState(false);
   const [projects, setProjects] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -213,7 +214,7 @@ function Projects() {
     });
   };
 
-  const titleColors = ["#42ff75", "#3ba3ed", "#fc47ed", "#e82e44", "#f2fa5f","#f2a04e"];
+
   return (
     <div>
       <h4 className="text-center ">Projects Component</h4>

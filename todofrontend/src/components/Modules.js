@@ -6,6 +6,7 @@ import axios from 'axios';
 import { useLocation } from "react-router-dom";
 import { API_BASE_URL } from '../Api';
 const Modules = () => {
+  const titleColors = ["#42ff75", "#3ba3ed", "#fc47ed", "#e82e44", "#f2fa5f","#f2a04e"];
   const location = useLocation();
   const { state: { username } = {} } = location;
   const [showModal, setShowModal] = useState(false);
@@ -37,7 +38,7 @@ const Modules = () => {
         console.error("Error fetching users:", error);
       });
   }, []);
-  
+
   const handleCreateModule = () => {
 
     setModuleName('');
@@ -79,7 +80,7 @@ const Modules = () => {
   const handleModalClose = () => {
     // Fetch all modules when the modal is closed
     console.log('Closing modal...');
-    fetchModules();
+    fetchModules(projects);
     // Set selectedProject to null
     setSelectedProject(null);
   };
@@ -125,7 +126,7 @@ const Modules = () => {
         });
         setShowModal(false);
         setSelectedProject(null);
-        fetchModules();
+        fetchModules(projects);
       })
       .catch(error => {
         console.error('Error saving module:', error);
@@ -146,7 +147,7 @@ const Modules = () => {
       .then((response) => response.json())
       .then((module) => {
         const moduleStatus = module.status;
-  
+
         // Check if the module status is "Closed"
         if (moduleStatus === 'Closed') {
           Swal.fire({
@@ -181,8 +182,7 @@ const Modules = () => {
                         popup: 'max-width-100',
                       },
                     });
-                    // Fetch the updated list of modules after deletion
-                    fetchModules();
+                    fetchModules(projects);
                   } else {
                     console.error('Error deleting module:', response.status);
                     Swal.fire({
@@ -232,9 +232,9 @@ const Modules = () => {
         });
       });
   };
-  
+
   const [showAssignUserModal, setShowAssignUserModal] = useState(false);
-  // ... other state variables
+  
 
   // Function to handle showing the assign user modal for modules
   const handleAssignUser = (moduleId) => {
@@ -279,10 +279,7 @@ const Modules = () => {
               popup: 'max-width-100',
             },
           });
-
-          // Optionally, you may want to update the frontend with the latest data
-          // Fetch the updated list of modules or update the state accordingly
-          fetchModules();
+          fetchModules(projects);
         } else {
           // Show error message if the request is not successful
           console.error('Error assigning users to module:', response.status);
@@ -344,7 +341,7 @@ const Modules = () => {
                     popup: 'max-width-100',
                   },
                 });
-                fetchModules(); // Fetch the updated list of modules or update the state accordingly
+                fetchModules(projects); // Fetch the updated list of modules or update the state accordingly
               } else {
                 // Show error message if the request is not successful
                 console.error(`Error removing user from ${selectedModule.moduleName}:`, response.status);
@@ -421,122 +418,123 @@ const Modules = () => {
 
   useEffect(() => {
     if (username) {
-        fetchUserDepartments(username);
+      fetchUserDepartments(username);
     }
-}, [username]);
+  }, [username]);
 
 
-const fetchUserDepartments = (username) => {
-  console.log("Fetching departments for user:", username);
+  const fetchUserDepartments = (username) => {
+    console.log("Fetching departments for user:", username);
 
-  return axios.get(`${API_BASE_URL}/api/departments/getAdminDepartments?username=${username}`)
-    .then(response => {
-      setDepartments(response.data);
-      return response.data; // Return the departments
-    })
-    .catch(error => {
-      console.error('Error fetching departments:', error);
-      throw error; // Throw the error to be caught by fetchProjects
-    });
-};
-
-useEffect(() => {
-  const fetchData = async () => {
-      try {
-          if (username) {
-              const userDepartments = await fetchUserDepartments(username);
-              fetchProjects(userDepartments);
-          }
-      } catch (error) {
-          console.error("Error fetching user departments:", error);
-      }
+    return axios.get(`${API_BASE_URL}/api/departments/getAdminDepartments?username=${username}`)
+      .then(response => {
+        setDepartments(response.data);
+        return response.data; // Return the departments
+      })
+      .catch(error => {
+        console.error('Error fetching departments:', error);
+        throw error; // Throw the error to be caught by fetchProjects
+      });
   };
 
-  fetchData();
-}, [username]);
-
-const fetchProjects = (userDepartments) => {
-  return fetch(`${API_BASE_URL}/api/projects/getAllProjects`)
-    .then((response) => response.json())
-    .then((projectsData) => {
+  useEffect(() => {
+    const fetchData = async () => {
       try {
-        // Filter projects to include only those that contain at least one of the user's assigned departments
-        const filteredProjects = projectsData.filter((project) => {
-          // Check if any of the user's departments match the project's department
-          return userDepartments.some((userDepartment) =>
-            project.department.departmentName === userDepartment.departmentName
-          );
-        });
-        // Set the filtered projects directly to the projects state
-        setProjects(filteredProjects);
-        return filteredProjects; 
+        if (username) {
+          const userDepartments = await fetchUserDepartments(username);
+          fetchProjects(userDepartments);
+        }
       } catch (error) {
-        console.error("Error filtering projects:", error);
+        console.error("Error fetching user departments:", error);
+      }
+    };
+
+    fetchData();
+  }, [username]);
+
+  const fetchProjects = (userDepartments) => {
+    return fetch(`${API_BASE_URL}/api/projects/getAllProjects`)
+      .then((response) => response.json())
+      .then((projectsData) => {
+        try {
+          // Filter projects to include only those that contain at least one of the user's assigned departments
+          const filteredProjects = projectsData.filter((project) => {
+            // Check if any of the user's departments match the project's department
+            return userDepartments.some((userDepartment) =>
+              project.department.departmentName === userDepartment.departmentName
+            );
+          });
+          // Set the filtered projects directly to the projects state
+          setProjects(filteredProjects);
+          return filteredProjects;
+        } catch (error) {
+          console.error("Error filtering projects:", error);
+          // Handle the error
+          throw error;
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching projects:", error);
         // Handle the error
         throw error;
-      }
-    })
-    .catch((error) => {
-      console.error("Error fetching projects:", error);
-      // Handle the error
-      throw error;
-    });
-};
-
-const fetchModules = (userProjects) => {
-  // Check if userProjects is available
-  if (!userProjects || userProjects.length === 0) {
-    console.error("No user projects available");
-    return;
-  }
-
-  // Extract project names from userProjects
-  const projectNames = userProjects.map(project => project.projectName);
-
-  // Fetch all modules
-  const apiUrl = `${API_BASE_URL}/api/modules/getAllModules`;
-
-  // Make a GET request to fetch modules
-  axios.get(apiUrl)
-    .then((response) => {
-      // Filter modules to include only those associated with user projects
-      const filteredModules = response.data.filter(module => projectNames.includes(module.project.projectName));
-      // Set the fetched modules to the state
-      setModules(filteredModules);
-    })
-    .catch((error) => {
-      console.error('Error fetching modules:', error);
-      // Handle the error
-    });
-};
-
-
-
-useEffect(() => {
-  const fetchData = async () => {
-    try {
-      if (username) {
-        const userDepartments = await fetchUserDepartments(username);
-        const userProjects = await fetchProjects(userDepartments);
-        fetchModules(userProjects);
-      }
-    } catch (error) {
-      console.error("Error fetching user data:", error);
-    }
+      });
   };
 
-  fetchData();
-}, [username]);
+  const fetchModules = (userProjects) => {
+    // Check if userProjects is available
+    if (!userProjects || userProjects.length === 0) {
+      console.error("No user projects available");
+      return;
+    }
 
-const filteredModules = modules.filter((module) => {
-  const lowerSearchTerm = searchTerm.toLowerCase();
+    // Extract project names from userProjects
+    const projectNames = userProjects.map(project => project.projectName);
 
-  return (
-    (module.moduleName && module.moduleName.toLowerCase().includes(lowerSearchTerm)) ||
-    (module.status && module.status.toLowerCase().includes(lowerSearchTerm)) ||
-    (module.remarks && module.remarks.toLowerCase().includes(lowerSearchTerm))
-  );
-});
+    // Fetch all modules
+    const apiUrl = `${API_BASE_URL}/api/modules/getAllModules`;
+
+    // Make a GET request to fetch modules
+    axios.get(apiUrl)
+      .then((response) => {
+        // Filter modules to include only those associated with user projects
+        const filteredModules = response.data.filter(module => projectNames.includes(module.project.projectName));
+        // Set the fetched modules to the state
+        setModules(filteredModules);
+      })
+      .catch((error) => {
+        console.error('Error fetching modules:', error);
+        // Handle the error
+      });
+  };
+
+
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        if (username) {
+          const userDepartments = await fetchUserDepartments(username);
+          const userProjects = await fetchProjects(userDepartments);
+          fetchModules(userProjects);
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    };
+
+    fetchData();
+  }, [username]);
+
+  const filteredModules = modules.filter((module) => {
+    const lowerSearchTerm = searchTerm.toLowerCase();
+
+    return (
+      (module.project.projectName && module.project.projectName.toLowerCase().includes(lowerSearchTerm)) ||
+      (module.moduleName && module.moduleName.toLowerCase().includes(lowerSearchTerm)) ||
+      (module.status && module.status.toLowerCase().includes(lowerSearchTerm)) ||
+      (module.remarks && module.remarks.toLowerCase().includes(lowerSearchTerm))
+    );
+  });
 
   return (
     <div>
@@ -553,12 +551,12 @@ const filteredModules = modules.filter((module) => {
       </Button>
       <FormControl
         type="text"
-        placeholder="Search by Module Name, Remarks, or Status"
+        placeholder="Search by Project Name. Module Name, Remarks, or Status"
         className="mb-3 "
         style={{ border: '1px solid black' }}
         onChange={(e) => setSearchTerm(e.target.value)}
       />
-      {filteredModules.length > 0 ? (
+      {/* {filteredModules.length > 0 ? (
         <>
           <Table striped bordered hover className="text-center  border border-dark " style={{ borderRadius: '10px  !important' }} >
             <thead>
@@ -594,11 +592,11 @@ const filteredModules = modules.filter((module) => {
 
                   <td style={{ maxWidth: '200px', overflowX: 'auto' }}>{module.remarks}</td>
                   <td>
-                   
+
                     <i className="bi bi-pencil fs-4" onClick={() => handleUpdateModule(module.id)}></i>
                     {' '}
                     <i class="bi bi-trash3 fs-4 m-2 text-danger" onClick={() => handleDeleteModule(module.id)}></i>
-                   
+
                     <i class="bi bi-person-plus fs-4" onClick={() => handleAssignUser(module.id)}></i>
 
                   </td>
@@ -611,142 +609,199 @@ const filteredModules = modules.filter((module) => {
         <Alert variant="danger text-center" className="mb-3">
           No results found for "{searchTerm}".
         </Alert>
-      )}
+      )} */}
+      {filteredModules.length > 0 ? (
+  <div className="row" >
+    {filteredModules.map((module,index) => (
+      <div className="col-md-4 mb-3" key={module.id}>
+        <div className="card h-100 d-flex flex-column border border-dark" style={{ backgroundColor: index < titleColors.length ? titleColors[index] : titleColors[index % titleColors.length] }}>
+          <div className="card-body">
+            <h5 className="card-title text-center">{module.moduleName}</h5>
+            <p><strong>Project Name:</strong> {module.project.projectName}</p>
+            <p><strong>Assigned To:</strong></p>
+            <ul>
+              {module.assignedTo.map((user, index) => (
+                <li key={index}>{user}</li>
+              ))}
+            </ul>
+          
+            <p><strong>Planned Start Date:</strong> {moment(module.startDate).format('YYYY-MM-DD')}</p>
+            <p><strong>Planned Closed Date:</strong> {moment(module.endDate).format('YYYY-MM-DD')}</p>
+            <p style={{ maxWidth: '200px', overflowX: 'auto' }}><strong>Comments:</strong> {module.remarks}</p>
+            <div className="d-flex justify-content-center align-items-center">
+                    <div className="mr-2">
+                      {module.status === "Closed" ? (
+                        <button className="btn btn-danger" style={{ borderRadius: "20px" }}>{module.status}</button>
+                      ) : module.status === "Open" ? (
+                        <button className="btn btn-success" style={{ borderRadius: "20px" }}>{module.status}</button>
+                      ) : (
+                        <button className="btn btn-warning" style={{ borderRadius: "20px" }}>{module.status}</button>
+                      )}
+                    </div>
+                    <div className="m-2">
+                      {module.priority === "Critical" ? (
+                        <button className="btn btn-danger" style={{ borderRadius: "20px" }}>{module.priority}</button>
+                      ) : module.priority === "High" ? (
+                        <button className="btn btn-warning" style={{ borderRadius: "20px" }}>{module.priority}</button>
+                      ) : module.priority === "Medium" ? (
+                        <button className="btn btn-primary" style={{ borderRadius: "20px" }}>{module.priority}</button>
+                      ) : (
+                        <button className="btn btn-secondary" style={{ borderRadius: "20px" }}>{module.priority}</button>
+                      )}
+                    </div>
+                  
+                  </div>
+          </div>
+          <div className="card-footer d-flex justify-content-center align-items-center border border-dark">
+              <i className="bi bi-pencil-square fs-4" style={{color:"black"}} onClick={() => handleUpdateModule(module.id)}></i>
+              <i className="bi bi-trash3 fs-4 m-2 " style={{color:"black"}} onClick={() => handleDeleteModule(module.id)}></i>
+              <i className="bi bi-person-plus fs-4" style={{color:"black"}} onClick={() => handleAssignUser(module.id)}></i>
+            </div>
+        </div>
+      </div>
+    ))}
+  </div>
+) : (
+  <Alert variant="danger text-center" className="mb-3">
+    No results found for "{searchTerm}".
+  </Alert>
+)}
 
 
 
 
-<Modal show={showModal} onHide={() => { setShowModal(false); handleModalClose(); }} backdrop="static" keyboard={false}>
-  <Modal.Header closeButton>
-    <Modal.Title>{selectedModuleId ? 'Update Module' : 'Create Module'}</Modal.Title>
-  </Modal.Header>
-  <Modal.Body>
-    <Form>
-      <Row>
-        <Col md={4}><Form.Label>Module Name</Form.Label></Col>
-        <Col md={8} >
-          <Form.Group controlId="formModuleName">
-            <Form.Control
-              type="text"
-              className="mb-3 border border-dark"
-              value={moduleName}
-              onChange={(e) => setModuleName(e.target.value)}
-            />
-            <Form.Text className="text-danger">{moduleNameError}</Form.Text>
-          </Form.Group>
-        </Col>
-      </Row>
-      {/* Conditionally render fields based on whether module is being updated */}
-      {selectedModuleId && (
-        <>
-          <Row>
-            <Col md={4}><Form.Label>Assigned To </Form.Label></Col>
-            <Col md={8} >
-              <Form.Group controlId="formAssignedTo">
+
+      <Modal show={showModal} onHide={() => { setShowModal(false); handleModalClose(); }} backdrop="static" keyboard={false}>
+        <Modal.Header closeButton>
+          <Modal.Title>{selectedModuleId ? 'Update Module' : 'Create Module'}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form>
+            <Row>
+              <Col md={4}><Form.Label>Module Name</Form.Label></Col>
+              <Col md={8} >
+                <Form.Group controlId="formModuleName">
+                  <Form.Control
+                    type="text"
+                    className="mb-3 border border-dark"
+                    value={moduleName}
+                    onChange={(e) => setModuleName(e.target.value)}
+                  />
+                  <Form.Text className="text-danger">{moduleNameError}</Form.Text>
+                </Form.Group>
+              </Col>
+            </Row>
+            {/* Conditionally render fields based on whether module is being updated */}
+            {selectedModuleId && (
+              <>
+                <Row>
+                  <Col md={4}><Form.Label>Assigned To </Form.Label></Col>
+                  <Col md={8} >
+                    <Form.Group controlId="formAssignedTo">
+                      <Form.Control
+                        as="select"
+                        value={assignedTo}
+                        className="border border-dark mb-3"
+                        onChange={(e) => setAssignedTo(Array.from(e.target.selectedOptions, (option) => option.value))}
+                      >
+                        <option value="">Select Assigned To</option>
+                        {filteredUsers.map((user) => (
+                          <option key={user.id} value={user.username}>
+                            {user.username}
+                          </option>
+                        ))}
+                      </Form.Control>
+                      <Form.Text className="text-danger">{assignedToError}</Form.Text>
+                    </Form.Group>
+                  </Col>
+                </Row>
+                <Row>
+                  <Col md={4}>
+                    <Form.Label>Status</Form.Label>
+                  </Col>
+                  <Col md={8}>
+                    <Form.Group controlId="formStatus">
+                      <Form.Select
+                        className="mb-3 border border-dark"
+                        value={status}
+                        onChange={(e) => setStatus(e.target.value)}
+                      >
+                        <option value="">Select Status</option>
+                        <option value="Open">Open</option>
+                        <option value="In Progress">In Progress</option>
+                        <option value="Fix/Fixed">Fix/Fixed</option>
+                        <option value="Reopened">Reopened</option>
+                        <option value="Closed">Closed</option>
+                      </Form.Select>
+                    </Form.Group>
+                  </Col>
+                </Row>
+                <Row>
+                  <Col md={4}>
+                    <Form.Label>Priority</Form.Label>
+                  </Col>
+                  <Col md={8}>
+                    <Form.Group controlId="formPriority">
+                      <Form.Select
+                        className="border border-black mb-3"
+                        value={priority}
+                        onChange={(e) => setPriority(e.target.value)}
+                      >
+                        <option value="">Select Priority</option>
+                        <option value="Critical">Critical</option>
+                        <option value="High">High</option>
+                        <option value="Medium">Medium</option>
+                        <option value="Low">Low</option>
+                      </Form.Select>
+                    </Form.Group>
+                  </Col>
+                </Row>
+              </>
+            )}
+            <Row>
+              <Col md={4}><Form.Label>Start Date</Form.Label></Col>
+              <Col md={8}><Form.Group controlId="formStartDate">
                 <Form.Control
-                  as="select"
-                  value={assignedTo}
-                  className="border border-dark mb-3"
-                  onChange={(e) => setAssignedTo(Array.from(e.target.selectedOptions, (option) => option.value))}
-                >
-                  <option value="">Select Assigned To</option>
-                  {filteredUsers.map((user) => (
-                    <option key={user.id} value={user.username}>
-                      {user.username}
-                    </option>
-                  ))}
-                </Form.Control>
-                <Form.Text className="text-danger">{assignedToError}</Form.Text>
-              </Form.Group>
-            </Col>
-          </Row>
-          <Row>
-            <Col md={4}>
-              <Form.Label>Status</Form.Label>
-            </Col>
-            <Col md={8}>
-              <Form.Group controlId="formStatus">
-                <Form.Select
-                  className="mb-3 border border-dark"
-                  value={status}
-                  onChange={(e) => setStatus(e.target.value)}
-                >
-                  <option value="">Select Status</option>
-                  <option value="Open">Open</option>
-                  <option value="In Progress">In Progress</option>
-                  <option value="Fix/Fixed">Fix/Fixed</option>
-                  <option value="Reopened">Reopened</option>
-                  <option value="Closed">Closed</option>
-                </Form.Select>
-              </Form.Group>
-            </Col>
-          </Row>
-          <Row>
-            <Col md={4}>
-              <Form.Label>Priority</Form.Label>
-            </Col>
-            <Col md={8}>
-              <Form.Group controlId="formPriority">
-                <Form.Select
-                  className="border border-black mb-3"
-                  value={priority}
-                  onChange={(e) => setPriority(e.target.value)}
-                >
-                  <option value="">Select Priority</option>
-                  <option value="Critical">Critical</option>
-                  <option value="High">High</option>
-                  <option value="Medium">Medium</option>
-                  <option value="Low">Low</option>
-                </Form.Select>
-              </Form.Group>
-            </Col>
-          </Row>
-        </>
-      )}
-      <Row>
-        <Col md={4}><Form.Label>Start Date</Form.Label></Col>
-        <Col md={8}><Form.Group controlId="formStartDate">
-          <Form.Control
-            type="date"
-            className=" mb-3 border border-dark"
-            value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
-          />
-        </Form.Group></Col>
-      </Row>
-      <Row>
-        <Col md={4}> <Form.Label>End Date</Form.Label></Col>
-        <Col md={8}> <Form.Group controlId="formEndDate">
-          <Form.Control
-            type="date"
-            className=" mb-3 border border-dark"
-            value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
-          />
-        </Form.Group></Col>
-      </Row>
-      <Row>
-        <Col md={4}><Form.Label>Remarks</Form.Label></Col>
-        <Col md={8}><Form.Group controlId="formRemarks">
-          <Form.Control
-            type="text"
-            className=" mb-3 border border-dark"
-            value={remarks}
-            onChange={(e) => setRemarks(e.target.value)}
-          />
-        </Form.Group></Col>
-      </Row>
-    </Form>
-  </Modal.Body>
-  <Modal.Footer className="d-flex justify-content-center align-content-center">
-        <Button variant="secondary" onClick={() => { setShowModal(false); handleModalClose(); }}>
-          Close
-        </Button>
-        <Button variant="primary" onClick={handleSaveModule}>
-          {selectedModuleId ? 'Update Module' : 'Create Module'}
-        </Button>
-      </Modal.Footer>
-</Modal>
+                  type="date"
+                  className=" mb-3 border border-dark"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                />
+              </Form.Group></Col>
+            </Row>
+            <Row>
+              <Col md={4}> <Form.Label>End Date</Form.Label></Col>
+              <Col md={8}> <Form.Group controlId="formEndDate">
+                <Form.Control
+                  type="date"
+                  className=" mb-3 border border-dark"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                />
+              </Form.Group></Col>
+            </Row>
+            <Row>
+              <Col md={4}><Form.Label>Remarks</Form.Label></Col>
+              <Col md={8}><Form.Group controlId="formRemarks">
+                <Form.Control
+                  type="text"
+                  className=" mb-3 border border-dark"
+                  value={remarks}
+                  onChange={(e) => setRemarks(e.target.value)}
+                />
+              </Form.Group></Col>
+            </Row>
+          </Form>
+        </Modal.Body>
+        <Modal.Footer className="d-flex justify-content-center align-content-center">
+          <Button variant="secondary" onClick={() => { setShowModal(false); handleModalClose(); }}>
+            Close
+          </Button>
+          <Button variant="primary" onClick={handleSaveModule}>
+            {selectedModuleId ? 'Update Module' : 'Create Module'}
+          </Button>
+        </Modal.Footer>
+      </Modal>
 
 
 

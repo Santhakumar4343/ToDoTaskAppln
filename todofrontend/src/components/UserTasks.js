@@ -286,8 +286,11 @@ const Task = () => {
           {filteredTasks.map((task, index) => (
             <div className="col-md-4 mb-3" key={task.id}>
               <div className="card h-80 d-flex flex-column border border-dark zoom-in"  style={{ backgroundColor: index < titleColors.length ? titleColors[index] : titleColors[index % titleColors.length] }}>
+                
                 <div className="card-body d-flex flex-column ">
                   <h5 className="card-title text-center" style={{ color: "black" }}>{task.taskName}</h5>
+                  <p className="card-text" style={{ color: "black" }}><strong>Project Name:</strong>{task.module.project.projectName} </p>
+                  <p className="card-text" style={{ color: "black" }}><strong>Module Name:</strong> {task.module.moduleName}</p>
                   <ul className="list-unstyled">
                     <li><strong style={{ color: "black" }}>Assigned To:</strong></li>
                     {task.assignedTo.map((user, userIndex) => (
