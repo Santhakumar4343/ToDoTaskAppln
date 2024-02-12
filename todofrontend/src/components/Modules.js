@@ -538,7 +538,7 @@ const Modules = () => {
 
   return (
     <div>
-      <h4 className='text-center '>Modules Component </h4>
+      <h4 className='text-center '>Modules</h4>
       <select id="projectDropdown" onChange={(e) => setSelectedProject(e.target.value)}>
         <option value="" className=''>-- Select Project --</option>
         {projects.map(project => (

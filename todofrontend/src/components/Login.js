@@ -22,6 +22,7 @@ const Login = () => {
   const [otpError, setOtpError] = useState("");
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
+  const [userData,setUserData]=useState(null);
   const handleUserTypeChange = (e) => {
     setUserType(e.target.value);
     formData.set("userType", e.target.value);
@@ -203,12 +204,13 @@ const Login = () => {
         const userUsername = userData.username;
 
         if (userTypeLowerCase === "user") {
-          navigate("/user-dashboard", { state: { username: userUsername } });
+          navigate("/user-dashboard", { state: { userData, username: userUsername } });
         } else if (userTypeLowerCase === "admin") {
-          navigate("/admin-dashboard",{ state: { username: userUsername } });
+          navigate("/admin-dashboard", { state: { userData, username: userUsername } });
         } else {
           console.error("Unknown userType:", userData.userType);
         }
+        
       } else {
         setError("Invalid credentials");
         console.error("Login failed:", response.statusText);

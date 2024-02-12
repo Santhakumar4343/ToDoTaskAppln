@@ -63,7 +63,10 @@ function SuperUserDashboard() {
                 <i className="bi bi-person-circle fs-7"></i>
               </Dropdown.Toggle>
               <Dropdown.Menu>
-                <Dropdown.Item onClick={handleLogout} style={{ fontSize: '14px' }}>Logout</Dropdown.Item>
+                <Dropdown.Item onClick={handleLogout} style={{ fontSize: '14px' ,color:"red"}}>Logout</Dropdown.Item>
+              </Dropdown.Menu>
+              <Dropdown.Menu>
+                <Dropdown.Item onClick={handleLogout} style={{ fontSize: '14px' ,color:"red"}}>Profile</Dropdown.Item>
               </Dropdown.Menu>
             </Dropdown>
           </div>

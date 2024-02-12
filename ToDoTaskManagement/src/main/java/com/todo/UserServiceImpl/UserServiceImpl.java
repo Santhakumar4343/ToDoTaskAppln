@@ -58,7 +58,7 @@ public class UserServiceImpl implements UserService {
      Optional<User> optionalUser = userRepository.findById(userId);
      if (optionalUser.isPresent()) {
          User existingUser = optionalUser.get();
-         // Update fields as needed
+         
          existingUser.setUsername(updatedUser.getUsername());
          existingUser.setPassword(updatedUser.getPassword());
          existingUser.setConfirmPassword(updatedUser.getConfirmPassword());
@@ -66,6 +66,23 @@ public class UserServiceImpl implements UserService {
          existingUser.setEmail(updatedUser.getEmail());
          existingUser.setMobileNumber(updatedUser.getMobileNumber());
          existingUser.setUserType(updatedUser.getUserType());
+
+         return userRepository.save(existingUser);
+     }
+     return null; // User not found
+ }
+ @Override
+ public User updateUserProfile(Long userId, User updatedUser) {
+     Optional<User> optionalUser = userRepository.findById(userId);
+     if (optionalUser.isPresent()) {
+         User existingUser = optionalUser.get();
+         // Update fields as needed
+         existingUser.setUsername(updatedUser.getUsername());
+         existingUser.setManager(updatedUser.getManager());
+         existingUser.setEmployeeId(updatedUser.getEmployeeId());
+         existingUser.setEmail(updatedUser.getEmail());
+         existingUser.setMobileNumber(updatedUser.getMobileNumber());
+       
 
          return userRepository.save(existingUser);
      }

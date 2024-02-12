@@ -491,6 +491,7 @@ const RegistrationForm = () => {
                 <Modal.Body>
                   <Form.Control
                     type="text"
+                    className="border border-dark"
                     placeholder="Enter OTP"
                     value={otp}
                     onChange={(e) => setOtp(e.target.value)}

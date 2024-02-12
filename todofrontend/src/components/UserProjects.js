@@ -217,7 +217,7 @@ function Projects() {
 
   return (
     <div>
-      <h4 className="text-center ">Projects Component</h4>
+      <h4 className="text-center ">Projects</h4>
       {/* <Button variant="success" className="mb-3" onClick={handleShowModal}>
         Create Project
       </Button> */}
@@ -229,10 +229,7 @@ function Projects() {
         onChange={(e) => setSearchTerm(e.target.value)}
       />
 
-      <span style={{ position: 'absolute', top: '50%', right: '10px', transform: 'translateY(-50%)', pointerEvents: 'none' }}>
-      <i class="bi bi-search"></i>
-      </span>
-
+    
       {filteredProjects.length === 0 ? (
         searchTerm !== "" ? (
           <Alert variant="danger text-center" className="mb-3">

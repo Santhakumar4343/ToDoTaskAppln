@@ -241,7 +241,7 @@ const Task = () => {
 
   return (
     <div>
-      <h4 className="text-center ">Tasks Component </h4>
+      <h4 className="text-center ">Tasks</h4>
       {/* <select
         id="projectDropdown"
         onChange={(e) => setSelectedProject(e.target.value)}

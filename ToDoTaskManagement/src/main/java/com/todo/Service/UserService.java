@@ -27,4 +27,6 @@ public interface UserService {
   void sendOtpToSuperUser(User user);
   public ResponseEntity<String> verifyOtp(String username, String enteredOtp);
   User updatePassword(Long userId, User updatedUser);
+
+User updateUserProfile(Long userId, User updatedUser);
 }

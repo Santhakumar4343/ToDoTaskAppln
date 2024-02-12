@@ -557,7 +557,7 @@ function Projects() {
   return (
 
     <div>
-      <h4 className="text-center ">Projects Component</h4>
+      <h4 className="text-center ">Projects</h4>
       <select id="departmentDropdown" onChange={(e) => setSelectedDepartment(e.target.value)}>
         <option value="" className=''>-- Select Department --</option>
         {departments.map(department => (

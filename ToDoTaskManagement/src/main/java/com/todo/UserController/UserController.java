@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.el.parser.AstFalse;
+
 //UserController.java
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,7 +65,7 @@ public class UserController {
 	@PostMapping("/save")
 	public ResponseEntity<User> createUser(@RequestParam String username, @RequestParam String password,
 			@RequestParam String confirmPassword, @RequestParam String employeeId, @RequestParam String email,
-			@RequestParam String mobileNumber, @RequestParam String userType) {
+			@RequestParam String mobileNumber, @RequestParam String userType,@RequestParam (required = false)String manager) {
 		User user = new User();
 		user.setUsername(username);
 		user.setPassword(password);
@@ -72,7 +74,7 @@ public class UserController {
 		user.setEmail(email);
 		user.setMobileNumber(mobileNumber);
 		user.setUserType(userType);
-
+        user.setManager(null);
 		User createdUser = userService.createUser(user);
 		return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
 	}
@@ -80,7 +82,7 @@ public class UserController {
 	@PutMapping("/update/{userId}")
 	public ResponseEntity<User> updateUser(@PathVariable Long userId, @RequestParam String username,
 			@RequestParam String password, @RequestParam String confirmPassword, @RequestParam String employeeId,
-			@RequestParam String email, @RequestParam String mobileNumber, @RequestParam String userType) {
+			@RequestParam String email, @RequestParam String mobileNumber, @RequestParam String userType,@RequestParam (required=false)String manager) {
 		User updatedUser = new User();
 		updatedUser.setId(userId);
 		updatedUser.setUsername(username);
@@ -90,8 +92,23 @@ public class UserController {
 		updatedUser.setEmail(email);
 		updatedUser.setMobileNumber(mobileNumber);
 		updatedUser.setUserType(userType);
-
+        updatedUser.setManager(null);
 		User user = userService.updateUser(userId, updatedUser);
+		return user != null ? new ResponseEntity<>(user, HttpStatus.OK) : new ResponseEntity<>(HttpStatus.NOT_FOUND);
+	}
+	@PutMapping("/profile-update/{userId}")
+	public ResponseEntity<User> profileEdit(@PathVariable Long userId, @RequestParam String username,
+			 @RequestParam String employeeId,
+			@RequestParam String email, @RequestParam String mobileNumber,@RequestParam String manager) {
+		User updatedUser = new User();
+		updatedUser.setId(userId);
+		updatedUser.setUsername(username);
+		updatedUser.setEmployeeId(employeeId);
+		updatedUser.setEmail(email);
+		updatedUser.setMobileNumber(mobileNumber);
+		updatedUser.setManager(manager);
+
+		User user = userService.updateUserProfile(userId, updatedUser);
 		return user != null ? new ResponseEntity<>(user, HttpStatus.OK) : new ResponseEntity<>(HttpStatus.NOT_FOUND);
 	}
 	@PutMapping("/update-user/{userId}")

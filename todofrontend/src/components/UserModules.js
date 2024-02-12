@@ -230,7 +230,7 @@ const Modules = () => {
 
   return (
     <div>
-      <h4 className="text-center ">Modules Component </h4>
+      <h4 className="text-center ">Modules</h4>
       <FormControl
         type="text"
         placeholder="Search by Module Name, Remarks, or Status"
